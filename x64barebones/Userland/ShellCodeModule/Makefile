@@ -1,4 +1,4 @@
-include ../Makefile.inc
+include ../../Makefile.inc
 
 MODULE=../shellCodeModule.bin
 SOURCES=$(wildcard *.c)
@@ -12,17 +12,22 @@ STATICLIBS=
 all: $(MODULE)
 
 $(MODULE): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
-	$(LD) $(LDFLAGS) -T shellCodeModule.ld -o $(MODULE) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
-	$(LD) $(LDFLAGS) -T shellCodeModule.ld --oformat=elf64-x86-64 -fno-pic -o ../shellCodeModule.elf $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
+	@echo "LINKING SHELL BIN"
+	@$(LD) $(LDFLAGS) -T shellCodeModule.ld -o $(MODULE) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
+	@echo "LINKING SHELL ELF"
+	@$(LD) $(LDFLAGS) -T shellCodeModule.ld --oformat=elf64-x86-64 -o ../shellCodeModule.elf $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
 
 %.o: %.c
-	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
+	@echo "COMPILING $<"
+	@$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
 
 %.o : %.asm
-	$(ASM) $(ASMFLAGS) $< -o $@
+	@echo "COMPILING $<"
+	@$(ASM) $(ASMFLAGS) $< -o $@
 
 $(LOADEROBJECT):
-	$(GCC) $(GCCFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
+	@echo "COMPILING $(LOADEROBJECT)"
+	@$(GCC) $(GCCFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
 
 clean:
 	rm -rf asm/*.o *.o *.bin

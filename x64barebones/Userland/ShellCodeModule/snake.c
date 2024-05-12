@@ -409,7 +409,7 @@ uint8_t get_directions() {
     uint64_t read = SyscallRead(STD_IN, keyboard_buffer, 254);
     uint8_t newDir1 = 0;
     uint8_t newDir2 = 0;
-    if (keyboard_buffer[0] != 0);
+    if (keyboard_buffer[0] != 0) {
         for (uint8_t i = 0; i < read - 1; i++) {
             switch(keyboard_buffer[i]) {
                 
@@ -451,6 +451,7 @@ uint8_t get_directions() {
                     return 1;
             }
         }
+    }
     if(newDir1) snakePos1.dir = newDir1;
     if(newDir2) snakePos2.dir = newDir2;
     return 0;

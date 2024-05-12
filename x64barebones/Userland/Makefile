@@ -1,4 +1,4 @@
-include Makefile.inc
+include ../Makefile.inc
 
 SHELL_CODE=shellCodeModule.bin
 
