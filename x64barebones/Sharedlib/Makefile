@@ -13,7 +13,7 @@ lib:
 	@echo "COMPILING SHARED LIB"
 	@$(GCC) $(GCCFLAGS) -I./ -c libc.c -o libc_c.o
 	@$(ASM) $(ASMFLAGS) libc.asm -o libc_asm.o
-	@$(LD) -r libc_c.o libc_asm.o -o libc.o
+	@$(LD) $(LDFLAGS) -r libc_c.o libc_asm.o -o libc.o
 
 clean:
 	rm -rf *.o 
