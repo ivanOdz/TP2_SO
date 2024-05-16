@@ -10,19 +10,19 @@ SOURCES_SNAKE=$(wildcard ./Games/*.c)
 OBJECTS_SNAKE=$(SOURCES_SNAKE:.c=.o)
 LOADERSRC=./_loader.c
 
-STATICLIBS=
+STATICLIBS=../Sharedlib/libc.o
 
 all: loader $(SHELL_CODE)
 
 $(SHELL_CODE): $(LOADEROBJECT) $(OBJECTS_SHELL) $(OBJECTS_SNAKE) $(STATICLIBS) $(OBJECTS_ASM)
 	@echo "LINKING USERLAND BIN"
-	$(LD) $(LDFLAGS) -T shellCodeModule.ld -o $(SHELL_CODE) loader.o $(OBJECTS_SHELL) $(OBJECTS_SNAKE) $(OBJECTS_ASM) $(STATICLIBS)
+	@$(LD) $(LDFLAGS) -T shellCodeModule.ld -o $(SHELL_CODE) loader.o $(OBJECTS_SHELL) $(OBJECTS_SNAKE) $(OBJECTS_ASM) $(STATICLIBS)
 	@echo "LINKING USERLAND ELF"
 	@$(LD) $(LDFLAGS) -T shellCodeModule.ld --oformat=elf64-x86-64 -o shellCodeModule.elf loader.o $(OBJECTS_SHELL) $(OBJECTS_SNAKE) $(OBJECTS_ASM) $(STATICLIBS)
 
 %.o: %.c
 	@echo "COMPILING $<"
-	@$(GCC) $(GCCFLAGS) -I./Shell/Include -I./Games -c $< -o $@
+	@$(GCC) $(GCCFLAGS) -I./Shell/Include -I./Games -I./../Sharedlib -c $< -o $@
 
 %.o : %.asm
 	@echo "COMPILING $<"

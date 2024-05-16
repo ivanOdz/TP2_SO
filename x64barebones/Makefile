@@ -1,5 +1,5 @@
 include Makefile.inc
-all:  printflags toolchain bootloader kernel userland image
+all:  printflags toolchain bootloader sharedlib kernel userland image
 
 printflags:
 	@echo "\n\nCOMPILING"
@@ -14,6 +14,9 @@ toolchain:
 bootloader:
 	cd Bootloader; make all
 
+sharedlib:
+	cd Sharedlib; make all
+
 kernel:
 	cd Kernel; make all
 
@@ -27,6 +30,7 @@ clean:
 	cd Toolchain; make clean
 	cd Bootloader; make clean
 	cd Image; make clean
+	cd Sharedlib; make clean
 	cd Kernel; make clean
 	cd Userland; make clean
 
