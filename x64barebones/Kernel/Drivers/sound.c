@@ -1,11 +1,11 @@
-#include <sound.h>
 #include <stdint.h>
-#include <naiveConsole.h>
+#include <sound.h>
 #include <videoDriver.h>
+#include "./../Include/naiveConsole.h"
 
-#define FREQDELAY 1193180 / 8
-#define IS_LOOP 0b000000001
-#define IS_SFX  0b000000010
+#define FREQDELAY   1193180 / 8
+#define IS_LOOP     0b000000001
+#define IS_SFX      0b000000010
 
 typedef struct {
     const uint8_t* buffer;
@@ -17,10 +17,10 @@ typedef struct {
 
 static song_type bg, sfx;
 
-//esta pensado para hacer sonar un stream tipo midi pero muy simplificado
-//donde cada par de uint8s indica freq del parlante y tiempo hasta la proxima nota respectivamente
-void playSound(uint8_t flags, const uint8_t * snd, uint64_t length){
-    if (flags&IS_SFX){
+// esta pensado para hacer sonar un stream tipo midi pero muy simplificado donde cada par de uint8s indica freq del parlante y tiempo hasta la proxima nota respectivamente
+void playSound(uint8_t flags, const uint8_t * snd, uint64_t length) {
+
+    if (flags&IS_SFX) {
         sfx.length = length;
         sfx.isLoop = 0;
         sfx.buffer = snd;
@@ -35,16 +35,22 @@ void playSound(uint8_t flags, const uint8_t * snd, uint64_t length){
     }
     spkMov();
 }
-void soundNext(){
+
+void soundNext() {
+
     song_type* playing;
-    if(sfx.length){
+
+    if (sfx.length) {
         playing = &sfx;
     } else {
         playing = &bg;
     }
-    if (playing->current < playing->length || (playing->current == playing->length && playing->current_delay_left)){
-        if (playing->current_delay_left == 0){
-            if (playing->buffer[playing->current] != 0){
+
+    if (playing->current < playing->length || (playing->current == playing->length && playing->current_delay_left)) {
+
+        if (playing->current_delay_left == 0) {
+
+            if (playing->buffer[playing->current] != 0) {
                 setPIT2Freq((uint16_t)(FREQDELAY / playing->buffer[playing->current]));
             } else {
                 setPIT2Freq((uint16_t)(FREQDELAY * 8));
@@ -53,7 +59,9 @@ void soundNext(){
             playing->current_delay_left = playing->buffer[playing->current++];
         } else {
             playing->current_delay_left--;
-            if (getPIT2Freq() != playing->buffer[playing->current - 2]){
+
+            if (getPIT2Freq() != playing->buffer[playing->current - 2]) {
+
                 if (playing->buffer[playing->current - 2] != 0){
                     setPIT2Freq((uint16_t)(FREQDELAY / playing->buffer[playing->current - 2]));
                 } else {
@@ -62,13 +70,18 @@ void soundNext(){
             }
         }
     } else {
+
         if (playing->isLoop == 1) {
             playing->current = 0;
         } else {
-            if(playing->buffer == bg.buffer) spkStop();
+
+            if (playing->buffer == bg.buffer) spkStop();
             playing->length = 0;
         }
     }
 }
 
-void beep(){return;}
+void beep() {
+
+    return;
+}

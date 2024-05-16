@@ -9,16 +9,19 @@ void timer_handler() {
 
 	soundNext();
 	ticks++;
-	if (ticks % 9 == 0){
+
+	if (ticks % 9 == 0) {
         printCursor();
 	}
 }
 
 int ticks_elapsed() {
+
 	return ticks;
 }
 
 int seconds_elapsed() {
+
 	return ticks / 18;
 }
 

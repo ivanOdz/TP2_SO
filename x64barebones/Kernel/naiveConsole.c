@@ -11,24 +11,31 @@ static uint8_t * currentVideo = (uint8_t*)0xB8000;
 static const uint32_t width = 80;
 static const uint32_t height = 25;
 
-void ncPrint(const char * string)
-{
+void ncPrint(const char * string) {
+
 	int i;
-	for (i = 0; string[i] != 0; i++)
+	
+	for (i = 0; string[i] != 0; i++) {
 		ncPrintChar(string[i]);
+	}
 }
 
-void ncPrintChar(char character)
-{
-	if(((uint64_t)(currentVideo - video)) >= width*height*2) ncScroll();
+void ncPrintChar(char character) {
+
+	if (((uint64_t)(currentVideo - video)) >= width*height*2) {
+		ncScroll();
+	}
 	*currentVideo = character;
 	currentVideo += 2;
 }
 
-void ncScroll(){
-	for (int i = 0; i < height; i++){
-		if (i != height-1)
+void ncScroll() {
+
+	for (int i = 0; i < height; i++) {
+
+		if (i != height-1) {
 			memcpy(video + i * width * 2, video + (i+1) * width * 2, width * 2);
+		}
 		else {
 			currentVideo -= width * 2;
 			ncBlankLine();
@@ -37,65 +44,68 @@ void ncScroll(){
 	currentVideo -= width * 2;
 }
 
-void ncBlankLine(){
-	do
-	{
+void ncBlankLine() {
+
+	do {
 		ncPrintCustomizedChar(' ', DEFAULT_FMT);
 	}
-	while((uint64_t)(currentVideo - video) % (width * 2) != 0);
+	while ((uint64_t)(currentVideo - video) % (width * 2) != 0);
 }
 
-void ncNewline()
-{
+void ncNewline() {
+
 	ncBlankLine();
-	if(((uint64_t)(currentVideo - video)) >= width*height*2) ncScroll();
+	if (((uint64_t)(currentVideo - video)) >= width*height*2) {
+		ncScroll();
+	}
 }
 
-void ncPrintDec(uint64_t value)
-{
+void ncPrintDec(uint64_t value) {
+
 	ncPrintBase(value, 10);
 }
 
-void ncPrintHex(uint64_t value)
-{
+void ncPrintHex(uint64_t value) {
+
 	ncPrintBase(value, 16);
 }
 
-void ncPrintBin(uint64_t value)
-{
+void ncPrintBin(uint64_t value) {
+
 	ncPrintBase(value, 2);
 }
 
-void ncPrintBase(uint64_t value, uint32_t base)
-{
+void ncPrintBase(uint64_t value, uint32_t base) {
+
     uintToBase(value, (char *)buffer, base);
     ncPrint(buffer);
 }
-void ncPrintBase2(uint64_t value, uint32_t base)
-{
+void ncPrintBase2(uint64_t value, uint32_t base) {
+
     uintToBase(value, (char *)buffer, base);
     //ncPrint(buffer);
 	print((uint8_t *)buffer);
 }
 
-void ncClear()
-{
+void ncClear() {
+
 	int i;
 	currentVideo=video;
-	for (i = 0; i < height * width; i++)
+
+	for (i = 0; i < height * width; i++) {
 		ncPrintCustomizedChar(' ', DEFAULT_FMT);
+	}
 	currentVideo = video;
 }
 
-uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base)
-{
+uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base) {
+
 	char *p = buffer;
 	char *p1, *p2;
 	uint32_t digits = 0;
 
-	//Calculate characters for each digit
-	do
-	{
+	// Calculate characters for each digit
+	do {
 		uint32_t remainder = value % base;
 		*p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
 		digits++;
@@ -105,11 +115,12 @@ uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base)
 	// Terminate string in buffer.
 	*p = 0;
 
-	//Reverse string in buffer.
+	// Reverse string in buffer.
 	p1 = buffer;
 	p2 = p - 1;
-	while (p1 < p2)
-	{
+
+	while (p1 < p2) {
+
 		char tmp = *p1;
 		*p1 = *p2;
 		*p2 = tmp;
@@ -120,20 +131,23 @@ uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base)
 	return digits;
 }
 
-void ncPrintCustomizedChar(char character, uint8_t fmt)
-{
+void ncPrintCustomizedChar(char character, uint8_t fmt) {
+
 	*currentVideo = character;
 	currentVideo++;
 	*currentVideo = fmt;
 	currentVideo++;
 }
 
-void ncPrintCustomizedMessage(const char * string, uint8_t fmt)
-{
+void ncPrintCustomizedMessage(const char * string, uint8_t fmt) {
+
 	int i;
-	for (i = 0; string[i] != 0; i++)
+
+	for (i = 0; string[i] != 0; i++) {
 		ncPrintCustomizedChar(string[i], fmt);
+	}
 }
+
 /*
 void sys_write(uint8_t fd, uint8_t * buffer, uint64_t size)
 {

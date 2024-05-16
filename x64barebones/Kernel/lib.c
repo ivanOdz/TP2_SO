@@ -1,22 +1,23 @@
 #include <stdint.h>
 #include <lib.h>
-#include <videoDriver.h>
 #include <defs.h>
 #include <naiveConsole.h>
+#include <videoDriver.h>
 
-void * memset(void * destination, int32_t c, uint64_t length)
-{
+void * memset(void * destination, int32_t c, uint64_t length) {
+
 	uint8_t chr = (uint8_t)c;
 	char * dst = (char*)destination;
 
-	while(length--)
+	while(length--) {
 		dst[length] = chr;
+	}
 
 	return destination;
 }
 
-void * memcpy(void * destination, const void * source, uint64_t length)
-{
+void * memcpy(void * destination, const void * source, uint64_t length) {
+
 	/*
 	* memcpy does not support overlapping buffers, so always do it
 	* forwards. (Don't change this without adjusting memmove.)
@@ -33,43 +34,49 @@ void * memcpy(void * destination, const void * source, uint64_t length)
 
 	if ((uint64_t)destination % sizeof(uint32_t) == 0 &&
 		(uint64_t)source % sizeof(uint32_t) == 0 &&
-		length % sizeof(uint32_t) == 0)
-	{
+		length % sizeof(uint32_t) == 0) {
+		
 		uint32_t *d = (uint32_t *) destination;
 		const uint32_t *s = (const uint32_t *)source;
 
-		for (i = 0; i < length / sizeof(uint32_t); i++)
+		for (i = 0; i < length / sizeof(uint32_t); i++) {
 			d[i] = s[i];
+		}
 	}
-	else
-	{
+	else {
+
 		uint8_t * d = (uint8_t*)destination;
 		const uint8_t * s = (const uint8_t*)source;
 
-		for (i = 0; i < length; i++)
+		for (i = 0; i < length; i++) {
 			d[i] = s[i];
+		}
 	}
 
 	return destination;
 }
 
 int strcmp(const char* str1, const char* str2) {
+
     while (*str1 != '\0' || *str2 != '\0') {
+
         if (*str1 < *str2) {
-            return -1; // str1 es menor que str2
-        } else if (*str1 > *str2) {
-            return 1; // str1 es mayor que str2
+            return -1;	// str1 es menor que str2
+        }
+		else if (*str1 > *str2) {
+            return 1;	// str1 es mayor que str2
         }
         str1++;
         str2++;
     }
-    return 0; // Las cadenas son iguales
+
+    return 0; 			// Las cadenas son iguales
 }
 
 
-//recibe un struct de registros por stack (basado en el pushState/popState macro)
-//usa uintToBase para convertir a hexa
-void printRegs(stack_registers regs, uint64_t fd){
+// recibe un struct de registros por stack (basado en el pushState/popState macro) usa uintToBase para convertir a hexa
+void printRegs(stack_registers regs, uint64_t fd) {
+
 	setFontSize(1);
 	uint8_t buffer[32] = {'0'};
 	clearBuffer(buffer);
@@ -154,6 +161,9 @@ void printRegs(stack_registers regs, uint64_t fd){
 	putchar('\n');
 }
 
-void clearBuffer(uint8_t* buffer){
-	for (int i = 0; i < 32; i++) buffer[i] = '0';
+void clearBuffer(uint8_t* buffer) {
+
+	for (int i = 0; i < 32; i++) {
+		buffer[i] = '0';
+	}
 }

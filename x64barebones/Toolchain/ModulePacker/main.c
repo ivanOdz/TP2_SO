@@ -7,15 +7,12 @@
 
 #include "modulePacker.h"
 
-//Parser elements
-const char *argp_program_version =
-  "x64BareBones ModulePacker (C) v0.2";
-const char *argp_program_bug_address =
-  "arq-catedra@googlegroups.com";
+// Parser elements
+const char *argp_program_version = "x64BareBones ModulePacker (C) v0.2";
+const char *argp_program_bug_address = "arq-catedra@googlegroups.com";
 
 /* Program documentation. */
-static char doc[] =
-  "ModulePacker is an appender of binary files to be loaded all together";
+static char doc[] = "ModulePacker is an appender of binary files to be loaded all together";
 
 /* A description of the arguments we accept. */
 static char args_doc[] = "KernelFile Module1 Module2 ...";
@@ -30,7 +27,6 @@ static struct argp_option options[] = {
 /* Our argp parser. */
 static struct argp argp = { options, parse_opt, args_doc, doc };
 
-
 int main(int argc, char *argv[]) {
 	
 	struct arguments arguments;
@@ -42,7 +38,7 @@ int main(int argc, char *argv[]) {
 
 	array_t fileArray = {arguments.args, arguments.count};
 
-	if(!checkFiles(fileArray)) {
+	if (!checkFiles(fileArray)) {
 		return 1;
 	}	
 
@@ -53,34 +49,36 @@ int buildImage(array_t fileArray, char *output_file) {
 
 	FILE *target;
 
-	if((target = fopen(output_file, "w")) == NULL) {
+	if ((target = fopen(output_file, "w")) == NULL) {
+
 		printf("Can't create target file\n");
 		return FALSE;
 	}
 
-	//First, write the kernel
+	// First, write the kernel
 	FILE *source = fopen(fileArray.array[0], "r");
 	write_file(target, source);
 
-	//Write how many extra binaries we got.
+	// Write how many extra binaries we got.
 	int extraBinaries = fileArray.length - 1;
 	fwrite(&extraBinaries, sizeof(extraBinaries), 1, target);	
 	fclose(source);
 
 	int i;
 	for (i = 1 ; i < fileArray.length ; i++) {
+
 		FILE *source = fopen(fileArray.array[i], "r");
-		
 		//Write the file size;
 		write_size(target, fileArray.array[i]);
 
-		//Write the binary
+		// Write the binary
 		write_file(target, source);
 
 		fclose(source);
 
-	} 
+	}
 	fclose(target);
+	
 	return TRUE;
 }
 

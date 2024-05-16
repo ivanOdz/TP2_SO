@@ -9,7 +9,8 @@ void * memcpy(void * destination, const void * source, uint64_t length);
 char *cpuVendor(char *result);
 
 char getChar();
-typedef struct{
+
+typedef struct {
     uint64_t r15, r14, r13, r12, r11, r10, r9, r8, rsi, rdi, rbp, rdx, rcx, rbx, rax, rip, cs, rflags, rsp, ss;
 } stack_registers;
 

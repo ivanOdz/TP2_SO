@@ -6,11 +6,12 @@ GLOBAL setPIT0Freq
 GLOBAL setPIT2Freq
 GLOBAL getPIT2Freq
 GLOBAL spkStop
-ALIGN 16
 
+ALIGN 16
 
 section .text
 	
+
 cpuVendor:
 	push rbp
 	mov rbp, rsp
@@ -19,7 +20,6 @@ cpuVendor:
 
 	mov rax, 0
 	cpuid
-
 
 	mov [rdi], ebx
 	mov [rdi + 4], edx
@@ -60,7 +60,7 @@ getRTC:
 	in al, 71h
 	mov [rdi+1], al     ; minutos
 
-	;obtengo las horas
+	; obtengo las horas
 	mov al, 0x04
 	out 70h, al
 	in al, 71h
@@ -75,6 +75,8 @@ getRTC:
 	pop rbp
 	mov rax, 3
 	ret
+
+
 getKey: 
 
     push rbp
@@ -87,6 +89,8 @@ getKey:
     mov rsp, rbp
     pop rbp
     ret
+
+	
 setPIT0Freq:
 	mov al, 0x36
 	out 0x43, al
@@ -96,6 +100,7 @@ setPIT0Freq:
 	out 0x40, al
 	ret
 
+
 setPIT2Freq:
 	mov al, 0xB6
 	out 0x43, al
@@ -104,6 +109,8 @@ setPIT2Freq:
 	mov al, ah
 	out 0x42, al
 	ret
+
+
 getPIT2Freq:
 	mov rax, 0
 	push rbx
@@ -117,11 +124,13 @@ getPIT2Freq:
 	pop rbx
 	ret
 
+
 spkMov:
 	in al, 0x61
 	or al, 0x3
 	out 0x61, al
 	ret
+
 
 spkStop:
 	in al, 0x61

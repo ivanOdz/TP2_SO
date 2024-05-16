@@ -1,9 +1,10 @@
 #ifndef _KEYBOARD_H_
 #define _KEYBOARD_H_
+
 #include <stdint.h>
+
 void keyboard_handler();
 uint64_t consume_keys(uint8_t* buf, uint64_t size);
-
 
 #define STD_IN 0
 

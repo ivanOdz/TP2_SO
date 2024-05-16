@@ -1,7 +1,7 @@
 #include "videoDriver.h"
-#include <font.h>
-#include <lib.h>
-#include <defs.h>
+#include "./../Include/defs.h"
+#include "./../Include/font.h"
+#include "./../Include/lib.h"
 
 struct vbe_mode_info_structure {
 
@@ -73,7 +73,6 @@ void scrollUp() {
 	uint64_t lineSize = SCREEN_WIDTH * charHeight * (VBE_mode_info->bpp / 8);
 	uint64_t frameSize = SCREEN_WIDTH * (SCREEN_HEIGHT -  charHeight) * (VBE_mode_info->bpp / 8);
 	memmove(framebuffer, framebuffer + lineSize, frameSize);
-
 	// Borra la última línea
 	memset(framebuffer + frameSize, backgroundColor, lineSize);
 }
@@ -84,10 +83,12 @@ void *memmove(void *dest, const void *src, uint64_t n) {
     const uint8_t *ps = src;
 
     if (pd == ps || n == 0) {
+
         return dest;
     }
 
     if (pd < ps || pd >= (ps + n)) {
+
         while (n--) {
             *pd++ = *ps++;
         }
@@ -95,8 +96,11 @@ void *memmove(void *dest, const void *src, uint64_t n) {
         pd += n;
         ps += n;
 
-        while (n--) { *--pd = *--ps; }
+        while (n--) {
+			*--pd = *--ps;
+		}
     }
+
     return dest;
 }
 
@@ -108,6 +112,7 @@ void print(uint8_t * word) {
 
 
 void initializeVideoDriver() {
+
     cursorActive = 1;   
     framebuffer = VBE_mode_info->framebuffer;
     cursor_x = X_OFFSET; 
@@ -121,8 +126,12 @@ void putPixel(uint64_t x, uint64_t y, uint32_t color) {
 	putBuffer(framebuffer + offset, color);
 }
 
-void putBuffer(uint8_t* buffer, uint32_t color){
-	if(color&0xFF000000) return;
+void putBuffer(uint8_t* buffer, uint32_t color) {
+
+	if (color&0xFF000000) {
+
+		return;
+	}
     buffer[0]   =  (color) & 0xFF;
     buffer[1]   =  (color >> 8) & 0xFF; 
     buffer[2]   =  (color >> 16) & 0xFF;
@@ -134,10 +143,14 @@ void drawchar_transparent(uint8_t c, uint64_t x, uint64_t y, uint32_t fgcolor) {
     static const uint64_t mask[8] = {128, 64, 32, 16, 8, 4, 2, 1};  // Cambiamos el orden de los bits en el array mask
     const uint8_t * glyph = font + (uint8_t)c * 16;
     uint8_t* buffer = framebuffer + y * VBE_mode_info->pitch + x*(VBE_mode_info->bpp>>3);
+
     for (cy = 0; cy < charHeight; cy++) {
+
         for (cx = 0; cx < charWidth; cx++) {
-            if (glyph[cy / fontSize] & mask[cx / fontSize])  // Verificamos si el bit correspondiente está encendido
+
+            if (glyph[cy / fontSize] & mask[cx / fontSize]) { 		// Verificamos si el bit correspondiente está encendido
                 putBuffer(buffer + cx * (VBE_mode_info->bpp>>3), fgcolor);
+			}
         }
 		buffer+=VBE_mode_info->pitch;
     }
@@ -159,9 +172,11 @@ void putchar(uint8_t c) {
 void backSpace() {
 
 	drawchar_transparent(219, cursor_x, cursor_y, backgroundColor);
-	if (cursor_x < charSpacing + X_OFFSET){
+
+	if (cursor_x < charSpacing + X_OFFSET) {
+
 		cursor_x = VBE_mode_info->width - ((VBE_mode_info->width - X_OFFSET)%charSpacing) - charSpacing;
-		if (cursor_y < charHeight + Y_OFFSET){
+		if (cursor_y < charHeight + Y_OFFSET) {
 			cursor_y = Y_OFFSET;
 			cursor_x = X_OFFSET;
 		} else {
@@ -180,9 +195,9 @@ void printChar(uint8_t c, uint32_t fg) {
 	} else if (c == '\n') {
         drawchar_transparent(219, cursor_x, cursor_y, backgroundColor);
 		nextLine();
-    } else if (c == '\b'){
+    } else if (c == '\b') {
 		backSpace();
-	} else if (c == '\e'){
+	} else if (c == '\e') {
 		clear();
 	} else if (c == 0xD) {
 		cursor_x = X_OFFSET;
@@ -191,9 +206,9 @@ void printChar(uint8_t c, uint32_t fg) {
         drawchar_transparent(219, cursor_x, cursor_y, backgroundColor);
 		drawchar_transparent(c, cursor_x, cursor_y, fg);
 		cursor_x += charSpacing;
-		if (cursor_x + charWidth >= VBE_mode_info->width) 
+		if (cursor_x + charWidth >= VBE_mode_info->width) {
 			nextLine();
-			
+		}
 	}
 }
 
@@ -235,18 +250,19 @@ void clear() {
     cursor_y = Y_OFFSET;
 }
 
-
-//Funcion para colorear el fondo de un color liso a eleccion pasado como Hexadecimal
+// Funcion para colorear el fondo de un color liso a eleccion pasado como Hexadecimal
 void setBackground() {
 
     uint8_t * framebuffer = (uint8_t *) VBE_mode_info->framebuffer;
     uint64_t pitch = VBE_mode_info->pitch;
-        for(uint64_t j = 0; j < VBE_mode_info->height; j++){
-            for(uint64_t i = 0; i < VBE_mode_info->width; i++){
-                framebuffer[i*3+j*pitch]     =  (backgroundColor) & 0xFF;
-                framebuffer[i*3+j*pitch+1]   =  (backgroundColor >> 8) & 0xFF; 
-                framebuffer[i*3+j*pitch+2]   =  (backgroundColor >> 16) & 0xFF;
-        }
+
+	for (uint64_t j = 0; j < VBE_mode_info->height; j++) {
+
+		for (uint64_t i = 0; i < VBE_mode_info->width; i++) {
+			framebuffer[i*3+j*pitch]     =  (backgroundColor) & 0xFF;
+			framebuffer[i*3+j*pitch+1]   =  (backgroundColor >> 8) & 0xFF; 
+			framebuffer[i*3+j*pitch+2]   =  (backgroundColor >> 16) & 0xFF;
+		}
     }
 }
 
@@ -254,19 +270,16 @@ void printCursor() {
 
 	static uint8_t setCursor = 0;
 
-	if (setCursor && cursorActive)
-	{
-		for (uint16_t cont=0; cont < charWidth; cont++)
-		{
+	if (setCursor && cursorActive) {
+
+		for (uint16_t cont=0; cont < charWidth; cont++) {
 			putPixel(cursor_x+cont, cursor_y + 12 * fontSize, fontColor);
 			putPixel(cursor_x+cont, cursor_y + 12 * fontSize + 1, fontColor);
 		}
 		setCursor = 0;
-	}
-	else
-	{
-		for (uint16_t cont=0; cont < charWidth; cont++)
-		{
+	} else {
+
+		for (uint16_t cont=0; cont < charWidth; cont++) {
 			putPixel(cursor_x+cont, cursor_y + 12 * fontSize, backgroundColor);
 			putPixel(cursor_x+cont, cursor_y + 12 * fontSize + 1, backgroundColor);
 		}
@@ -278,9 +291,11 @@ uint64_t syscall_puts(uint8_t fd, uint8_t * buf, uint64_t size) {
 
 	uint32_t foreground = (fd == STD_ERR) ? STDERR_FG : fontColor;
 	uint64_t i;
+
 	for (i = 0; i < size; i++) {
 		printChar(buf[i], foreground);
 	}
+
 	return i;
 }
 
@@ -290,6 +305,7 @@ uint64_t setFormat(const text_format * fmt) {
 	fontColor = fmt->fg;
 	setFontSize(fmt->size);
 	cursorActive = fmt->enableCursorBlink;
+
 	return sizeof(text_format);
 }
 
@@ -299,26 +315,36 @@ uint64_t getFormat(text_format * fmt) {
 	fmt->fg = fontColor;
 	fmt->size = fontSize;
 	fmt->enableCursorBlink = cursorActive;
+
 	return sizeof(text_format);
 }
 
 void putBlock(draw_type* draw) {
-	if (draw->border_width){
-		for(int i = 0; i < draw->border_width; i++){
-			for(int j = 0; j < draw->width; j++){
+
+	if (draw->border_width) {
+
+		for (int i = 0; i < draw->border_width; i++) {
+
+			for (int j = 0; j < draw->width; j++) {
 				putPixel(draw->x + j, draw->y - i, draw->border_color);
 				putPixel(draw->x + j, draw->y + draw->height - i, draw->border_color);
 			}
-			for(int j = 0; j < draw->height; j++){
+			for (int j = 0; j < draw->height; j++) {
 				putPixel(draw->x - i, draw->y + j, draw->border_color);
 				putPixel(draw->x + draw->width - i, draw->y + j, draw->border_color);
 			}
 		}
 	}
+
 	uint8_t* buffer = framebuffer + draw->y * VBE_mode_info->pitch + draw->x * (VBE_mode_info->bpp >> 3);
-    for(uint64_t i = 0; i < draw->width; i++) {
-        for(uint64_t j = 0; j < draw->height; j++) {
-            if (draw->texture) putBuffer(buffer + j * (VBE_mode_info->bpp >> 3), draw->texture[j + i * draw->width]);
+
+    for (uint64_t i = 0; i < draw->width; i++) {
+
+        for (uint64_t j = 0; j < draw->height; j++) {
+
+            if (draw->texture) {
+				putBuffer(buffer + j * (VBE_mode_info->bpp >> 3), draw->texture[j + i * draw->width]);
+			}
         }
 		buffer += VBE_mode_info->pitch;
     }

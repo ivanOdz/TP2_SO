@@ -28,7 +28,7 @@ void drawWord(uint8_t fd, uint8_t * word);
 void nextLine();
 void setTab();
 void drawchar_transparent(uint8_t c, uint64_t x, uint64_t y, uint32_t fgcolor);
-void print(uint8_t * word);             //imprime un string en formato C.
+void print(uint8_t * word);             // imprime un string en formato C.
 void printChar(uint8_t c, uint32_t fg);
 void setFontSize(uint8_t fontSize);
 void scrollUp();

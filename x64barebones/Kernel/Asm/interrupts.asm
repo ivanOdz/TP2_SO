@@ -1,4 +1,3 @@
-
 GLOBAL _cli
 GLOBAL _sti
 GLOBAL picMasterMask
@@ -73,9 +72,9 @@ SECTION .text
 %macro irqHandlerMaster 1
 	pushState
 	push rax
-	mov rax, [rsp + 8]			;r15
+	mov rax, [rsp + 8]		;r15
 	mov [regs], rax
-	mov rax, [rsp + 2*8]		;r14
+	mov rax, [rsp + 2*8]	;r14
 	mov [regs + 8], rax
 	mov rax, [rsp + 3*8]	;r13
 	mov [regs + 2*8], rax
@@ -115,7 +114,7 @@ SECTION .text
 	mov [regs + 19*8], rax
 	pop rax
 
-	mov rdi, %1 ; pasaje de parametro
+	mov rdi, %1  ; pasaje de parametro
 	mov r12, rax ; se mueven a estos registros porque deben ser preservados por funciones
 	mov r13, rcx ; (me garantizo que no me los van a tocar)
 	mov r15, rdx ; y yo estoy preservandolos con pushState y popState
@@ -134,7 +133,7 @@ SECTION .text
 %macro exceptionHandler 1
 	push rax
 	pushState
-	mov rdi, %1 ; pasaje de parametro
+	mov rdi, %1 		; pasaje de parametro
 	call exceptionDispatcher
 
 	popState
@@ -179,61 +178,61 @@ picSlaveMask:
     retn
 
 
-;8254 Timer (Timer Tick)
+; 8254 Timer (Timer Tick)
 _irq00Handler:
 	push rax
 	irqHandlerMaster 0
 	pop rax
 	iretq
 
-;Keyboard
+; Keyboard
 _irq01Handler:
 	push rax
 	irqHandlerMaster 1
 	pop rax
 	iretq
 
-;Cascade pic never called
+; Cascade pic never called
 _irq02Handler:
 	push rax
 	irqHandlerMaster 2
 	pop rax
 	iretq
 
-;Serial Port 2 and 4
+; Serial Port 2 and 4
 _irq03Handler:
 	push rax
 	irqHandlerMaster 3
 	pop rax
 	iretq
 
-;Serial Port 1 and 3
+; Serial Port 1 and 3
 _irq04Handler:
 	push rax
 	irqHandlerMaster 4
 	pop rax
 	iretq
 
-;USB
+; USB
 _irq05Handler:
 	push rax
 	irqHandlerMaster 5
 	pop rax
 	iretq
 
-;INT 80h
+; INT 80h
 _irq80Handler:
-	push rax	;syscall id
+	push rax	; syscall id
     irqHandlerMaster 6
 	pop rdx
 	iretq
 
 
-;Zero Division Exception
+; Zero Division Exception
 _exception0Handler:
 	exceptionHandler 0
 
-;Invalid Opcode Exception
+; Invalid Opcode Exception
 _exception06Handler:
     exceptionHandler 1
 
@@ -287,7 +286,6 @@ haltcpu:
 	hlt
 	ret
 
-
 SECTION .text
 	syscalls dq syscall_getRTC, syscall_clear, syscall_getRegisters, syscall_read, syscall_write, syscall_getFormat, syscall_setFormat, syscall_putBlock, syscall_getTicks, syscall_playSound, syscall_setTimer
 
@@ -298,4 +296,3 @@ SECTION .bss
 
 SECTION .rodata
 	userland equ 0x400000
-

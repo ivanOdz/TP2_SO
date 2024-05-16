@@ -8,5 +8,5 @@ loader:
 	call main
 hang:
 	cli
-	hlt	; halt machine should kernel return
+	hlt							; halt machine should kernel return
 	jmp hang
