@@ -34,4 +34,4 @@ clean:
 	cd Kernel; make clean
 	cd Userland; make clean
 
-.PHONY: toolchain bootloader image collections kernel userland all clean
+.PHONY: sharedlib toolchain bootloader image collections kernel userland all clean
