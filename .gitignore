@@ -14,3 +14,4 @@ x64barebones/c.sh
 .vscode/settings.json
 x64barebones/.vscode/c_cpp_properties.json
 .vscode
+pulseaudio_win
