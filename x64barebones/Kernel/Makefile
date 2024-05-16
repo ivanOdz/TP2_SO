@@ -9,6 +9,8 @@ OBJECTS=$(SOURCES:.c=.o)
 OBJECTS_ASM=$(SOURCES_ASM:.asm=.o)
 OBJECTS_IRQ=$(SOURCES_IRQ:.c=.o)
 OBJECTS_DRIVERS=$(SOURCES_DRIVERS:.c=.o)
+SOURCES_MM=$(wildcard memoryManagers/*.c)
+OBJECTS_MM=$(SOURCES_MM:.c=.o)
 LOADERSRC=./loader.asm
 
 LOADEROBJECT=$(LOADERSRC:.asm=.o)
@@ -16,15 +18,15 @@ STATICLIBS=
 
 all: $(KERNEL)
 
-$(KERNEL): $(LOADEROBJECT) $(OBJECTS_DRIVERS) $(OBJECTS_IRQ) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
+$(KERNEL): $(LOADEROBJECT) $(OBJECTS_DRIVERS) $(OBJECTS_IRQ) $(OBJECTS_MM) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
 	echo "LINKING KERNEL BIN"
-	@$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS) $(OBJECTS_DRIVERS) $(OBJECTS_IRQ) 
+	@$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS) $(OBJECTS_DRIVERS) $(OBJECTS_IRQ) $(OBJECTS_MM)
 	echo "LINKING KERNEL ELF"
 	@$(LD) $(LDFLAGS) -T kernel.ld --oformat=elf64-x86-64 -o kernel.elf $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS) $(OBJECTS_DRIVERS) $(OBJECTS_IRQ) 
 
 %.o: %.c
 	@echo "COMPILING $<"
-	@$(GCC) $(GCCFLAGS) -I./Include -I./Drivers/Include -I./Irq/Include -c $< -o $@
+	@$(GCC) $(GCCFLAGS) -I./Include -I./Drivers/Include -I./Irq/Include -I./memoryManagers -c $< -o $@
 
 %.o : %.asm
 	@echo "COMPILING $<"

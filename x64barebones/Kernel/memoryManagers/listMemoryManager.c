@@ -1,7 +1,14 @@
 #include <MemoryManager.h>
+#include <stddef.h>
 
 #define BLOCK_SIZE	  8 /// 8 chars = 64 bits
 #define LIST_MEM_SIZE 8192
+
+typedef struct BlockNode {
+	void *base;
+	uint64_t blocks;
+	struct BlockNode *next;
+} BlockNode;
 
 typedef struct MemoryManagerCDT {
 	void *startAddress;
@@ -9,12 +16,7 @@ typedef struct MemoryManagerCDT {
 	BlockNode *first;
 } MemoryManagerCDT;
 
-typedef struct BlockNode {
-	void *base;
-	uint64_t blocks;
-	BlockNode *next;
-} BlockNode;
-
+BlockNode *getNextFree();
 static MemoryManagerCDT memMan;
 static BlockNode list[LIST_MEM_SIZE] = {0};
 
