@@ -1,7 +1,7 @@
 /* shellCodeModule.c */
 #include <stdint.h>
 #include <libc.h>
-#include "commands.h"
+#include <commands.h>
 
 #define COLORS_DEFAULT  0x0020FF00
 #define BUFFER_MAX_SIZE 256

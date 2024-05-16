@@ -5,10 +5,10 @@ SHELL_CODE=shellCodeModule.bin
 all: shellCodeModule
 
 shellCodeModule:
-	cd ShellCodeModule; make
+	cd Shell; make
 
 clean:
-	cd ShellCodeModule; make clean
+	cd Shell; make clean
 	rm -rf *.bin *.elf
 	
 
