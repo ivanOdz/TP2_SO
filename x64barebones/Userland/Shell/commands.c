@@ -1,5 +1,7 @@
 #include <commands.h>
 #include <libc.h>
+#include <snake.h>
+#include <sc.h>
 
 static text_format shell_fmt = {0x00000000, 0x0000FF00, 1, 1};
 
@@ -126,7 +128,7 @@ int command_clear(int argc, char** argv){
 }
 
 int command_tunes(int argc, char** argv){
-    //SyscallAudio(0, skelliecity, skelliecitylength);
+    SyscallAudio(0, skelliecity, skelliecitylength);
     return 0;
 }
 
@@ -136,7 +138,7 @@ int command_getRegisters(int argc, char** argv){
 }
 
 int command_snakeGame(int argc, char** argv){
-    //snake(argc, argv);
+    snake(argc, argv);
     return 0;
 }
 

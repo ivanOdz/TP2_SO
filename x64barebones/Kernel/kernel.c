@@ -53,7 +53,6 @@ int main() {
 	
 	load_idt();
     initializeVideoDriver();
-
 	((EntryPoint)shellModuleAddress)();
 	syscall_puts(STD_ERR, (uint8_t *)"Shell has quit, kernel halting", 31);
 
