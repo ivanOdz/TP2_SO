@@ -15,6 +15,6 @@ typedef struct {
 	uint8_t seg;
 } time_t;
 
-extern uint8_t getRTC(time_t * timestruct);
+extern uint8_t getRTC(time_t *timestruct);
 
 #endif

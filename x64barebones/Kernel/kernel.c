@@ -1,12 +1,12 @@
+#include <idtLoader.h>
+#include <keyboard.h>
+#include <lib.h>
+#include <moduleLoader.h>
+#include <naiveConsole.h>
+#include <sound.h>
 #include <stdint.h>
 #include <string.h>
 #include <videoDriver.h>
-#include <keyboard.h>
-#include <sound.h>
-#include <moduleLoader.h>
-#include <naiveConsole.h>
-#include <idtLoader.h>
-#include <lib.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -17,30 +17,23 @@ extern uint8_t endOfKernel;
 
 static const uint64_t PageSize = 0x1000;
 
-static void * const shellModuleAddress = (void*)0x400000;
+static void *const shellModuleAddress = (void *) 0x400000;
 
 typedef int (*EntryPoint)();
 
-
-void clearBSS(void * bssAddress, uint64_t bssSize) {
-
+void clearBSS(void *bssAddress, uint64_t bssSize) {
 	memset(bssAddress, 0, bssSize);
 }
 
-void * getStackBase() {
-
-	return (void*) (
-		(uint64_t)&endOfKernel
-		+ PageSize * 8				// The size of the stack itself, 32KiB
-		- sizeof(uint64_t)			// Begin at the top of the stack
+void *getStackBase() {
+	return (void *) ((uint64_t) &endOfKernel + PageSize * 8 // The size of the stack itself, 32KiB
+					 - sizeof(uint64_t)						// Begin at the top of the stack
 	);
 }
 
-void * initializeKernelBinary() {
-
-	void * moduleAddresses[] = {
-        shellModuleAddress
-	};
+void *initializeKernelBinary() {
+	void *moduleAddresses[] = {
+		shellModuleAddress};
 
 	loadModules(&endOfKernelBinary, moduleAddresses);
 
@@ -49,12 +42,11 @@ void * initializeKernelBinary() {
 	return getStackBase();
 }
 
-int main() {	
-	
+int main() {
 	load_idt();
-    initializeVideoDriver();
-	((EntryPoint)shellModuleAddress)();
-	syscall_puts(STD_ERR, (uint8_t *)"Shell has quit, kernel halting", 31);
+	initializeVideoDriver();
+	((EntryPoint) shellModuleAddress)();
+	syscall_puts(STD_ERR, (uint8_t *) "Shell has quit, kernel halting", 31);
 
 	return 0;
 }
