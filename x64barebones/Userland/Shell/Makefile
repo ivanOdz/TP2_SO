@@ -13,13 +13,13 @@ all: $(MODULE)
 
 $(MODULE): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
 	@echo "LINKING SHELL BIN"
-	$(LD) $(LDFLAGS) -T shellCodeModule.ld -o $(MODULE) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
+	@$(LD) $(LDFLAGS) -T shellCodeModule.ld -o $(MODULE) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
 	@echo "LINKING SHELL ELF"
 	@$(LD) $(LDFLAGS) -T shellCodeModule.ld --oformat=elf64-x86-64 -o ../shellCodeModule.elf $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
 
 %.o: %.c
 	@echo "COMPILING $<"
-	$(GCC) $(GCCFLAGS) -I./Include -c $< -o $@
+	@$(GCC) $(GCCFLAGS) -I./Include -c $< -o $@
 
 %.o : %.asm
 	@echo "COMPILING $<"
