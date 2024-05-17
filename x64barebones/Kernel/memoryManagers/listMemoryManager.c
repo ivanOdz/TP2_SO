@@ -1,4 +1,5 @@
-#include <MemoryManager.h>
+#include <libc.h>
+#include <memoryManager.h>
 #include <stddef.h>
 
 #define BLOCK_SIZE	  8 /// 8 chars = 64 bits
@@ -24,6 +25,11 @@ MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_
 	memMan.startAddress = managedMemory;
 	memMan.totalMemory = memAmount;
 	memMan.first = NULL;
+	for (uint32_t i = 0; i < LIST_MEM_SIZE; i++) {
+		list[i].blocks = 0;
+		list[i].base = NULL;
+		list[i].next = NULL;
+	}
 	return &memMan;
 }
 
@@ -63,14 +69,16 @@ void *allocMemory(const uint64_t size) {
 	newNode->next = currentNode->next;
 	newNode->base = currentNode->base + currentNode->blocks * BLOCK_SIZE;
 	newNode->blocks = blocksToBeAssigned;
-	currentNode->next = newNode->next;
+	currentNode->next = newNode;
+
 	return newNode->base;
 }
 
 BlockNode *getNextFree() {
 	for (uint32_t i = 0; i < LIST_MEM_SIZE; i++) {
-		if (!list[i].blocks)
-			return list + i * sizeof(BlockNode);
+		if (list[i].blocks == 0) {
+			return &list[i];
+		}
 	}
 	return NULL;
 }
@@ -81,13 +89,42 @@ void free(void *ptrAllocatedMemory) {
 		return;
 	if (current->base == ptrAllocatedMemory) {
 		current->blocks = 0;
+		current->base = NULL;
+		current->next = NULL;
 		memMan.first = current->next;
 	}
 	while (current->next) {
 		if (current->next->base == ptrAllocatedMemory) {
 			current->next->blocks = 0;
+			current->base = NULL;
+			current->next = NULL;
 			current->next = current->next->next;
 		}
+		current = current->next;
 	}
 	return;
+}
+
+void printNodes() {
+	if (!memMan.first) {
+		printf("No nodes\n");
+		return;
+	}
+	printf("MemMan start %x size %x next %x\n", memMan.startAddress, memMan.totalMemory, memMan.first);
+	BlockNode *current = memMan.first;
+	while (current) {
+		printf("Node %x start %x size %x next %x\n", current, current->base, current->blocks, current->next);
+		if (current == current->next) {
+			printf("ERROR\n");
+			return;
+		}
+		current = current->next;
+	}
+}
+
+void printList() {
+	for (int i = 0; i < 12; i++) {
+		printf("Node %d %x %x %x\n", i, list[i].base, list[i].blocks, list[i].next);
+	}
+	printf("\n");
 }

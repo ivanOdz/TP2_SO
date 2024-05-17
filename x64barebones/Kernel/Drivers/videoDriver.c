@@ -150,10 +150,6 @@ void setFontSize(uint8_t size) {
 	fontSize = size;
 }
 
-void putchar(uint8_t c) {
-	printChar(c, fontColor);
-}
-
 void backSpace() {
 	drawchar_transparent(219, cursor_x, cursor_y, backgroundColor);
 

@@ -14,7 +14,6 @@ typedef struct {
 	uint64_t r15, r14, r13, r12, r11, r10, r9, r8, rsi, rdi, rbp, rdx, rcx, rbx, rax, rip, cs, rflags, rsp, ss;
 } stack_registers;
 
-int strcmp(const char *str1, const char *str2);
 void printRegs(stack_registers regs, uint64_t fd);
 void clearBuffer(uint8_t *buffer);
 

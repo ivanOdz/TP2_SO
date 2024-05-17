@@ -14,19 +14,18 @@ OBJECTS_MM=$(SOURCES_MM:.c=.o)
 LOADERSRC=./loader.asm
 
 LOADEROBJECT=$(LOADERSRC:.asm=.o)
-STATICLIBS=
-
+STATICLIBS=../Sharedlib/libc.o
 all: $(KERNEL)
 
 $(KERNEL): $(LOADEROBJECT) $(OBJECTS_DRIVERS) $(OBJECTS_IRQ) $(OBJECTS_MM) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
-	echo "LINKING KERNEL BIN"
+	@echo "LINKING KERNEL BIN"
 	@$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS) $(OBJECTS_DRIVERS) $(OBJECTS_IRQ) $(OBJECTS_MM)
-	echo "LINKING KERNEL ELF"
-	@$(LD) $(LDFLAGS) -T kernel.ld --oformat=elf64-x86-64 -o kernel.elf $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS) $(OBJECTS_DRIVERS) $(OBJECTS_IRQ) 
+	@echo "LINKING KERNEL ELF"
+	@$(LD) $(LDFLAGS) -T kernel.ld --oformat=elf64-x86-64 -o kernel.elf $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS) $(OBJECTS_DRIVERS) $(OBJECTS_IRQ) $(OBJECTS_MM)
 
 %.o: %.c
 	@echo "COMPILING $<"
-	@$(GCC) $(GCCFLAGS) -I./Include -I./Drivers/Include -I./Irq/Include -I./memoryManagers -c $< -o $@
+	@$(GCC) $(GCCFLAGS) -I./Include -I./Drivers/Include -I./Irq/Include -I./memoryManagers -I../Sharedlib -c $< -o $@
 
 %.o : %.asm
 	@echo "COMPILING $<"

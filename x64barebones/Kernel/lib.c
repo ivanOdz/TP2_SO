@@ -52,21 +52,6 @@ void *memcpy(void *destination, const void *source, uint64_t length) {
 	return destination;
 }
 
-int strcmp(const char *str1, const char *str2) {
-	while (*str1 != '\0' || *str2 != '\0') {
-		if (*str1 < *str2) {
-			return -1; // str1 es menor que str2
-		}
-		else if (*str1 > *str2) {
-			return 1; // str1 es mayor que str2
-		}
-		str1++;
-		str2++;
-	}
-
-	return 0; // Las cadenas son iguales
-}
-
 // recibe un struct de registros por stack (basado en el pushState/popState macro) usa uintToBase para convertir a hexa
 void printRegs(stack_registers regs, uint64_t fd) {
 	setFontSize(1);
