@@ -8,23 +8,27 @@
 #define MIN_MEM_SIZE  8
 #define MAX_LEVELS	  32
 
-#define BUDDY_RECURSIVE
+#define BUDDY_ITERATIVE
 
 typedef struct BlockNode {
 	void *addr;
 	uint64_t blocks;
 	struct BlockNode *left;
 	struct BlockNode *right;
+
 } BlockNode;
 
 typedef struct MemoryManagerCDT {
 	void *startAddress;
 	BlockNode *root; // Root considered at level 0
 	uint64_t totalMemory;
+	uint64_t largestAvailableMemoryBlock;
+	uint32_t levels;
+	uint32_t minBlockMemory;
 } MemoryManagerCDT;
 
 BlockNode list[LIST_MEM_SIZE] = {0};
-BlockNode route[MAX_LEVELS] = {0};
+BlockNode *route[MAX_LEVELS] = {0};
 
 static MemoryManagerCDT memMan;
 
@@ -48,6 +52,9 @@ MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_
 	memMan.totalMemory = size_pow2;
 
 	memMan.root = NULL;
+	memMan.levels = 0;
+	memMan.minBlockMemory = MIN_MEM_SIZE;
+
 	return &memMan;
 }
 
@@ -57,34 +64,35 @@ void *allocMemory(const uint64_t size) {
 		return NULL;
 
 	void *newAlloc = NULL;
-	BlockNode actualNode = memMan.root;
-	uint64_t actualAddress = memMan.startAddress;
+	BlockNode *actualNode = memMan.root;
+	void *actualAddress = memMan.startAddress;
 	uint32_t listIndex = 0; // Points to the father of the actual node
 	uint8_t memFound = 0;
 
 	while (!memFound) {
 		if (actualNode == NULL) {
 			actualNode = getNextFree();
-			actualNode.left = NULL;
-			actualNode.right = NULL;
-			actualNode.addr = actualAddress;
-			actualNode.size = memMan.totalMemory / (listIndex + 1);
-			if (listIndex > 0)
-				if (route[listIndex].left == NULL)
-					route[listIndex].left = actualNode;
+			actualNode->left = NULL;
+			actualNode->right = NULL;
+			actualNode->addr = actualAddress;
+			actualNode->blocks = memMan.totalMemory / (listIndex + 1);
+			if (listIndex > 0) {
+				if (route[listIndex]->left == NULL)
+					route[listIndex]->left = actualNode;
 				else
-					route[listIndex].right = actualNode;
+					route[listIndex]->right = actualNode;
+			}
 		}
-		if (size <= (actualNode.size / 2)) { // Go deeper
+		if (size <= (actualNode->blocks / 2)) { // Go deeper
 			route[listIndex] = actualNode;
 			listIndex++;
-			actualNode = actualNode.left;
+			actualNode = actualNode->left;
 		}
-		else if (actualNode.left != NULL || actualNode.right != NULL) { // Go to the right side or climb up
+		else if (actualNode->left != NULL || actualNode->right != NULL) { // Go to the right side or climb up
 
-			if (route[listIndex].left == actualNode) {
-				actualAddress = actualNode.addr + actualNode.size;
-				actualNode = route[listIndex].right;
+			if (route[listIndex]->left == actualNode) {
+				actualAddress = actualNode->addr + actualNode->blocks;
+				actualNode = route[listIndex]->right;
 			}
 			else {
 				while (listIndex) {
