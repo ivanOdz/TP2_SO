@@ -2,6 +2,8 @@
 #include <memoryManager.h>
 #include <stddef.h>
 
+#ifdef LIST
+
 #define BLOCK_SIZE	  8 /// 8 chars = 64 bits
 #define LIST_MEM_SIZE 8192
 
@@ -171,3 +173,5 @@ void printList() {
 	}
 	printf("\n");
 }
+
+#endif
