@@ -68,7 +68,7 @@ void *allocMemory(const uint64_t size) {
 	void *actualAddress = memMan.startAddress;
 	uint32_t listIndex = 0; // Points to the father of the actual node
 	uint8_t memFound = 0;
-
+	
 	while (!memFound) {
 		if (actualNode == NULL) {
 			actualNode = getNextFree();
@@ -82,22 +82,28 @@ void *allocMemory(const uint64_t size) {
 				else
 					route[listIndex]->right = actualNode;
 			}
+			else {
+				route[listIndex] = actualNode;
+			}
 		}
 		if (size <= (actualNode->blocks / 2)) { // Go deeper
-			route[listIndex] = actualNode;
 			listIndex++;
+			route[listIndex] = actualNode;
 			actualNode = actualNode->left;
 		}
-		else if (actualNode->left != NULL || actualNode->right != NULL) { // Go to the right side or climb up
-
+		else if (actualNode->left != NULL && actualNode->right != NULL) { // Go to the right side or climb up
 			if (route[listIndex]->left == actualNode) {
 				actualAddress = actualNode->addr + actualNode->blocks;
 				actualNode = route[listIndex]->right;
 			}
 			else {
-				while (listIndex) {
-					actualNode = route[listIndex--];
+				while (listIndex && route[listIndex]->right != NULL) {
+					listIndex--;
 				}
+				if (listIndex == 0)
+					return NULL;
+				else
+					actualNode = route[listIndex]->right;
 			}
 		}
 		else {
