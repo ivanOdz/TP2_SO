@@ -54,30 +54,30 @@ int main() {
 	}
 	free(test[0]);
 	free(test[1]);
-	// printNodes();
-	// printList();
 	test[0] = allocMemory(0x20000);
-	printf("Allocated 0x%x bytes at 0x%x\n\n", 0x20000, test[0]);
+	printf("Allocated 0x%x bytes at 0x%x (expected 0x500000)\n", 0x20000, test[0]);
 	printNodes();
 	free(test[4]);
+	printNodes();
 	free(test[5]);
 	free(test[6]);
-	printNodes();
-	test[4] = allocMemory(0x20000);
-	printf("4 Allocated 0x%x bytes at 0x%x\n", 0x20000, test[4]);
+
+	/*test[4] = allocMemory(0x20000);
+	printf("4 Allocated 0x%x bytes at 0x%x (expected 0x540000)\n", 0x20000, test[4]);
 	test[5] = allocMemory(0x5000);
-	printf("5 Allocated 0x%x bytes at 0x%x\n", 0x5000, test[5]);
+	printf("5 Allocated 0x%x bytes at 0x%x (expected 0x560000\n", 0x5000, test[5]);
 	test[6] = allocMemory(0x5000);
-	printf("6 Allocated 0x%x bytes at 0x%x\n\n", 0x5000, test[6]);
+	printf("6 Allocated 0x%x bytes at 0x%x (expected 0x565000)\n\n", 0x5000, test[6]);
 	free(test[4]);
 	free(test[5]);
 	free(test[6]);
 	test[4] = allocMemory(0x30000);
 	printf("4 Allocated 0x%x bytes at 0x%x\n", 0x30000, test[4]);
-	test[5] = allocMemory(0x2000);
+	test[5] = allocMemory(0x20000);
 	printf("5 Allocated 0x%x bytes at 0x%x\n", 0x20000, test[5]);
-	test[6] = allocMemory(0x1000);
+	test[6] = allocMemory(0x10000);
 	printf("6 Allocated 0x%x bytes at 0x%x\n", 0x10000, test[6]);
+	*/
 
 	((EntryPoint) shellModuleAddress)();
 	syscall_puts(STD_ERR, (uint8_t *) "Shell has quit, kernel halting", 31);

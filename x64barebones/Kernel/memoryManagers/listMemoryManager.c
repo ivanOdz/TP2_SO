@@ -47,13 +47,13 @@ void *allocMemory(const uint64_t size) {
 		return memMan.startAddress;
 	}
 	/// big enough gap between first node and mem start
-	if (memMan.startAddress != memMan.first->base && memMan.first->base <= memMan.startAddress + blocksToBeAssigned) {
+	if ((memMan.startAddress != memMan.first->base) && (memMan.first->base >= (memMan.startAddress + blocksToBeAssigned * BLOCK_SIZE))) {
 		BlockNode *temp = getNextFree();
 		if (temp == NULL)
 			return NULL;
 		temp->base = memMan.startAddress;
 		temp->blocks = blocksToBeAssigned;
-		temp->next = memMan.first->next;
+		temp->next = memMan.first;
 		memMan.first = temp;
 		return memMan.startAddress;
 	}
@@ -90,15 +90,15 @@ void free(void *ptrAllocatedMemory) {
 	if (current->base == ptrAllocatedMemory) {
 		current->blocks = 0;
 		current->base = NULL;
-		current->next = NULL;
 		memMan.first = current->next;
 	}
 	while (current->next) {
 		if (current->next->base == ptrAllocatedMemory) {
 			current->next->blocks = 0;
-			current->base = NULL;
-			current->next = NULL;
+			current->next->base = NULL;
 			current->next = current->next->next;
+			current->next->next = NULL;
+			return;
 		}
 		current = current->next;
 	}
@@ -113,7 +113,7 @@ void printNodes() {
 	printf("MemMan start %x size %x next %x\n", memMan.startAddress, memMan.totalMemory, memMan.first);
 	BlockNode *current = memMan.first;
 	while (current) {
-		printf("Node %x start %x size %x next %x\n", current, current->base, current->blocks, current->next);
+		printf("Node %x start %x size %x next %x\n", current, current->base, current->blocks * BLOCK_SIZE, current->next);
 		if (current == current->next) {
 			printf("ERROR\n");
 			return;
@@ -124,7 +124,7 @@ void printNodes() {
 
 void printList() {
 	for (int i = 0; i < 12; i++) {
-		printf("Node %d %x %x %x\n", i, list[i].base, list[i].blocks, list[i].next);
+		printf("Node %d %x %x %x\n", i, list[i].base, list[i].blocks * BLOCK_SIZE, list[i].next);
 	}
 	printf("\n");
 }
