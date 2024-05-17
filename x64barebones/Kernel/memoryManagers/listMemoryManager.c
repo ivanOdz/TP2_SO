@@ -48,6 +48,7 @@ void *allocMemory(const uint64_t size) {
 	}
 	/// big enough gap between first node and mem start
 	if ((memMan.startAddress != memMan.first->base) && (memMan.first->base >= (memMan.startAddress + blocksToBeAssigned * BLOCK_SIZE))) {
+		printf("initgap\n");
 		BlockNode *temp = getNextFree();
 		if (temp == NULL)
 			return NULL;
@@ -58,7 +59,7 @@ void *allocMemory(const uint64_t size) {
 		return memMan.startAddress;
 	}
 	BlockNode *currentNode = memMan.first;
-	while (currentNode->next && currentNode->base + size * BLOCK_SIZE > currentNode->next->base)
+	while (currentNode->next && currentNode->base + blocksToBeAssigned * BLOCK_SIZE >= currentNode->next->base)
 		currentNode = currentNode->next;
 	/// malloc te la mete
 	if (!currentNode->next && currentNode->base + (currentNode->blocks + blocksToBeAssigned) * BLOCK_SIZE >= memMan.startAddress + memMan.totalMemory)
@@ -88,16 +89,19 @@ void free(void *ptrAllocatedMemory) {
 	if (!current)
 		return;
 	if (current->base == ptrAllocatedMemory) {
+		printf("Freed %x bytes at %x\n", current->blocks * BLOCK_SIZE, current->base);
 		current->blocks = 0;
 		current->base = NULL;
 		memMan.first = current->next;
 	}
 	while (current->next) {
 		if (current->next->base == ptrAllocatedMemory) {
-			current->next->blocks = 0;
-			current->next->base = NULL;
-			current->next = current->next->next;
-			current->next->next = NULL;
+			BlockNode *temp = current->next;
+			printf("Freed %x bytes at %x\n", temp->blocks * BLOCK_SIZE, temp->base);
+			temp->blocks = 0;
+			temp->base = NULL;
+			current->next = temp->next;
+			temp->next = NULL;
 			return;
 		}
 		current = current->next;
