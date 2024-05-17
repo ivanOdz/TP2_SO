@@ -23,6 +23,11 @@ static BlockNode list[LIST_MEM_SIZE] = {0};
 
 MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_t memAmount) {
 	memMan.startAddress = managedMemory;
+	if ((uint64_t) memMan.startAddress % BLOCK_SIZE) {
+		memMan.startAddress = (void *) ((uint64_t) memMan.startAddress / BLOCK_SIZE);
+		memMan.startAddress++;
+		memMan.startAddress = (void *) ((uint64_t) memMan.startAddress * BLOCK_SIZE);
+	}
 	memMan.totalMemory = memAmount;
 	memMan.first = NULL;
 	for (uint32_t i = 0; i < LIST_MEM_SIZE; i++) {
@@ -34,6 +39,8 @@ MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_
 }
 
 void *allocMemory(const uint64_t size) {
+	if (!size)
+		return NULL;
 	uint64_t blocksToBeAssigned = size / BLOCK_SIZE;
 	if (size % BLOCK_SIZE)
 		blocksToBeAssigned++;
@@ -48,13 +55,13 @@ void *allocMemory(const uint64_t size) {
 	}
 	/// big enough gap between first node and mem start
 	if ((memMan.startAddress != memMan.first->base) && (memMan.first->base >= (memMan.startAddress + blocksToBeAssigned * BLOCK_SIZE))) {
-		BlockNode *temp = getNextFree();
-		if (temp == NULL)
+		BlockNode *newNode = getNextFree();
+		if (!newNode)
 			return NULL;
-		temp->base = memMan.startAddress;
-		temp->blocks = blocksToBeAssigned;
-		temp->next = memMan.first;
-		memMan.first = temp;
+		newNode->base = memMan.startAddress;
+		newNode->blocks = blocksToBeAssigned;
+		newNode->next = memMan.first;
+		memMan.first = newNode;
 		return memMan.startAddress;
 	}
 	BlockNode *currentNode = memMan.first;
@@ -69,7 +76,6 @@ void *allocMemory(const uint64_t size) {
 	newNode->base = currentNode->base + currentNode->blocks * BLOCK_SIZE;
 	newNode->blocks = blocksToBeAssigned;
 	currentNode->next = newNode;
-
 	return newNode->base;
 }
 
