@@ -19,7 +19,7 @@ typedef struct MemoryManagerCDT {
 
 BlockNode *getNextFree();
 static MemoryManagerCDT memMan;
-static BlockNode list[LIST_MEM_SIZE] = {0};
+static BlockNode staticAllocatedNodes[LIST_MEM_SIZE] = {0};
 
 MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_t memAmount) {
 	memMan.startAddress = managedMemory;
@@ -31,9 +31,9 @@ MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_
 	memMan.totalMemory = memAmount;
 	memMan.first = NULL;
 	for (uint32_t i = 0; i < LIST_MEM_SIZE; i++) {
-		list[i].blocks = 0;
-		list[i].base = NULL;
-		list[i].next = NULL;
+		staticAllocatedNodes[i].blocks = 0;
+		staticAllocatedNodes[i].base = NULL;
+		staticAllocatedNodes[i].next = NULL;
 	}
 	return &memMan;
 }
@@ -47,7 +47,7 @@ void *allocMemory(const uint64_t size) {
 
 	/// No first node
 	if (!memMan.first) {
-		memMan.first = list;
+		memMan.first = staticAllocatedNodes;
 		memMan.first->base = memMan.startAddress;
 		memMan.first->blocks = blocksToBeAssigned;
 		memMan.first->next = NULL;
@@ -79,10 +79,47 @@ void *allocMemory(const uint64_t size) {
 	return newNode->base;
 }
 
+void getMemoryInfo(MemoryInfo *mminfo) {
+	uint64_t memoryFreeBetweenNodes = 0;
+	uint64_t currentNodeMemorySize;
+	BlockNode *current = memMan.first;
+	mminfo->startAddress = memMan.startAddress;
+	mminfo->totalMemory = memMan.totalMemory;
+	mminfo->occupiedMemory = 0;
+
+	/// Mientras recorro la lista, cuento cuanta memoria esta ocupada
+	/// freeMemory la calculo con la memoria total - memoria ocuapda
+	/// FragmentedMemoryPercentage -> memoria total libre entre nodos/memoria entre primer nodo y donde termina el ultimo nodo
+
+	/// Si el primer nodo es NULL, tengo toda la memoria libre, sin fragmentacion.
+	if (current == NULL) {
+		mminfo->freeMemory = memMan.totalMemory;
+		mminfo->fragmentedMemoryPercentage = 0;
+		mminfo->endAddress = memMan.first;
+		return;
+	}
+
+	while (current != NULL) {
+		currentNodeMemorySize = current->blocks * BLOCK_SIZE;
+		mminfo->occupiedMemory += currentNodeMemorySize;
+		if (current->next != NULL) { /// Si el siguiente nodo no es null, puedo tener memoria fragmentada
+			memoryFreeBetweenNodes += current->next->base - (current->base + currentNodeMemorySize);
+		}
+		else { /// Si el siguiente nodo es null, ya puedo calcular la dir final
+			mminfo->endAddress = current->base + currentNodeMemorySize;
+		}
+		/// Si el siguiente nodo es null, ya estoy en el ultimo nodo. no calculo memoryFreeBetweenNodes.
+		// Avanzo
+		current = current->next;
+	}
+	mminfo->freeMemory = memMan.totalMemory - mminfo->occupiedMemory;
+	mminfo->fragmentedMemoryPercentage = (memoryFreeBetweenNodes / (double) (mminfo->endAddress - mminfo->startAddress)) * 100;
+}
+
 BlockNode *getNextFree() {
 	for (uint32_t i = 0; i < LIST_MEM_SIZE; i++) {
-		if (list[i].blocks == 0) {
-			return &list[i];
+		if (staticAllocatedNodes[i].blocks == 0) {
+			return &staticAllocatedNodes[i];
 		}
 	}
 	return NULL;
@@ -130,7 +167,7 @@ void printNodes() {
 
 void printList() {
 	for (int i = 0; i < 12; i++) {
-		printf("Node %d %x %x %x\n", i, list[i].base, list[i].blocks * BLOCK_SIZE, list[i].next);
+		printf("Node %d %x %x %x\n", i, staticAllocatedNodes[i].base, staticAllocatedNodes[i].blocks * BLOCK_SIZE, staticAllocatedNodes[i].next);
 	}
 	printf("\n");
 }
