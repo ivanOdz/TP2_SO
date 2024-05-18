@@ -96,7 +96,7 @@ void getMemoryInfo(MemoryInfo *mminfo) {
 	/// Si el primer nodo es NULL, tengo toda la memoria libre, sin fragmentacion.
 	if (current == NULL) {
 		mminfo->freeMemory = memMan.totalMemory;
-		mminfo->fragmentedMemoryPercentage = 0;
+		mminfo->fragmentedMemory = 0;
 		mminfo->endAddress = memMan.first;
 		return;
 	}
@@ -115,7 +115,7 @@ void getMemoryInfo(MemoryInfo *mminfo) {
 		current = current->next;
 	}
 	mminfo->freeMemory = memMan.totalMemory - mminfo->occupiedMemory;
-	mminfo->fragmentedMemoryPercentage = (memoryFreeBetweenNodes / (double) (mminfo->endAddress - mminfo->startAddress)) * 100;
+	mminfo->fragmentedMemory = memoryFreeBetweenNodes;
 }
 
 BlockNode *getNextFree() {

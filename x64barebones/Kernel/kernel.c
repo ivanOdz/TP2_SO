@@ -53,8 +53,8 @@ int main() {
 		printf("%d Allocated 0x%x bytes at 0x%x\n", i, 0x10000, test[i]);
 	}
 
-	// free(test[5]);
-	/*free(test[0]);
+	free(test[5]);
+	free(test[0]);
 	free(test[1]);
 	test[0] = allocMemory(0x20000);
 	printf("Allocated 0x%x bytes at 0x%x (expected 0x500000)\n", 0x20000, test[0]);
@@ -74,28 +74,17 @@ int main() {
 	free(test[6]);
 
 	test[4] = allocMemory(0x40000);
-	printf("4 Allocated 0x%x bytes at 0x%x (expected 0x5A0000)\n", 0x40000, test[4]);
+	printf("4 Allocated 0x%x bytes at 0x%x (expected 0x5C0000 if B or 5A if L)\n", 0x40000, test[4]);
 	test[5] = allocMemory(0x20000);
 	printf("5 Allocated 0x%x bytes at 0x%x (expected 0x540000)\n", 0x20000, test[5]);
 
 	test[6] = allocMemory(0x10000);
-	printf("6 Allocated 0x%x bytes at 0x%x (expected 0x560000)\n", 0x10000, test[6]);*/
+	printf("6 Allocated 0x%x bytes at 0x%x (expected 0x560000)\n", 0x10000, test[6]);
+	free(test[6]);
 
-	/*typedef struct MemoryInfo {
-		void *startAddress;
-		uint64_t totalMemory;
-		uint64_t freeMemory;
-		uint64_t occupiedMemory;
-		double fragmentedMemoryPercentage;
-		double minGlobalFreeMemoryPercentage;
-		void *endAddress;
-	} MemoryInfo;
-
-	*/
 	MemoryInfo mminfoo;
 	getMemoryInfo(&mminfoo);
-
-	printf("\n\nStart Address: 0x%x\nEnd Address: 0x%x\nTotal Memory: 0x%x\nFree Memory: 0x%x\nOcupied Memory: 0x%x\nFrag Prctg: %d\n\n", mminfoo.startAddress, mminfoo.endAddress, mminfoo.totalMemory, mminfoo.freeMemory, mminfoo.occupiedMemory, mminfoo.fragmentedMemoryPercentage);
+	printf("\n\nStart Address: 0x%x\nEnd Address: 0x%x\nTotal Memory: 0x%x\nFree Memory: 0x%x\nOcupied Memory: 0x%x\nFragmented Memory: 0x%x\n\n", mminfoo.startAddress, mminfoo.endAddress, mminfoo.totalMemory, mminfoo.freeMemory, mminfoo.occupiedMemory, mminfoo.fragmentedMemory);
 
 	((EntryPoint) shellModuleAddress)();
 	syscall_puts(STD_ERR, (uint8_t *) "Shell has quit, kernel halting", 31);

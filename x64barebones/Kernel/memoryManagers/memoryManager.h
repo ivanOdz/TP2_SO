@@ -10,8 +10,7 @@ typedef struct MemoryInfo {
 	uint64_t totalMemory;
 	uint64_t freeMemory;
 	uint64_t occupiedMemory;
-	double fragmentedMemoryPercentage;
-	double minGlobalFreeMemoryPercentage;
+	uint64_t fragmentedMemory;
 	void *endAddress;
 } MemoryInfo;
 

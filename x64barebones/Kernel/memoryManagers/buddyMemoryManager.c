@@ -32,11 +32,12 @@ BlockNode list[LIST_MEM_SIZE] = {0};
 BlockNode *route[MAX_LEVELS] = {0};
 
 static MemoryManagerCDT memMan;
-static uint8_t debug = 0;
 
 void *findMemory(uint64_t size, BlockNode *node, uint8_t virginNode);
 BlockNode *newNode(void *address, uint64_t size);
 BlockNode *getNextFree();
+uint8_t binarySearch(void *addr, BlockNode *node, uint8_t level);
+void deleteNode(BlockNode *node);
 
 MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_t memAmount) {
 	if (managedMemory == NULL || memAmount < MIN_MEM_SIZE)
@@ -121,21 +122,15 @@ void *allocMemory(const uint64_t size) {
 #ifdef BUDDY_RECURSIVE
 
 void *allocMemory(uint64_t size) {
-	if (!size) {
-		if (debug)
-			printf("No given size\n");
+	if (!size)
 		return NULL;
-	}
+
 	uint64_t size_pow2 = 1;
 	while (size / BLOCK_SIZE > size_pow2)
 		size_pow2 <<= 1;
-	if (debug)
-		printf("Trying to allocate %x %x %x\n", size, size / BLOCK_SIZE, size_pow2);
 
 	if (!memMan.root) {
 		memMan.root = newNode(memMan.startAddress, memMan.totalMemory);
-		if (debug)
-			printf("No root node, created %x\n", memMan.root);
 		if (!memMan.root)
 			return NULL;
 		return findMemory(size_pow2, memMan.root, 1);
@@ -144,75 +139,48 @@ void *allocMemory(uint64_t size) {
 }
 
 void *findMemory(uint64_t blocks, BlockNode *node, uint8_t virginNode) {
-	if (debug)
-		printf("Finding node for %x (self %x %x %x %x %x %d)\n", blocks, node, node->addr, node->blocks, node->left, node->right, virginNode);
 	if (node->blocks < blocks) {
-		if (debug)
-			printf("too small, fuck\n");
 		return NULL;
 	}
 	/// yo soy candidato ideal
-	if (node->blocks >= blocks && (node->blocks >> 1) < blocks && virginNode) {
-		if (debug)
-			printf("I alone am the chosen one\n");
+	uint8_t minimal = node->blocks >= blocks && (node->blocks >> 1) < blocks;
+	if (minimal && virginNode) {
 		return node->addr;
 	}
 
 	// quiero DFS o como se llame, asi que priorizo ir por ramas ya existentes
 	if (!node->left) {
-		if (debug)
-			printf("got no left ");
 		if (!node->right) {
-			if (debug)
-				printf("got no right either ");
 			/// no hay ningun hijo, asi que quiero ver si recien me crearon para seguir avanzando o si soy memoria alocada 😛
 			if (virginNode) {
-				if (debug)
-					printf("But i'm virgin so idc, get new left node\n");
 				node->left = newNode(node->addr, node->blocks >> 1);
 				return findMemory(blocks, node->left, virginNode);
 			}
-			if (debug)
-				printf("I'm already allocated myself, shit\n");
 			return NULL;
 		}
-		if (debug)
-			printf("Let's check the right\n");
 		void *result = findMemory(blocks, node->right, virginNode);
 		if (result) /// encontro memoria en right
 			return result;
-		if (debug)
-			printf("Fuck, no dice there, lets generate a left and check\n");
-		/// nos vamos a left
-		node->left = newNode(node->addr, node->blocks / 2);
-		return findMemory(blocks, node->left, 1);
+		if (!minimal) {
+			/// nos vamos a left
+			node->left = newNode(node->addr, node->blocks / 2);
+			return findMemory(blocks, node->left, 1);
+		}
+		return NULL;
 	}
 	if (!node->right) {
-		if (debug)
-			printf("got left node only, lets check it\n");
 		void *result = findMemory(blocks, node->left, virginNode);
 		if (result) /// encontro memoria en left
 			return result;
 		/// nos vamos a right
-		if (debug)
-			printf("%x That was useless, lets generate a right node and traverse it\n", node);
-		node->right = newNode(node->addr + (node->blocks / 2), node->blocks / 2);
+		node->right = newNode(node->addr + (node->blocks * BLOCK_SIZE / 2), node->blocks / 2);
 		return findMemory(blocks, node->right, 1);
 	}
-	if (debug)
-		printf("I might be allocated for my children lemme check real quick\n");
 	void *result = findMemory(blocks, node->left, 0);
 	if (result) {
-		if (debug)
-			printf("I had space in left\n");
 		return result;
 	}
 	result = findMemory(blocks, node->right, 0);
-	if (debug && result)
-		printf("I had space in right\n");
-	if (debug && !result)
-		printf("I was already allocated for my children\n");
-
 	return result;
 }
 
@@ -230,7 +198,54 @@ BlockNode *newNode(void *address, uint64_t blocks) {
 }
 
 void free(void *ptrAllocatedMemory) {
-	return; // TODO
+	if (memMan.root)
+		binarySearch(ptrAllocatedMemory, memMan.root, 0);
+	return;
+}
+
+uint8_t binarySearch(void *addr, BlockNode *node, uint8_t level) {
+	if (node->addr == addr && !node->left && !node->right) {
+		deleteNode(node);
+		return 1;
+	}
+	void *breakAddr = node->addr + node->blocks * BLOCK_SIZE / 2;
+	if (addr >= breakAddr) {
+		// if its here, it must be in right
+		if (!node->right)
+			return 0;
+		if (binarySearch(addr, node->right, level + 1)) {
+			node->right = NULL;
+			// found & deleted. should I delete myself as well?
+			if (node->left == NULL && node->right == NULL) {
+				deleteNode(node);
+				return 1;
+			}
+			return 0;
+		}
+	}
+	else {
+		// if its here it must be in left
+		if (!node->left)
+			return 0;
+		if (binarySearch(addr, node->left, level + 1)) {
+			node->left = NULL;
+			// found & deleted. should I delete myself as well?
+			if (node->left == NULL && node->right == NULL) {
+				deleteNode(node);
+				return 1;
+			}
+			return 0;
+		}
+	}
+	return 0;
+}
+
+void deleteNode(BlockNode *node) {
+	node->addr = NULL;
+	node->blocks = 0;
+	node->left = NULL;
+	node->right = NULL;
+	return;
 }
 
 BlockNode *getNextFree() {
@@ -278,10 +293,6 @@ void printGraphRec(BlockNode *Node, int depth, int tree, int nodenum) {
 
 void printNodes() {
 	printGraphRec(memMan.root, 0, 0, 0);
-}
-
-void setDebug(uint8_t bool) {
-	debug = bool;
 }
 
 #endif
