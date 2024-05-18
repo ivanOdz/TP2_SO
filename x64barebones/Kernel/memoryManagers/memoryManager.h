@@ -21,5 +21,6 @@ void getMemoryInfo(MemoryInfo *mminfo);
 void free(void *ptrAllocatedMemory);
 void printNodes();
 void printList();
+void setDebug(uint8_t);
 
 #endif
