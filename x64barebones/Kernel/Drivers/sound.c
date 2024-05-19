@@ -49,9 +49,11 @@ void soundNext() {
 	if (playing->current < playing->length || (playing->current == playing->length && playing->current_delay_left)) {
 		if (playing->current_delay_left == 0) {
 			if (playing->buffer[playing->current] != 0) {
+				spkMov();
 				setPIT2Freq((uint16_t) (FREQDELAY / playing->buffer[playing->current]));
 			}
 			else {
+				spkStop();
 				setPIT2Freq((uint16_t) (FREQDELAY * 8));
 			}
 			playing->current++;

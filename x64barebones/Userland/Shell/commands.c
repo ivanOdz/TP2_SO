@@ -1,5 +1,7 @@
 #include <commands.h>
 #include <libc.h>
+#include <rick.h>
+#include <roll.h>
 #include <sc.h>
 #include <snake.h>
 
@@ -132,7 +134,21 @@ int command_clear(int argc, char **argv) {
 }
 
 int command_tunes(int argc, char **argv) {
-	SyscallAudio(0, skelliecity, skelliecitylength);
+	draw_type ricky = {0, 0, RICKWIDTH, RICKHEIGHT, 0, 0, (uint32_t *) rick};
+	text_format fmt = {0x00000000, 0x00C0C0C0, 3, 0};
+	SyscallSetTimer(25000);
+	SyscallSetFormat(&fmt);
+	SyscallClear();
+	SyscallAudio(1, roll, rolllength);
+	for (int i = 0; i + RICKWIDTH < 1024; i += RICKWIDTH) {
+		for (int j = 0; j + RICKHEIGHT < 768; j += RICKHEIGHT) {
+			ricky.x = i;
+			ricky.y = j;
+			SyscallPutBlock(&ricky);
+		}
+	}
+	while (1) {
+	}
 	return 0;
 }
 
