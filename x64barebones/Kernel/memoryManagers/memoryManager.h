@@ -1,25 +1,16 @@
 #ifndef MEMORY_MANAGER_H
 #define MEMORY_MANAGER_H
+#include <libc.h>
 #include <stdint.h>
 
 #define BUDDY
 typedef struct MemoryManagerCDT *MemoryManagerADT;
 
-typedef struct MemoryInfo {
-	void *startAddress;
-	uint64_t totalMemory;
-	uint64_t freeMemory;
-	uint64_t occupiedMemory;
-	uint64_t fragmentedMemory;
-	void *endAddress;
-} MemoryInfo;
-
 MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_t memAmount);
 void *allocMemory(const uint64_t size);
 void getMemoryInfo(MemoryInfo *mminfo);
-void free(void *ptrAllocatedMemory);
+void freeMemory(void *ptrAllocatedMemory);
 void printNodes();
 void printList();
-void setDebug(uint8_t);
 
 #endif

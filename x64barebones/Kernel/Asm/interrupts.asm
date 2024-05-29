@@ -32,6 +32,9 @@ EXTERN syscall_read
 EXTERN syscall_clear
 EXTERN syscall_getRTC
 EXTERN syscall_setTimer
+EXTERN syscall_malloc
+EXTERN syscall_free
+EXTERN syscall_meminfo
 
 SECTION .text
 
@@ -287,7 +290,7 @@ haltcpu:
 	ret
 
 SECTION .text
-	syscalls dq syscall_getRTC, syscall_clear, syscall_getRegisters, syscall_read, syscall_write, syscall_getFormat, syscall_setFormat, syscall_putBlock, syscall_getTicks, syscall_playSound, syscall_setTimer
+	syscalls dq syscall_getRTC, syscall_clear, syscall_getRegisters, syscall_read, syscall_write, syscall_getFormat, syscall_setFormat, syscall_putBlock, syscall_getTicks, syscall_playSound, syscall_setTimer, syscall_malloc, syscall_free, syscall_meminfo
 
 SECTION .bss
 	aux resq 1

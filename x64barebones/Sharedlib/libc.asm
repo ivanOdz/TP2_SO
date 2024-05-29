@@ -10,16 +10,19 @@ GLOBAL SyscallPutBlock
 GLOBAL SyscallGetTicks
 GLOBAL SyscallAudio
 GLOBAL SyscallSetTimer
+GLOBAL SyscallMalloc
+GLOBAL SyscallFree
+GLOBAL SyscallMemInfo
 ALIGN 16
 
 
 section .text
 
-SyscallWrite:
+SyscallGetRTC:
     push rbp
     mov rbp, rsp    
 
-    mov rax, 4
+    mov rax, 0
     mov rbx, rdi
     mov rcx, rsi
     int 80h
@@ -27,33 +30,6 @@ SyscallWrite:
     mov rsp, rbp
     pop rbp
     ret
-
-SyscallRead:
-    push rbp
-    mov rbp, rsp    
-
-    mov rax, 3
-    mov rbx, rdi
-    mov rcx, rsi
-    int 80h
-
-    mov rsp, rbp
-    pop rbp
-    ret
-
-SyscallAudio:
-    push rbp
-    mov rbp, rsp    
-
-    mov rax, 9
-    mov rbx, rdi
-    mov rcx, rsi
-    int 80h
-
-    mov rsp, rbp
-    pop rbp
-    ret
-
 
 SyscallClear:
     push rbp
@@ -79,11 +55,23 @@ SyscallGetRegisters:
     pop rbp
     ret
 
-SyscallGetRTC:
+SyscallRead:
     push rbp
     mov rbp, rsp    
 
-    mov rax, 0
+    mov rax, 3
+    mov rbx, rdi
+    mov rcx, rsi
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+SyscallWrite:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 4
     mov rbx, rdi
     mov rcx, rsi
     int 80h
@@ -131,6 +119,30 @@ SyscallPutBlock:
     pop rbp
     ret
 
+SyscallGetTicks:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 8
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+SyscallAudio:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 9
+    mov rbx, rdi
+    mov rcx, rsi
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
 SyscallSetTimer:
     push rbp
     mov rbp, rsp    
@@ -144,11 +156,38 @@ SyscallSetTimer:
     pop rbp
     ret
 
-SyscallGetTicks:
+SyscallMalloc:
     push rbp
     mov rbp, rsp    
 
-    mov rax, 8
+    mov rax, 0x0B
+    mov rbx, rdi
+    
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+SyscallFree:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x0C
+    mov rbx, rdi
+    
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+SyscallMemInfo:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x0D
+    mov rbx, rdi
+    
     int 80h
 
     mov rsp, rbp

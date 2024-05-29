@@ -205,3 +205,13 @@ uint32_t rand() {
 uint32_t randBetween(uint32_t start, uint32_t end) {
 	return rand() % (end - start) + start;
 }
+
+void *malloc(uint64_t size) {
+	return SyscallMalloc(size);
+}
+void free(void *memory) {
+	SyscallFree(memory);
+}
+void memoryManagerStats(MemoryInfo *meminfo) {
+	SyscallMemInfo(meminfo);
+}

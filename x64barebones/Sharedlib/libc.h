@@ -39,6 +39,17 @@ typedef struct {
 	uint32_t *texture;
 } draw_type;
 
+typedef struct MemoryInfo {
+	void *startAddress;
+	uint64_t totalMemory;
+	uint64_t freeMemory;
+	uint64_t occupiedMemory;
+	uint64_t fragmentedMemory;
+	uint64_t minFragmentedSize;
+	uint64_t maxFragmentedSize;
+	void *endAddress;
+} MemoryInfo;
+
 extern uint64_t SyscallWrite(uint8_t fd, uint8_t *buffer, uint64_t size);
 extern uint64_t SyscallRead(uint8_t fd, uint8_t *buffer, uint64_t size);
 extern uint64_t SyscallClear();
@@ -50,6 +61,9 @@ extern uint64_t SyscallPutBlock(draw_type *draw);
 extern uint64_t SyscallGetTicks();
 extern uint64_t SyscallAudio(uint8_t isLoop, const uint8_t *buffer, uint64_t size);
 extern uint64_t SyscallSetTimer(uint16_t delay);
+extern void *SyscallMalloc(uint64_t size);
+extern uint64_t SyscallFree(void *memory);
+extern uint64_t SyscallMemInfo(MemoryInfo *meminfo);
 
 int64_t strcmp(const uint8_t *str1, const uint8_t *str2);
 uint64_t strlen(const uint8_t *str);
@@ -70,5 +84,6 @@ uint32_t text_color_get();
 int command_argvTest(int argc, char **argv);
 void printPadded(uint8_t fd, uint8_t *buffer, uint8_t pad, uint64_t totalLen);
 extern void invalidOpcode();
-
+void *malloc(uint64_t size);
+void memoryManagerStats(MemoryInfo *meminfo);
 #endif

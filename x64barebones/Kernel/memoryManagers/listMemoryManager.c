@@ -82,12 +82,14 @@ void *allocMemory(const uint64_t size) {
 }
 
 void getMemoryInfo(MemoryInfo *mminfo) {
-	uint64_t memoryFreeBetweenNodes = 0;
 	uint64_t currentNodeMemorySize;
 	BlockNode *current = memMan.first;
 	mminfo->startAddress = memMan.startAddress;
 	mminfo->totalMemory = memMan.totalMemory;
 	mminfo->occupiedMemory = 0;
+	mminfo->fragmentedMemory = 0;
+	mminfo->maxFragmentedSize = 0;
+	mminfo->minFragmentedSize = mminfo->totalMemory;
 
 	/// Mientras recorro la lista, cuento cuanta memoria esta ocupada
 	/// freeMemory la calculo con la memoria total - memoria ocuapda
@@ -105,7 +107,12 @@ void getMemoryInfo(MemoryInfo *mminfo) {
 		currentNodeMemorySize = current->blocks * BLOCK_SIZE;
 		mminfo->occupiedMemory += currentNodeMemorySize;
 		if (current->next != NULL) { /// Si el siguiente nodo no es null, puedo tener memoria fragmentada
-			memoryFreeBetweenNodes += current->next->base - (current->base + currentNodeMemorySize);
+			uint64_t fragmented = current->next->base - (current->base + currentNodeMemorySize);
+			mminfo->fragmentedMemory += fragmented;
+			if (fragmented > mminfo->maxFragmentedSize)
+				mminfo->maxFragmentedSize = fragmented;
+			if (fragmented < mminfo->minFragmentedSize)
+				mminfo->minFragmentedSize = fragmented;
 		}
 		else { /// Si el siguiente nodo es null, ya puedo calcular la dir final
 			mminfo->endAddress = current->base + currentNodeMemorySize;
@@ -115,7 +122,6 @@ void getMemoryInfo(MemoryInfo *mminfo) {
 		current = current->next;
 	}
 	mminfo->freeMemory = memMan.totalMemory - mminfo->occupiedMemory;
-	mminfo->fragmentedMemory = memoryFreeBetweenNodes;
 }
 
 BlockNode *getNextFree() {
@@ -127,7 +133,7 @@ BlockNode *getNextFree() {
 	return NULL;
 }
 
-void free(void *ptrAllocatedMemory) {
+void freeMemory(void *ptrAllocatedMemory) {
 	BlockNode *current = memMan.first;
 	if (!current)
 		return;

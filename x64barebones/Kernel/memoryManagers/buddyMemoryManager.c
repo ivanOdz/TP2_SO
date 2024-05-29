@@ -22,7 +22,7 @@ typedef struct BlockNode {
 typedef struct MemoryManagerCDT {
 	void *startAddress;
 	BlockNode *root; // Root considered at level 0
-	uint64_t totalMemory;
+	uint64_t totalBlocks;
 	uint64_t largestAvailableMemoryBlock;
 	uint32_t levels;
 	uint32_t minBlockMemory;
@@ -38,6 +38,7 @@ BlockNode *newNode(void *address, uint64_t size);
 BlockNode *getNextFree();
 uint8_t binarySearch(void *addr, BlockNode *node, uint8_t level);
 void deleteNode(BlockNode *node);
+void *getMemoryRecursive(MemoryInfo *meminfo, BlockNode *node, void *lastUsedAddress);
 
 MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_t memAmount) {
 	if (managedMemory == NULL || memAmount < MIN_MEM_SIZE)
@@ -52,7 +53,7 @@ MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_
 	uint64_t size_pow2 = 1;
 	while (size_pow2 <= memAmount && (size_pow2 << 1) < memAmount)
 		size_pow2 <<= 1;
-	memMan.totalMemory = size_pow2;
+	memMan.totalBlocks = size_pow2;
 
 	memMan.root = NULL;
 	memMan.levels = 0;
@@ -77,7 +78,7 @@ void *allocMemory(const uint64_t size) {
 			actualNode->left = NULL;
 			actualNode->right = NULL;
 			actualNode->addr = actualAddress;
-			actualNode->blocks = memMan.totalMemory / (listIndex + 1);
+			actualNode->blocks = memMan.totalBlocks / (listIndex + 1);
 			if (listIndex > 0) {
 				if (route[listIndex]->left == NULL)
 					route[listIndex]->left = actualNode;
@@ -130,7 +131,7 @@ void *allocMemory(uint64_t size) {
 		size_pow2 <<= 1;
 
 	if (!memMan.root) {
-		memMan.root = newNode(memMan.startAddress, memMan.totalMemory);
+		memMan.root = newNode(memMan.startAddress, memMan.totalBlocks);
 		if (!memMan.root)
 			return NULL;
 		return findMemory(size_pow2, memMan.root, 1);
@@ -197,7 +198,7 @@ BlockNode *newNode(void *address, uint64_t blocks) {
 	return myNode;
 }
 
-void free(void *ptrAllocatedMemory) {
+void freeMemory(void *ptrAllocatedMemory) {
 	if (memMan.root)
 		binarySearch(ptrAllocatedMemory, memMan.root, 0);
 	return;
@@ -256,9 +257,51 @@ BlockNode *getNextFree() {
 	}
 	return NULL;
 }
-
+/*
+typedef struct MemoryInfo {
+*	void *startAddress;
+*	uint64_t totalMemory;
+	uint64_t freeMemory;
+	uint64_t occupiedMemory;
+	uint64_t fragmentedMemory;
+	uint64_t minFragmentedSize;
+	uint64_t maxFragmentedSize;
+*	void *endAddress;
+} MemoryInfo;*/
 void getMemoryInfo(MemoryInfo *meminfo) {
+	meminfo->startAddress = memMan.startAddress;
+	meminfo->totalMemory = memMan.totalBlocks * BLOCK_SIZE;
+	meminfo->occupiedMemory = 0;
+	meminfo->fragmentedMemory = 0;
+	meminfo->minFragmentedSize = memMan.totalBlocks * BLOCK_SIZE;
+	meminfo->maxFragmentedSize = 0;
+	meminfo->endAddress = getMemoryRecursive(meminfo, memMan.root, memMan.startAddress);
+	meminfo->freeMemory = meminfo->totalMemory - meminfo->occupiedMemory;
 	return;
+}
+// casos  -> 2 ramas -> me adentro
+//			1 rama  -> me adentro a una y retorno la otra
+//			0 ramas -> sumo memoria, comparo addr ultima y sumo frag y free, retorno
+void *getMemoryRecursive(MemoryInfo *meminfo, BlockNode *node, void *lastUsedAddress) {
+	if (!node->left && !node->right) {
+		// leaf
+		meminfo->occupiedMemory += node->blocks * BLOCK_SIZE;
+		if (node->addr != lastUsedAddress) {
+			uint64_t fragmented = node->addr - lastUsedAddress;
+			meminfo->fragmentedMemory += fragmented;
+			if (fragmented > meminfo->maxFragmentedSize)
+				meminfo->maxFragmentedSize = fragmented;
+			if (fragmented < meminfo->minFragmentedSize)
+				meminfo->minFragmentedSize = fragmented;
+		}
+		return node->addr + node->blocks * BLOCK_SIZE;
+	}
+	// branch
+	if (node->left)
+		lastUsedAddress = getMemoryRecursive(meminfo, node->left, lastUsedAddress);
+	if (node->right)
+		lastUsedAddress = getMemoryRecursive(meminfo, node->right, lastUsedAddress);
+	return lastUsedAddress;
 }
 
 void printPad(void *nodeAddr, void *memAddr, uint64_t blocks, BlockNode *left, BlockNode *right, int tree, int nodenum) {
@@ -274,7 +317,7 @@ void printPad(void *nodeAddr, void *memAddr, uint64_t blocks, BlockNode *left, B
 		}
 		tree = tree >> 1;
 	}
-	printf("(%d) %x (%x %x %x %x)\n", nodenum, nodeAddr, memAddr, blocks, left, right);
+	printf("(%d) %x (%x %x %x %x)\n", nodenum, nodeAddr, memAddr, blocks * BLOCK_SIZE, left, right);
 	for (uint32_t i = 0; i < 10000000; i++) {
 	}
 }

@@ -1,6 +1,7 @@
 #include <defs.h>
 #include <keyboard.h>
 #include <lib.h>
+#include <memoryManager.h>
 #include <sound.h>
 #include <stdint.h>
 #include <time.h>
@@ -91,6 +92,19 @@ uint64_t syscall_playSound(uint8_t flags, const uint8_t *buffer, uint64_t length
 }
 uint64_t syscall_setTimer(uint16_t delay) {
 	setPIT0Freq(delay);
+	return 0;
+}
+
+void *syscall_malloc(uint64_t size) {
+	return allocMemory(size);
+}
+
+uint64_t syscall_free(void *memory) {
+	freeMemory(memory);
+	return 0;
+}
+uint64_t syscall_meminfo(MemoryInfo *meminfo) {
+	getMemoryInfo(meminfo);
 	return 0;
 }
 
