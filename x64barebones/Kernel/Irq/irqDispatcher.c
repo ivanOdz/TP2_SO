@@ -108,4 +108,9 @@ uint64_t syscall_meminfo(MemoryInfo *meminfo) {
 	return 0;
 }
 
+uint64_t syscall_printMemory() {
+	printMem();
+	return 0;
+}
+
 typedef int (*EntryPoint)();

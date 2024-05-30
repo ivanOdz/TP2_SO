@@ -13,6 +13,7 @@ GLOBAL SyscallSetTimer
 GLOBAL SyscallMalloc
 GLOBAL SyscallFree
 GLOBAL SyscallMemInfo
+GLOBAL SyscallPrintMem
 ALIGN 16
 
 
@@ -187,6 +188,18 @@ SyscallMemInfo:
 
     mov rax, 0x0D
     mov rbx, rdi
+    
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+SyscallPrintMem:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x0E
     
     int 80h
 

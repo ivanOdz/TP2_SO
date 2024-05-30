@@ -3,6 +3,7 @@
 
 #include <libc.h>
 #include <stdint.h>
+#include <tests.h>
 
 // ------------------------------- TEXTS -------------------------------------------
 #define STR_PREAMBLE_FOR_COMANDS "Estos son los comandos disponibles para ejecutar:\n"
@@ -44,8 +45,10 @@ static const availableCommand avCommands[] = {
 	{(uint8_t *) "getTime", command_get_rtc},
 	{(uint8_t *) "getRegisters", command_getRegisters},
 	{(uint8_t *) "argvTest", command_argvTest},
-	{(uint8_t *) "tunes", command_tunes}};
+	{(uint8_t *) "tunes", command_tunes},
+	{(uint8_t *) "mm_test", mm_test}};
 
-int64_t commands(uint8_t *strBuffer);
+int64_t
+commands(uint8_t *strBuffer);
 
 #endif

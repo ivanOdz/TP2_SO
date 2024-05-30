@@ -133,10 +133,10 @@ BlockNode *getNextFree() {
 	return NULL;
 }
 
-void freeMemory(void *ptrAllocatedMemory) {
+uint8_t freeMemory(void *ptrAllocatedMemory) {
 	BlockNode *current = memMan.first;
 	if (!current)
-		return;
+		return 0;
 	if (current->base == ptrAllocatedMemory) {
 		current->blocks = 0;
 		current->base = NULL;
@@ -149,14 +149,14 @@ void freeMemory(void *ptrAllocatedMemory) {
 			temp->base = NULL;
 			current->next = temp->next;
 			temp->next = NULL;
-			return;
+			return 1;
 		}
 		current = current->next;
 	}
-	return;
+	return 0;
 }
 
-void printNodes() {
+void printMem() {
 	if (!memMan.first) {
 		printf("No nodes\n");
 		return;
@@ -171,13 +171,6 @@ void printNodes() {
 		}
 		current = current->next;
 	}
-}
-
-void printList() {
-	for (int i = 0; i < 12; i++) {
-		printf("Node %d %x %x %x\n", i, staticAllocatedNodes[i].base, staticAllocatedNodes[i].blocks * BLOCK_SIZE, staticAllocatedNodes[i].next);
-	}
-	printf("\n");
 }
 
 #endif

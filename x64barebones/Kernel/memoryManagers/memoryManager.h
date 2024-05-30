@@ -9,8 +9,7 @@ typedef struct MemoryManagerCDT *MemoryManagerADT;
 MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_t memAmount);
 void *allocMemory(const uint64_t size);
 void getMemoryInfo(MemoryInfo *mminfo);
-void freeMemory(void *ptrAllocatedMemory);
-void printNodes();
-void printList();
+uint8_t freeMemory(void *ptrAllocatedMemory);
+void printMem();
 
 #endif

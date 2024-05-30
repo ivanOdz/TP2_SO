@@ -47,6 +47,7 @@ typedef struct MemoryInfo {
 	uint64_t fragmentedMemory;
 	uint64_t minFragmentedSize;
 	uint64_t maxFragmentedSize;
+	uint64_t assignedNodes;
 	void *endAddress;
 } MemoryInfo;
 
@@ -64,6 +65,7 @@ extern uint64_t SyscallSetTimer(uint16_t delay);
 extern void *SyscallMalloc(uint64_t size);
 extern uint64_t SyscallFree(void *memory);
 extern uint64_t SyscallMemInfo(MemoryInfo *meminfo);
+extern uint64_t SyscallPrintMem();
 
 int64_t strcmp(const uint8_t *str1, const uint8_t *str2);
 uint64_t strlen(const uint8_t *str);
@@ -85,5 +87,6 @@ int command_argvTest(int argc, char **argv);
 void printPadded(uint8_t fd, uint8_t *buffer, uint8_t pad, uint64_t totalLen);
 extern void invalidOpcode();
 void *malloc(uint64_t size);
+void free(void *memory);
 void memoryManagerStats(MemoryInfo *meminfo);
 #endif
