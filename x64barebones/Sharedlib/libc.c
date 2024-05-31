@@ -10,6 +10,16 @@ uint64_t pow(uint64_t base, uint64_t exp) {
 	return ans;
 }
 
+int64_t strcpy(uint8_t *dest, const uint8_t *src) {
+	int64_t i = 0;
+	while (*src != 0) {
+		*dest++ = *src++;
+		i++;
+	}
+	*dest = 0;
+	return i;
+}
+
 int64_t strcmp(const uint8_t *str1, const uint8_t *str2) {
 	while (*str1 != '\0' || *str2 != '\0') {
 		if (*str1 < *str2) {
