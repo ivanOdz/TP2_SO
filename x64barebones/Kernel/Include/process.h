@@ -2,12 +2,12 @@
 #define PROCESS_H
 
 #define MAX_FILE_DESCRIPTORS 64
-#define MAX_NAME_SIZE 25
-
+#define MAX_NAME_SIZE		 25
 
 #include <stdint.h>
 
 typedef enum { BLOCKED = 0,
+			   STOPPED,
 			   READY,
 			   RUNNING } ProcessStatus;
 
