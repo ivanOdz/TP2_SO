@@ -292,6 +292,7 @@ typedef struct MemoryInfo {
 *	void *endAddress;
 } MemoryInfo;*/
 void getMemoryInfo(MemoryInfo *meminfo) {
+	meminfo->mmType = 'B';
 	meminfo->startAddress = memMan.startAddress;
 	meminfo->totalMemory = memMan.totalBlocks * BLOCK_SIZE;
 	meminfo->occupiedMemory = 0;

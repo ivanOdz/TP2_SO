@@ -49,6 +49,7 @@ typedef struct MemoryInfo {
 	uint64_t maxFragmentedSize;
 	uint64_t assignedNodes;
 	void *endAddress;
+	uint8_t mmType;
 } MemoryInfo;
 
 extern uint64_t SyscallWrite(uint8_t fd, uint8_t *buffer, uint64_t size);

@@ -85,7 +85,7 @@ int mm_test(int argc, char **argv) {
 	if (!maxMemSize)
 		maxMemSize = mminfoo.freeMemory >> 20;
 	printf("Starting memtest - abuse...\n");
-	printf("Max memory: %d MiB, Max Blocks: %d, Max Block Size: %d bytes, Min Block Size: %d bytes, Burn-in: %d\n", maxMemSize, maxBlocks, maxBlockSize, minBlockSize, burnin);
+	printf("MM Type: %c, Max memory: %d MiB, Max Blocks: %d, Max Block Size: %d bytes, Min Block Size: %d bytes, Burn-in: %d\n", mminfoo.mmType, maxMemSize, maxBlocks, maxBlockSize, minBlockSize, burnin);
 	memoryManagerStats(&mminfoo);
 	while (burnin--) {
 		printf("\nNew iteration (%d left)\n", burnin);
@@ -118,7 +118,7 @@ int mm_test(int argc, char **argv) {
 
 		printf("\nAssigned %d slots out of %d\n", assigned, maxBlocks);
 		memoryManagerStats(&mminfoo);
-		printf("Free Memory: 0x%x\tOcupied Memory: 0x%x\tFragmented Memory: 0x%x\tMax Memory Block Size:%x\tMin Memory Block Size:%x\tAssigned Nodes:%d\n", mminfoo.freeMemory, mminfoo.occupiedMemory, mminfoo.fragmentedMemory, mminfoo.maxFragmentedSize, mminfoo.minFragmentedSize, mminfoo.assignedNodes);
+		printf("Free Memory: 0x%x\tOcupied Memory: 0x%x\tFragmented Memory: 0x%x\tMax Frag Block Size:%x\nMin Frag Block Size:%x\tAssigned Nodes:%d\n", mminfoo.freeMemory, mminfoo.occupiedMemory, mminfoo.fragmentedMemory, mminfoo.maxFragmentedSize, mminfoo.minFragmentedSize, mminfoo.assignedNodes);
 		printf("Testing allocated memory for overlaps and corruption (0000)");
 		for (int testNum = 0; testNum < assigned; testNum++) {
 			uint8_t *memSlot = test[testNum];

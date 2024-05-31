@@ -84,6 +84,7 @@ void *allocMemory(const uint64_t size) {
 void getMemoryInfo(MemoryInfo *mminfo) {
 	uint64_t currentNodeMemorySize;
 	BlockNode *current = memMan.first;
+	mminfo->mmType = 'L';
 	mminfo->startAddress = memMan.startAddress;
 	mminfo->totalMemory = memMan.totalMemory;
 	mminfo->occupiedMemory = 0;
