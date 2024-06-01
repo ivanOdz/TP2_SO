@@ -124,5 +124,11 @@ uint64_t syscall_ps(){
 	return 0;
 }
 
+uint64_t syscall_nice(uint16_t pid, uint8_t newPriority){
+	setProcessPriority(pid, newPriority);
+	return 0;
+}
+
+
 
 typedef int (*EntryPoint)();

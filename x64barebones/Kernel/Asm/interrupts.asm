@@ -38,6 +38,7 @@ EXTERN syscall_meminfo
 EXTERN syscall_printMemory
 EXTERN syscall_createProcess
 EXTERN syscall_ps
+EXTERN syscall_nice
 
 SECTION .text
 
@@ -293,7 +294,7 @@ haltcpu:
 	ret
 
 SECTION .text
-	syscalls dq syscall_getRTC, syscall_clear, syscall_getRegisters, syscall_read, syscall_write, syscall_getFormat, syscall_setFormat, syscall_putBlock, syscall_getTicks, syscall_playSound, syscall_setTimer, syscall_malloc, syscall_free, syscall_meminfo, syscall_printMemory, syscall_createProcess, syscall_ps
+	syscalls dq syscall_getRTC, syscall_clear, syscall_getRegisters, syscall_read, syscall_write, syscall_getFormat, syscall_setFormat, syscall_putBlock, syscall_getTicks, syscall_playSound, syscall_setTimer, syscall_malloc, syscall_free, syscall_meminfo, syscall_printMemory, syscall_createProcess, syscall_ps, syscall_nice
 
 SECTION .bss
 	aux resq 1

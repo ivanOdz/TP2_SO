@@ -16,6 +16,7 @@ GLOBAL SyscallMemInfo
 GLOBAL SyscallPrintMem
 GLOBAL SyscallCreateProcess
 GLOBAL SyscallPs
+GLOBAL SyscallNice
 ALIGN 16
 
 
@@ -225,6 +226,19 @@ SyscallPs:
     mov rbp, rsp    
 
     mov rax, 0x10
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+SyscallNice:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x11
+    mov rbx, rdi    ; pid
+    mov rcx, rsi    ; newPriority
     int 80h
 
     mov rsp, rbp

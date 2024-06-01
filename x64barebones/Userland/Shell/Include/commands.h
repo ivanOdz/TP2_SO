@@ -27,6 +27,7 @@ int command_get_rtc(int argc, char **argv);
 int command_getRegisters();
 int command_tunes(int argc, char **argv);
 int command_argvTest(int argc, char **argv);
+int command_nice(int argc, char **argv);
 // ---------------------------------------------------------------------------------
 
 typedef struct {
@@ -48,9 +49,9 @@ static const availableCommand avCommands[] = {
 	{(uint8_t *) "tunes", command_tunes},
 	{(uint8_t *) "mm_test", mm_test},
 	{(uint8_t *) "test_processes", test_processes},
-	{(uint8_t *) "ps", ps}};
+	{(uint8_t *) "ps", ps},
+	{(uint8_t *) "nice", command_nice}};
 
-int64_t
-commands(uint8_t *strBuffer);
+int64_t commands(uint8_t *strBuffer);
 
 #endif

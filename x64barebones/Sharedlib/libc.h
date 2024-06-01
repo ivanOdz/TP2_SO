@@ -69,7 +69,7 @@ extern uint64_t SyscallMemInfo(MemoryInfo *meminfo);
 extern uint64_t SyscallPrintMem();
 extern uint64_t SyscallCreateProcess();
 extern uint64_t SyscallPs();
-
+extern uint64_t SyscallNice(uint16_t pid, uint8_t newPriority);
 
 int64_t strcpy(uint8_t *dest, const uint8_t *src);
 int64_t strcmp(const uint8_t *str1, const uint8_t *str2);

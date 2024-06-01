@@ -10,8 +10,8 @@
 
 static uint16_t nextPid = 1;
 
-static PCB processes[MAX_PROCESSES] = {0};
-/*static PCB processes[MAX_PROCESSES] = {
+//static PCB processes[MAX_PROCESSES] = {0};
+static PCB processes[MAX_PROCESSES] = {
 	{
 		.pid = 1,
 		.parentPid = 0,
@@ -54,8 +54,8 @@ static PCB processes[MAX_PROCESSES] = {0};
 		.priority = 1,
 		.status = BLOCKED
 	}
-};*/
-static uint16_t numberOfProcesses = 0;
+};
+static uint16_t numberOfProcesses = 3;
 
 static int16_t getNextPosition() {
 	int16_t availablePos = 0;
@@ -149,27 +149,16 @@ uint64_t ps() {
 	return 0;
 }
 
-/*
-
-
-void killProcess(uint16_t pid) {
+void setProcessPriority(uint16_t pid, int8_t priority) {
 	int8_t index = getProcessIndex(pid);
-	if (index < 0) {
-		return;
-	}
-	processes[index].status = STOPPED; // Para que no vuelva a ser elegido por el scheduler.
-	processes[index].stackBase = NULL;
-	processes[index].stackPointer = NULL;
-}
-
-void setProcessPriority(uint16_t pid, uint8_t priority) {
-	int8_t index = getProcessIndex(pid);
-	if (index < 0) {
+	if (index < 0 || priority < 0 || priority > 31) {
 		return;
 	}
 	processes[index].priority = priority;
 }
 
+
+/*
 void setProcessState(uint16_t pid, ProcessStatus ps) {
 
 }

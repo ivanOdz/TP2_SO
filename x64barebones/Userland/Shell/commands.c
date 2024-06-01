@@ -161,3 +161,23 @@ int command_snakeGame(int argc, char **argv) {
 	snake(argc, argv);
 	return 0;
 }
+
+int ps(int argc, char **argv) {
+	SyscallPs();
+	return 0;
+}
+
+int command_nice(int argc, char **argv) {
+	if (argc != 3) {
+		fprintf(STD_ERR, "Wrong amount of arguments...\n");
+		return 1;
+	}
+	int16_t pid = stringToInt(argv[1], strlen((uint8_t *) argv[1]));
+	int8_t newPriority = stringToInt(argv[2], strlen((uint8_t *) argv[2]));
+	if(newPriority < 0 || newPriority > 31){
+		fprintf(STD_ERR, "Priority must be between 0 and 31...\n");
+		return 1;
+	}
+	SyscallNice(pid, newPriority);
+	return 0;
+}

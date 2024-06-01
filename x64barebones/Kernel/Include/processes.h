@@ -31,6 +31,7 @@ typedef struct {
 } PCB;
 
 int8_t createProcess(uint8_t *name, uint8_t **argv, ProcessRunMode runMode);
+void setProcessPriority(uint16_t pid, int8_t priority);
 uint64_t ps();
 
 #endif
