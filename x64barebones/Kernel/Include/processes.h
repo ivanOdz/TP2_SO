@@ -6,6 +6,7 @@
 
 #include <stdint.h>
 
+
 typedef enum { BLOCKED = 0,
 			   STOPPED,
 			   READY,
@@ -17,7 +18,7 @@ typedef enum { FOREGROUND = 0,
 typedef struct {
 	uint16_t pid;
 	uint16_t parentPid;
-	uint8_t *stackBase;	   // base del stack
+	uint8_t *stackBasePointer;	   // base del stack
 	uint8_t *stackPointer; // puntero a la posicion actual
 	ProcessStatus status;
 	uint8_t name[MAX_NAME_SIZE];
@@ -28,6 +29,7 @@ typedef struct {
 	uint16_t fileDescriptorsInUse;
 	uint8_t priority;
 } PCB;
+
 
 int8_t createProcess(const char *name, const char **argv, ProcessRunMode runMode, uint16_t parentPid);
 

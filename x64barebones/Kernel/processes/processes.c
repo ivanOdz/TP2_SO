@@ -11,7 +11,7 @@ static PCB processes[MAX_PROCESSES] = {0};
 
 static int16_t getNextPosition() {
 	int16_t availablePos = 0;
-	while (availablePos < MAX_PROCESSES && processes[availablePos].stackBase != NULL) {
+	while (availablePos < MAX_PROCESSES && processes[availablePos].stackBasePointer != NULL) {
 		availablePos++;
 	}
 	if (availablePos == MAX_PROCESSES) {
@@ -40,7 +40,7 @@ int8_t createProcess(const char *name, const char **argv, ProcessRunMode runMode
 	processes[pos].fileDescriptorsInUse = DEFAULT_QTY_FDS;
 	processes[pos].priority = 1;
 
-	printf("LLego a crearse el proceso %s con modo %d y el padre es PID: %d\n", name, runMode, parentPid);
+	//printf("LLego a crearse el proceso %s con modo %d y el padre es PID: %d\n", name, runMode, parentPid);
 	return processes[pos].pid;
 }
 /*

@@ -115,7 +115,7 @@ uint64_t syscall_printMemory() {
 }
 
 uint64_t syscall_createProcess(){
-	createProcess(NULL, NULL, 0, 5);
+	createProcess("My First Process", NULL, 0, 5);
 	return 0;
 }
 
