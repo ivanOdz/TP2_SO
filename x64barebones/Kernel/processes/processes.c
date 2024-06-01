@@ -10,50 +10,52 @@
 
 static uint16_t nextPid = 1;
 
-static PCB processes[MAX_PROCESSES] = {
-    {
-        .pid = 1,
-        .parentPid = 0,
-        .stackBasePointer = 0x400000,
-        .stackPointer = 0x500000,
-        .name = (uint8_t*)"Process1",
-        .argv = NULL,
-        .runMode = FOREGROUND,
-        .returnValue = 0,
-        .fileDescriptors = {0},
-        .fileDescriptorsInUse = 0,
-        .priority = 5,
-        .status = READY
-    },
-    {
-        .pid = 2,
-        .parentPid = 0,
-        .stackBasePointer = 0x300000,
-        .stackPointer = 0x200000,
-        .name = (uint8_t*)"Process2",
-        .argv = NULL,
-        .runMode = BACKGROUND,
-        .returnValue = 0,
-        .fileDescriptors = {0},
-        .fileDescriptorsInUse = 0,
-        .priority = 10,
-        .status = RUNNING
-    },
-    {
-        .pid = 3,
-        .parentPid = 1,
-        .stackBasePointer = 0x100000,
-        .stackPointer = 0x200000,
-        .name = (uint8_t*)"Process3",
-        .argv = NULL,
-        .runMode = FOREGROUND,
-        .returnValue = -1,
-        .fileDescriptors = {0},
-        .fileDescriptorsInUse = 0,
-        .priority = 1,
-        .status = BLOCKED
-    }
-};static uint16_t numberOfProcesses = 0;
+static PCB processes[MAX_PROCESSES] = {0};
+/*static PCB processes[MAX_PROCESSES] = {
+	{
+		.pid = 1,
+		.parentPid = 0,
+		.stackBasePointer = 0x400000,
+		.stackPointer = 0x500000,
+		.name = (uint8_t*)"Process1",
+		.argv = NULL,
+		.runMode = FOREGROUND,
+		.returnValue = 0,
+		.fileDescriptors = {0},
+		.fileDescriptorsInUse = 0,
+		.priority = 5,
+		.status = READY
+	},
+	{
+		.pid = 2,
+		.parentPid = 0,
+		.stackBasePointer = 0x300000,
+		.stackPointer = 0x200000,
+		.name = (uint8_t*)"Process2",
+		.argv = NULL,
+		.runMode = BACKGROUND,
+		.returnValue = 0,
+		.fileDescriptors = {0},
+		.fileDescriptorsInUse = 0,
+		.priority = 10,
+		.status = RUNNING
+	},
+	{
+		.pid = 3,
+		.parentPid = 1,
+		.stackBasePointer = 0x100000,
+		.stackPointer = 0x200000,
+		.name = (uint8_t*)"Process3",
+		.argv = NULL,
+		.runMode = FOREGROUND,
+		.returnValue = -1,
+		.fileDescriptors = {0},
+		.fileDescriptorsInUse = 0,
+		.priority = 1,
+		.status = BLOCKED
+	}
+};*/
+static uint16_t numberOfProcesses = 0;
 
 static int16_t getNextPosition() {
 	int16_t availablePos = 0;
@@ -66,11 +68,20 @@ static int16_t getNextPosition() {
 	return availablePos;
 }
 
-int8_t createProcess(const char *name, uint8_t **argv, ProcessRunMode runMode, uint16_t parentPid) {
+int8_t getProcessIndex(int16_t pid) {
+	for (int i = 0; i < MAX_PROCESSES; i++) {
+		if (processes[i].pid == pid) {
+			return i;
+		}
+	}
+	return -1;
+}
+int8_t createProcess(uint8_t *name, uint8_t **argv, ProcessRunMode runMode) {
 	int16_t pos = getNextPosition();
 	if (pos < 0) {
 		return -1;
 	}
+	processes[pos].name = name;
 	processes[pos].pid = nextPid++;
 	// processes[pos].parentPid = getCurrentProcessPid();
 	processes[pos].stackBasePointer = (uint8_t *) allocMemory(STACK_DEFAULT_SIZE) + STACK_DEFAULT_SIZE;
@@ -85,17 +96,36 @@ int8_t createProcess(const char *name, uint8_t **argv, ProcessRunMode runMode, u
 	}
 	processes[pos].fileDescriptorsInUse = DEFAULT_QTY_FDS;
 	processes[pos].priority = 1;
-
-	// printf("LLego a crearse el proceso %s con modo %d y el padre es PID: %d\n", name, runMode, parentPid);
 	numberOfProcesses++;
 	return processes[pos].pid;
 }
+/*
+int8_t finishProcess() {
+	int8_t index = getCurrentIndex();
+	freeMemory(processes[index].stackBasePointer);
+	processes[index].status = ZOMBIE;
+	processes[index].stackBasePointer = 0;
+	processes[index].stackPointer = 0;
+}
+
+int8_t killProcess(uint16_t pid) {
+	int8_t index = getProcessIndex(pid);
+	if (index < 0) {
+		return;
+	}
+	freeMemory(processes[index].stackBasePointer);
+	processes[index].status = ZOMBIE;
+	processes[index].stackBasePointer = 0;
+	processes[index].stackPointer = 0;
+}*/
 
 uint64_t ps() {
+	int16_t i = 0, processesFound = 0;
+	char *status;
 	printf("NOMBRE\t\t PID\tPID DEL PADRE\tMODO\tSTACK BASE POINTER\tSTACK POINTER\tESTADO\tPRIORIDAD\n");
 	printf("=========================================================================================================\n");
-	char *status;
-	for (int i = 0; i < 3; i++) {
+	while (i < MAX_PROCESSES && processesFound < numberOfProcesses) {
+		if(processes[i].stackBasePointer != NULL){
 		switch (processes[i].status) {
 			case 0:
 				status = "BL";
@@ -112,19 +142,15 @@ uint64_t ps() {
 		}
 		printf("%s\t\t%d\t\t %d\t\t\t  %s\t\t\t%x\t\t\t%x\t\t  %s\t\t  %d\t\t\n", processes[i].name, processes[i].pid, processes[i].parentPid, ((processes[i].runMode == 0) ? "F" : "B"),
 			   processes[i].stackBasePointer, processes[i].stackPointer, status, processes[i].priority);
+			   processesFound++;
+		}
+		i++;	
 	}
 	return 0;
 }
 
 /*
-int8_t getProcessIndex(int16_t pid) {
-	for (int i = 0; i < MAX_PROCESSES; i++) {
-		if (processes[i].pid == pid) {
-			return i;
-		}
-	}
-	return -1;
-}
+
 
 void killProcess(uint16_t pid) {
 	int8_t index = getProcessIndex(pid);

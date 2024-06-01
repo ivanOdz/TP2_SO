@@ -30,7 +30,7 @@ typedef struct {
 	ProcessStatus status;	
 } PCB;
 
-int8_t createProcess(const char *name, uint8_t **argv, ProcessRunMode runMode, uint16_t parentPid);
+int8_t createProcess(uint8_t *name, uint8_t **argv, ProcessRunMode runMode);
 uint64_t ps();
 
 #endif
