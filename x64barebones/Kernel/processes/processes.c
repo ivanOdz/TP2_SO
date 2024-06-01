@@ -1,6 +1,7 @@
 #include <libc.h>
 #include <stdint.h>
 #include <processes.h>
+#include <scheduler.h>
 
 #define MAX_PROCESSES	250
 #define DEFAULT_QTY_FDS 3
@@ -26,7 +27,7 @@ int8_t createProcess(const char *name, const char **argv, ProcessRunMode runMode
 		return -1;
 	}
 	processes[pos].pid = nextPid++;
-	processes[pos].parentPid = parentPid;
+	//processes[pos].parentPid = getCurrentProcessPid();
 	//processes[pos].stackBase = getStackBase();
 	//processes[pos].stackPointer = processes[pos].stackBase;
 	processes[pos].status = READY;
@@ -43,6 +44,12 @@ int8_t createProcess(const char *name, const char **argv, ProcessRunMode runMode
 	//printf("LLego a crearse el proceso %s con modo %d y el padre es PID: %d\n", name, runMode, parentPid);
 	return processes[pos].pid;
 }
+
+uint64_t ps(){
+	printf("Dentro del ps\n");
+	return 0;
+}
+
 /*
 int8_t getProcessIndex(int16_t pid) {
 	for (int i = 0; i < MAX_PROCESSES; i++) {

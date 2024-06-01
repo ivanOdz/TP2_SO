@@ -119,5 +119,10 @@ uint64_t syscall_createProcess(){
 	return 0;
 }
 
+uint64_t syscall_ps(){
+	ps();
+	return 0;
+}
+
 
 typedef int (*EntryPoint)();

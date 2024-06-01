@@ -15,6 +15,7 @@ GLOBAL SyscallFree
 GLOBAL SyscallMemInfo
 GLOBAL SyscallPrintMem
 GLOBAL SyscallCreateProcess
+GLOBAL SyscallPs
 ALIGN 16
 
 
@@ -219,6 +220,16 @@ SyscallCreateProcess:
     pop rbp
     ret
 
+SyscallPs:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x10
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
 
 invalidOpcode:
     ud2

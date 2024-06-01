@@ -152,3 +152,8 @@ int test_processes(int argc, char **argv) {
 	SyscallCreateProcess();
 	return 0;
 }
+
+int ps(int argc, char **argv) {
+	SyscallPs();
+	return 0;
+}

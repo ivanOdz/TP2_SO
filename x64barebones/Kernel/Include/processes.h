@@ -32,5 +32,6 @@ typedef struct {
 
 
 int8_t createProcess(const char *name, const char **argv, ProcessRunMode runMode, uint16_t parentPid);
+uint64_t ps();
 
 #endif
