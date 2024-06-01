@@ -20,7 +20,7 @@ typedef struct {
 	uint16_t parentPid;
 	uint8_t *stackBasePointer;	   // base del stack
 	uint8_t *stackPointer; // puntero a la posicion actual
-	uint8_t name[MAX_NAME_SIZE];
+	uint8_t *name;
 	uint8_t **argv;
 	ProcessRunMode runMode;
 	int8_t returnValue;

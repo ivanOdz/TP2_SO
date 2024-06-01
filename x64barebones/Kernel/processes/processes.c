@@ -1,9 +1,8 @@
 #include <libc.h>
+#include <memoryManager.h>
 #include <processes.h>
 #include <scheduler.h>
 #include <stdint.h>
-#include <memoryManager.h>
-
 
 #define MAX_PROCESSES	   250
 #define DEFAULT_QTY_FDS	   3
@@ -11,7 +10,50 @@
 
 static uint16_t nextPid = 1;
 
-static PCB processes[MAX_PROCESSES] = {0};
+static PCB processes[MAX_PROCESSES] = {
+    {
+        .pid = 1,
+        .parentPid = 0,
+        .stackBasePointer = 0x400000,
+        .stackPointer = 0x500000,
+        .name = (uint8_t*)"Process1",
+        .argv = NULL,
+        .runMode = FOREGROUND,
+        .returnValue = 0,
+        .fileDescriptors = {0},
+        .fileDescriptorsInUse = 0,
+        .priority = 5,
+        .status = READY
+    },
+    {
+        .pid = 2,
+        .parentPid = 0,
+        .stackBasePointer = 0x300000,
+        .stackPointer = 0x200000,
+        .name = (uint8_t*)"Process2",
+        .argv = NULL,
+        .runMode = BACKGROUND,
+        .returnValue = 0,
+        .fileDescriptors = {0},
+        .fileDescriptorsInUse = 0,
+        .priority = 10,
+        .status = RUNNING
+    },
+    {
+        .pid = 3,
+        .parentPid = 1,
+        .stackBasePointer = 0x100000,
+        .stackPointer = 0x200000,
+        .name = (uint8_t*)"Process3",
+        .argv = NULL,
+        .runMode = FOREGROUND,
+        .returnValue = -1,
+        .fileDescriptors = {0},
+        .fileDescriptorsInUse = 0,
+        .priority = 1,
+        .status = BLOCKED
+    }
+};static uint16_t numberOfProcesses = 0;
 
 static int16_t getNextPosition() {
 	int16_t availablePos = 0;
@@ -45,11 +87,32 @@ int8_t createProcess(const char *name, uint8_t **argv, ProcessRunMode runMode, u
 	processes[pos].priority = 1;
 
 	// printf("LLego a crearse el proceso %s con modo %d y el padre es PID: %d\n", name, runMode, parentPid);
+	numberOfProcesses++;
 	return processes[pos].pid;
 }
 
 uint64_t ps() {
-	printf("Dentro del ps\n");
+	printf("NOMBRE\t\t PID\tPID DEL PADRE\tMODO\tSTACK BASE POINTER\tSTACK POINTER\tESTADO\tPRIORIDAD\n");
+	printf("=========================================================================================================\n");
+	char *status;
+	for (int i = 0; i < 3; i++) {
+		switch (processes[i].status) {
+			case 0:
+				status = "BL";
+				break;
+			case 1:
+				status = "RD";
+				break;
+			case 2:
+				status = "RN";
+				break;
+			default:
+				status = "ZB";
+				break;
+		}
+		printf("%s\t\t%d\t\t %d\t\t\t  %s\t\t\t%x\t\t\t%x\t\t  %s\t\t  %d\t\t\n", processes[i].name, processes[i].pid, processes[i].parentPid, ((processes[i].runMode == 0) ? "F" : "B"),
+			   processes[i].stackBasePointer, processes[i].stackPointer, status, processes[i].priority);
+	}
 	return 0;
 }
 
