@@ -3,6 +3,7 @@
 #define MAX_BLOCK_SIZE_DEFAULT 30000000
 #define MIN_BLOCK_SIZE_DEFAULT 10
 #define BURN_IN_DEFAULT		   3
+#define NULL_MALLOC_RETRY	   100
 #define HELP_STRING			   "\nmm_test is a program designed to stress test the system memory manager \
 by reserving a bunch of memory in blocks and ensuring \nthese dont overlap by filling each block with a \
 probe value and testing for it. If a block fails, you'll see a red warning, \n\
@@ -34,34 +35,34 @@ int mm_test(int argc, char **argv) {
 	uint64_t maxBlockSize = MAX_BLOCK_SIZE_DEFAULT;
 	uint64_t minBlockSize = MIN_BLOCK_SIZE_DEFAULT;
 	uint64_t burnin = BURN_IN_DEFAULT;
-	printf("%d", argc);
-	for (int arg = 2; arg <= argc; arg++) {
+	for (int arg = 1; arg < argc; arg++) {
+		printf("Parsing %s\n", argv[arg]);
 		if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-help") == 0) {
 			printf(HELP_STRING, MAX_BLOCK_SIZE_DEFAULT, MIN_BLOCK_SIZE_DEFAULT, BURN_IN_DEFAULT, MAX_BLOCKS_DEFAULT);
 			return 0;
 		}
 		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-maxmemsize") == 0) {
-			maxMemSize = argumentParse(arg, argc, argv);
+			maxMemSize = argumentParse(arg++, argc, argv);
 			if (!maxMemSize)
 				return -1;
 		}
 		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-maxblocksize") == 0) {
-			maxBlockSize = argumentParse(arg, argc, argv);
+			maxBlockSize = argumentParse(arg++, argc, argv);
 			if (!maxBlockSize)
 				return -1;
 		}
 		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-minblocksize") == 0) {
-			minBlockSize = argumentParse(arg, argc, argv);
+			minBlockSize = argumentParse(arg++, argc, argv);
 			if (!minBlockSize)
 				return -1;
 		}
 		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-burnin") == 0) {
-			burnin = argumentParse(arg, argc, argv);
+			burnin = argumentParse(arg++, argc, argv);
 			if (!burnin)
 				return -1;
 		}
 		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-maxblocks") == 0) {
-			maxBlocks = argumentParse(arg, argc, argv);
+			maxBlocks = argumentParse(arg++, argc, argv);
 			if (!maxBlocks)
 				return -1;
 		}
@@ -98,23 +99,25 @@ int mm_test(int argc, char **argv) {
 		printf("Allocating memory slots and writing probe data (0000 of %4d blocks) (000MiB of %3dMiB)", maxBlocks, maxMemSize);
 		int assigned = 0;
 		uint64_t assignedBytes = 0;
+		uint8_t tries = 0;
 		do {
 			testsize[assigned] = randBetween(minBlockSize, maxBlockSize);
 			uint8_t *malloctest = (uint8_t *) malloc(testsize[assigned] * sizeof(uint8_t));
 			test[assigned] = malloctest;
 			uint8_t probe = randBetween(0, 255);
-			if (test[assigned] == NULL)
-				break;
-			assignedBytes += testsize[assigned];
-			for (uint64_t j = 0; j < testsize[assigned]; j++) {
-				test[assigned][j] = probe;
+			if (test[assigned] == NULL) {
+				tries++;
 			}
-			// for (uint64_t j = 0; j <= assigned; j++) {
-			//	printf("Test slot %d size %d\n", j, testsize[j]);
-			// }
-			assigned++;
+			else {
+				tries = 0;
+				assignedBytes += testsize[assigned];
+				for (uint64_t j = 0; j < testsize[assigned]; j++) {
+					test[assigned][j] = probe;
+				}
+				assigned++;
+			}
 			printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4d blocks) (%3dMiB of %3dMiB)", assigned, maxBlocks, assignedBytes >> 20, maxMemSize);
-		} while (assigned < maxBlocks && assignedBytes <= maxMemSize << 20);
+		} while (assigned < maxBlocks && assignedBytes <= maxMemSize << 20 && tries < NULL_MALLOC_RETRY);
 
 		printf("\nAssigned %d slots out of %d\n", assigned, maxBlocks);
 		memoryManagerStats(&mminfoo);
@@ -125,9 +128,9 @@ int mm_test(int argc, char **argv) {
 			uint8_t probe = memSlot[0];
 			for (uint64_t position = 1; position < testsize[testNum]; position++) {
 				if (memSlot[position] != probe) {
-					fprintf(STD_ERR, "\nTest %d Error at 0x%x (pos %d of %d) (read %d, expected %d)\n", testNum, memSlot + position, position, testsize[testNum], memSlot[position], memSlot[0]);
+					fprintf(STD_ERR, "\nTest %d Error at 0x%x (pos %d of %d) (read %d, expected %d, previous %d)\n", testNum, memSlot + position, position, testsize[testNum], memSlot[position], memSlot[0], memSlot[position - 1]);
 					printf("Testing allocated memory for overlaps and corruption (0000)");
-					break;
+					// break;
 				}
 			}
 			printf("\b\b\b\b\b%4d)", testNum + 1);
@@ -144,7 +147,6 @@ int mm_test(int argc, char **argv) {
 	free(testsize);
 	return 0;
 }
-
 
 int test_processes(int argc, char **argv) {
 	SyscallCreateProcess();
