@@ -46,7 +46,8 @@ static const availableCommand avCommands[] = {
 	{(uint8_t *) "getRegisters", command_getRegisters},
 	{(uint8_t *) "argvTest", command_argvTest},
 	{(uint8_t *) "tunes", command_tunes},
-	{(uint8_t *) "mm_test", mm_test}};
+	{(uint8_t *) "mm_test", mm_test},
+	{(uint8_t *) "test_processes", test_processes}};
 
 int64_t
 commands(uint8_t *strBuffer);

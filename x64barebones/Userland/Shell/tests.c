@@ -144,3 +144,9 @@ int mm_test(int argc, char **argv) {
 	free(testsize);
 	return 0;
 }
+
+
+int test_processes(int argc, char **argv) {
+	SyscallCreateProcess();
+	return 0;
+}

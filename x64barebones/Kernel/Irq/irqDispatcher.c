@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <videoDriver.h>
+#include <processes.h>
 
 #define MAX_INTS	 256
 #define MAX_SYSCALLS 338
@@ -112,5 +113,11 @@ uint64_t syscall_printMemory() {
 	printMem();
 	return 0;
 }
+
+uint64_t syscall_createProcess(){
+	createProcess(NULL, NULL, 0, 5);
+	return 0;
+}
+
 
 typedef int (*EntryPoint)();

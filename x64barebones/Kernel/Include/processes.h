@@ -1,5 +1,5 @@
-#ifndef PROCESS_H
-#define PROCESS_H
+#ifndef PROCESSES_H
+#define PROCESSES_H
 
 #define MAX_FILE_DESCRIPTORS 64
 #define MAX_NAME_SIZE		 25
@@ -11,7 +11,7 @@ typedef enum { BLOCKED = 0,
 			   READY,
 			   RUNNING } ProcessStatus;
 
-typedef enum { FOREGROUND,
+typedef enum { FOREGROUND = 0,
 			   BACKGROUND } ProcessRunMode;
 
 typedef struct {
@@ -28,5 +28,7 @@ typedef struct {
 	uint16_t fileDescriptorsInUse;
 	uint8_t priority;
 } PCB;
+
+int8_t createProcess(const char *name, const char **argv, ProcessRunMode runMode, uint16_t parentPid);
 
 #endif

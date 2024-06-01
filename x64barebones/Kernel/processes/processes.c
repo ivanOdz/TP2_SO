@@ -1,6 +1,6 @@
-#include "../include/process.h"
 #include <libc.h>
 #include <stdint.h>
+#include <processes.h>
 
 #define MAX_PROCESSES	250
 #define DEFAULT_QTY_FDS 3
@@ -27,10 +27,10 @@ int8_t createProcess(const char *name, const char **argv, ProcessRunMode runMode
 	}
 	processes[pos].pid = nextPid++;
 	processes[pos].parentPid = parentPid;
-	processes[pos].stackBase = getStackBase();
-	processes[pos].stackPointer = processes[pos].stackBase;
+	//processes[pos].stackBase = getStackBase();
+	//processes[pos].stackPointer = processes[pos].stackBase;
 	processes[pos].status = READY;
-	processes[pos].argv = argv;
+	//processes[pos].argv = argv;
 	processes[pos].runMode = runMode;
 	processes[pos].returnValue = 0;
 
@@ -39,9 +39,11 @@ int8_t createProcess(const char *name, const char **argv, ProcessRunMode runMode
 	}
 	processes[pos].fileDescriptorsInUse = DEFAULT_QTY_FDS;
 	processes[pos].priority = 1;
+
+	printf("LLego a crearse el proceso %s con modo %d y el padre es PID: %d\n", name, runMode, parentPid);
 	return processes[pos].pid;
 }
-
+/*
 int8_t getProcessIndex(int16_t pid) {
 	for (int i = 0; i < MAX_PROCESSES; i++) {
 		if (processes[i].pid == pid) {
@@ -92,3 +94,4 @@ void setProcessState(uint16_t pid, ProcessStatus ps) {
 		interesting_handler();
 	}
 }
+*/
