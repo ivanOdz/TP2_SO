@@ -42,7 +42,14 @@ int64_t commands(uint8_t *strBuffer) {
 		// Search for command and execute
 		if (strcmp(command, (avCommands[cont]).name) == 0) {
 			if (avCommands[cont].function != NULL) {
-				int retValue = avCommands[cont].function(argc, (char **) argv);
+				int retValue;
+				if (avCommands[cont].builtin) {
+					retValue = avCommands[cont].function(argc, (char **) argv);
+				}
+				else {
+					execv(avCommands[cont].function, argv, FOREGROUND);
+					retValue = 0;
+				}
 				SyscallSetFormat(&shell_fmt);
 				SyscallSetTimer(SHELL_TIMER);
 				if (retValue)
@@ -172,7 +179,7 @@ int ps(int argc, char **argv) {
 		info = info->nextProcessInfo;
 		free(temp);
 	}
-	return 0;
+	exit(0);
 }
 
 int command_nice(int argc, char **argv) {

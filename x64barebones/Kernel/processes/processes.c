@@ -96,6 +96,16 @@ PID_t execute(int (*processMain)(int argc, char **argv), char **argv, ProcessRun
 		return 0;
 	return process->pid;
 }
+void exitProcess(int returnValue) {
+	PCB *process = getCurrentProcess();
+	// removeProcess(process->pid);
+	process->returnValue = returnValue;
+	process->status = ZOMBIE;
+	free(process->stackBasePointer);
+	process->stackPointer = NULL;
+	yield();
+}
+
 /*
 int8_t finishProcess() {
 	int8_t index = getCurrentIndex();

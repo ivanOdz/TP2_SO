@@ -87,6 +87,7 @@ extern uint64_t SyscallFree(void *memory);
 extern uint64_t SyscallMemInfo(MemoryInfo *meminfo);
 extern uint64_t SyscallPrintMem();
 extern PID_t SyscallExecv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
+extern void SyscallExit(int returnValue);
 extern ProcessInfo *SyscallProcessInfo();
 extern uint64_t SyscallNice(uint16_t pid, uint8_t newPriority);
 extern uint64_t SyscallToggleBlockProcess(uint16_t pid);
@@ -114,4 +115,6 @@ extern void invalidOpcode();
 void *malloc(uint64_t size);
 void free(void *memory);
 void memoryManagerStats(MemoryInfo *meminfo);
+PID_t execv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
+void exit(int returnValue);
 #endif

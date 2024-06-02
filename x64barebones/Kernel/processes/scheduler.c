@@ -84,7 +84,8 @@ uint8_t *pickNextProcess() {
 			winningProcess = candidate;
 		}
 	}
-	currentProcess->process->status = READY;
+	if (currentProcess->process->status == RUNNING)
+		currentProcess->process->status = READY;
 	currentProcess = winningProcess;
 	currentProcess->process->status = RUNNING;
 	return currentProcess->process->stackPointer;
@@ -129,11 +130,15 @@ PID_t getCurrentPID() {
 	}
 	return 0;
 }
+PCB *getCurrentProcess() {
+	return currentProcess->process;
+}
 uint8_t removeProcess(PID_t pid) {
+	ProcessListNode *nextNode = currentProcess->next;
 	if (checkRemoveNode(currentProcess, pid)) {
+		currentProcess = nextNode;
 		return TRUE;
 	}
-	ProcessListNode *nextNode = currentProcess->next;
 	while (nextNode != currentProcess) {
 		if (checkRemoveNode(nextNode, pid)) {
 			return TRUE;

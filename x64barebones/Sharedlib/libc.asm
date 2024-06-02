@@ -15,6 +15,7 @@ GLOBAL SyscallFree
 GLOBAL SyscallMemInfo
 GLOBAL SyscallPrintMem
 GLOBAL SyscallExecv
+GLOBAL SyscallExit
 GLOBAL SyscallProcessInfo
 GLOBAL SyscallNice
 GLOBAL SyscallToggleBlockProcess
@@ -255,6 +256,17 @@ SyscallToggleBlockProcess:
     mov rbp, rsp    
 
     mov rax, 0x12
+    mov rbx, rdi    ; pid
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+SyscallExit:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x13
     mov rbx, rdi    ; pid
     int 80h
 

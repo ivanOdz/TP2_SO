@@ -31,6 +31,7 @@ typedef struct PCB {
 
 PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
 PID_t execute(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
+void exitProcess(int returnValue);
 void setProcessPriority(uint16_t pid, int8_t priority);
 void blockProcess(uint16_t pid);
 extern uint8_t *fabricateProcessStack(uint8_t *stackBasePointer, int argc, char **argv, int (*processMain)(int argc, char **argv));

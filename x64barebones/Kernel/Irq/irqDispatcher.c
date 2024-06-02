@@ -120,6 +120,11 @@ uint64_t syscall_execv(int (*processMain)(int argc, char **argv), char **argv, P
 	return 0;
 }
 
+uint64_t syscall_exit(int returnValue) {
+	exitProcess(returnValue);
+	return 0;
+}
+
 ProcessInfo *syscall_processInfo() {
 	return processInfo();
 }
