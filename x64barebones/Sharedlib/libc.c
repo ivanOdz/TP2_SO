@@ -225,3 +225,7 @@ void free(void *memory) {
 void memoryManagerStats(MemoryInfo *meminfo) {
 	SyscallMemInfo(meminfo);
 }
+
+PID_t execv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode) {
+	return SyscallExecv(processMain, argv, runMode);
+}

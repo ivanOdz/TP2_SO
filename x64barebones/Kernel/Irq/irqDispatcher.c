@@ -8,7 +8,6 @@
 #include <time.h>
 #include <videoDriver.h>
 
-
 #define MAX_INTS	 256
 #define MAX_SYSCALLS 338
 
@@ -115,9 +114,8 @@ uint64_t syscall_printMemory() {
 	return 0;
 }
 
-uint64_t syscall_createProcess(int argc, char **argv) {
-	int8_t runMode = stringToInt(argv[2], strlen((uint8_t *) argv[2]));
-	createProcess((uint8_t *) argv[1], (ProcessRunMode) runMode);
+uint64_t syscall_execv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode) {
+	execute(processMain, argv, runMode);
 	return 0;
 }
 
@@ -135,7 +133,5 @@ uint64_t syscall_block(uint16_t pid) {
 	blockProcess(pid);
 	return 0;
 }
-
-
 
 typedef int (*EntryPoint)();

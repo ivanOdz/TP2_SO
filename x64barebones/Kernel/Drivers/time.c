@@ -1,5 +1,6 @@
 #include "videoDriver.h"
 #include <keyboard.h>
+#include <scheduler.h>
 #include <sound.h>
 #include <time.h>
 
@@ -12,6 +13,7 @@ void timer_handler() {
 	if (ticks % 9 == 0) {
 		printCursor();
 	}
+	yield();
 }
 
 int ticks_elapsed() {

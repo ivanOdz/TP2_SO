@@ -3,15 +3,15 @@
 #include <processes.h>
 #include <scheduler.h>
 #include <stdint.h>
+#include <time.h>
 
-#define MAX_PROCESSES	   250
 #define DEFAULT_QTY_FDS	   3
 #define STACK_DEFAULT_SIZE (1 << 12)
 
 static int16_t getNextPosition();
 static int8_t getProcessIndex(int16_t pid);
 
-static uint16_t nextPid = 1;
+static uint16_t nextPid = 0;
 static PCB processes[MAX_PROCESSES] = {0};
 /*static PCB processes[MAX_PROCESSES] = {
 	{
@@ -59,28 +59,43 @@ static PCB processes[MAX_PROCESSES] = {0};
 };*/
 static uint16_t numberOfProcesses = 0;
 
-int8_t createProcess(uint8_t *name, ProcessRunMode runMode) {
+// TODO copy argv to its own memory (on stack??)
+PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode) {
 	int16_t pos = getNextPosition();
 	if (pos < 0) {
-		return -1;
+		return NULL;
 	}
-	processes[pos].name = name;
+	processes[pos].stackBasePointer = (uint8_t *) allocMemory(STACK_DEFAULT_SIZE);
+	if (!processes[pos].stackBasePointer)
+		return NULL;
+	processes[pos].stackBasePointer += STACK_DEFAULT_SIZE - 1; // stack works backwards
+	int argc = 0;
+	while (argv[argc++]) {
+	}
+	processes[pos].stackPointer = fabricateProcessStack(processes[pos].stackBasePointer, argc, argv, processMain);
+	processes[pos].name = argv[0];
 	processes[pos].pid = nextPid++;
-	// processes[pos].parentPid = getCurrentProcessPid();
-	processes[pos].stackBasePointer = (uint8_t *) allocMemory(STACK_DEFAULT_SIZE) + STACK_DEFAULT_SIZE;
-	processes[pos].stackPointer = processes[pos].stackBasePointer;
+	processes[pos].parentPid = getCurrentPID();
 	processes[pos].status = READY;
-	// processes[pos].argv = argv;
 	processes[pos].runMode = runMode;
 	processes[pos].returnValue = 0;
+	processes[pos].lastTickRun = get_ticks();
 
 	for (int i = 0; i < DEFAULT_QTY_FDS; i++) {
 		processes[pos].fileDescriptors[i] = i;
 	}
 	processes[pos].fileDescriptorsInUse = DEFAULT_QTY_FDS;
 	processes[pos].priority = 1;
-	numberOfProcesses++;
-	return processes[pos].pid;
+	return &processes[pos];
+}
+
+PID_t execute(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode) {
+	PCB *process = createProcess(processMain, argv, runMode);
+	if (!process)
+		return 0;
+	if (!addProcess(process))
+		return 0;
+	return process->pid;
 }
 /*
 int8_t finishProcess() {

@@ -14,7 +14,7 @@ GLOBAL SyscallMalloc
 GLOBAL SyscallFree
 GLOBAL SyscallMemInfo
 GLOBAL SyscallPrintMem
-GLOBAL SyscallCreateProcess
+GLOBAL SyscallExecv
 GLOBAL SyscallPs
 GLOBAL SyscallNice
 GLOBAL SyscallToggleBlockProcess
@@ -212,13 +212,14 @@ SyscallPrintMem:
     pop rbp
     ret
 
-SyscallCreateProcess:
+SyscallExecv:
     push rbp
     mov rbp, rsp    
 
     mov rax, 0x0F
-    mov rbx, rdi    ; argc
+    mov rbx, rdi    ; rip
     mov rcx, rsi    ; argv
+                    ; rdx (mode) in place
     int 80h
 
     mov rsp, rbp

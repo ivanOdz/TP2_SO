@@ -4,7 +4,9 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-#define NULL 0
+#define NULL  0
+#define TRUE  1
+#define FALSE 0
 
 #define STD_IN	0
 #define STD_OUT 1
@@ -20,6 +22,7 @@
 
 typedef enum { FOREGROUND = 0,
 			   BACKGROUND } ProcessRunMode;
+typedef uint16_t PID_t;
 
 typedef struct text_format {
 	uint32_t bg;
@@ -70,7 +73,7 @@ extern void *SyscallMalloc(uint64_t size);
 extern uint64_t SyscallFree(void *memory);
 extern uint64_t SyscallMemInfo(MemoryInfo *meminfo);
 extern uint64_t SyscallPrintMem();
-extern uint64_t SyscallCreateProcess(int argc, char **argv);
+extern PID_t SyscallExecv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
 extern uint64_t SyscallPs();
 extern uint64_t SyscallNice(uint16_t pid, uint8_t newPriority);
 extern uint64_t SyscallToggleBlockProcess(uint16_t pid);

@@ -6,6 +6,8 @@ GLOBAL setPIT0Freq
 GLOBAL setPIT2Freq
 GLOBAL getPIT2Freq
 GLOBAL spkStop
+GLOBAL haltProcess
+GLOBAL fabricateProcessStack
 
 ALIGN 16
 
@@ -136,4 +138,51 @@ spkStop:
 	in al, 0x61
 	and al, 0xFC
 	out 0x61, al
+	ret
+
+haltProcess:
+	hlt
+	ret
+
+fabricateProcessStack:
+	;receives stackbase, argc, argv and rip as pointers (so rdi, rsi, rdx, rcx respectively)
+	;will pass argc as int and argv as pointer (strings have been copied somewhere safe)
+	mov r8, rsp		;preserve this stack so i can return later
+	and rdi, 0xFFFFFFFFFFFFFFBF ;align to quad-word if not aligned
+	mov rsp, rdi	;temp stack switcharoo
+
+	mov rax, 0
+	push rax	;20 ss
+
+	push rdi	;19 rsp
+
+	mov rax, 0x202
+	push rax	;18 rflags
+
+	mov rax, 0x8
+	push rax	;17 cs
+
+	push rcx	;16 RIP -> function to run
+
+	mov rax, 0
+	push rax    ;15 rax again
+	push rax	;14 rbx
+	push rax	;13 rcx
+	push rax	;12 rdx
+
+	push rdi	;11 rbp -> stack base
+	push rsi	;10 rdi -> argc as 1st argument
+	push rdx	;9  rsi -> argv as 2nd argument
+
+	push rax	;8  r8
+	push rax	;7  r9
+	push rax	;6  r10
+	push rax	;5  r11
+	push rax	;4  r12
+	push rax	;3  r13
+	push rax	;2  r14
+	push rax	;1  r15
+	push rax	;0  rax
+	mov rax, rsp
+	mov rsp, r8 ;restore old stack
 	ret

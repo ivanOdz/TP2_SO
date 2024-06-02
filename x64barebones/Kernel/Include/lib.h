@@ -17,4 +17,6 @@ typedef struct {
 void printRegs(stack_registers regs, uint64_t fd);
 void clearBuffer(uint8_t *buffer);
 
+extern int haltProcess(int argc, char **argv);
+
 #endif

@@ -5,6 +5,8 @@
 #include <memoryManager.h>
 #include <moduleLoader.h>
 #include <naiveConsole.h>
+#include <processes.h>
+#include <scheduler.h>
 #include <sound.h>
 #include <stdint.h>
 #include <videoDriver.h>
@@ -21,7 +23,7 @@ static const uint64_t PageSize = 0x1000;
 static void *const shellModuleAddress = (void *) 0x400000;
 static void *const heapStartAddress = (void *) 0x500000;
 
-typedef int (*EntryPoint)();
+typedef int (*EntryPoint)(int argc, char **argv);
 
 void clearBSS(void *bssAddress, uint64_t bssSize) {
 	memset(bssAddress, 0, bssSize);
@@ -47,8 +49,11 @@ int main() {
 	load_idt();
 	initializeVideoDriver();
 	createMemoryManager(heapStartAddress, 0x10000000);
-	((EntryPoint) shellModuleAddress)();
-	syscall_puts(STD_ERR, (uint8_t *) "Shell has quit, kernel halting", 31);
-
+	char *argv[2] = {"Shell", NULL};
+	initScheduler();
+	execute((EntryPoint) shellModuleAddress, argv, FOREGROUND);
+	// syscall_puts(STD_ERR, (uint8_t *) "Shell has quit, kernel halting", 31);
+	while (TRUE) {
+	}
 	return 0;
 }

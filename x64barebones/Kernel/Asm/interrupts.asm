@@ -18,6 +18,8 @@ GLOBAL _exception0Handler
 GLOBAL _exception06Handler
 GLOBAL syscall_getRegisters
 
+GLOBAL stackSwitcharoo
+
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 EXTERN printRegs
@@ -36,7 +38,7 @@ EXTERN syscall_malloc
 EXTERN syscall_free
 EXTERN syscall_meminfo
 EXTERN syscall_printMemory
-EXTERN syscall_createProcess
+EXTERN syscall_execv
 EXTERN syscall_ps
 EXTERN syscall_nice
 EXTERN syscall_block
@@ -80,6 +82,7 @@ SECTION .text
 %macro irqHandlerMaster 1
 	pushState
 	push rax
+	mov [stackSwitcharoo], rsp
 	mov rax, [rsp + 8]		;r15
 	mov [regs], rax
 	mov rax, [rsp + 2*8]	;r14
@@ -132,6 +135,8 @@ SECTION .text
 	push rax
 	mov al, 20h
 	out 20h, al
+
+	mov rsp, [stackSwitcharoo]
 	pop rax
 	popState
 %endmacro
@@ -295,12 +300,12 @@ haltcpu:
 	ret
 
 SECTION .text
-	syscalls dq syscall_getRTC, syscall_clear, syscall_getRegisters, syscall_read, syscall_write, syscall_getFormat, syscall_setFormat, syscall_putBlock, syscall_getTicks, syscall_playSound, syscall_setTimer, syscall_malloc, syscall_free, syscall_meminfo, syscall_printMemory, syscall_createProcess, syscall_ps, syscall_nice, syscall_block
+	syscalls dq syscall_getRTC, syscall_clear, syscall_getRegisters, syscall_read, syscall_write, syscall_getFormat, syscall_setFormat, syscall_putBlock, syscall_getTicks, syscall_playSound, syscall_setTimer, syscall_malloc, syscall_free, syscall_meminfo, syscall_printMemory, syscall_execv, syscall_ps, syscall_nice, syscall_block
 
 SECTION .bss
 	aux resq 1
     regs resq 21
-
+	stackSwitcharoo resq 1
 
 SECTION .rodata
 	userland equ 0x400000

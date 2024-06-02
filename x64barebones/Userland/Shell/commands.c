@@ -182,13 +182,8 @@ int command_nice(int argc, char **argv) {
 	return 0;
 }
 
-int command_createProcess(int argc, char **argv) {
-	SyscallCreateProcess(argc, argv);
-	return 0;
-}
-
 int command_block(int argc, char **argv) {
-	if(argc != 2){
+	if (argc != 2) {
 		fprintf(STD_ERR, "Wrong amount of arguments...\n");
 		return 1;
 	}

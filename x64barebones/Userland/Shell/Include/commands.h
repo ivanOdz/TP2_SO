@@ -53,7 +53,6 @@ static const availableCommand avCommands[] = {
 	{(uint8_t *) "test_processes", test_processes},
 	{(uint8_t *) "ps", ps},
 	{(uint8_t *) "nice", command_nice},
-	{(uint8_t *) "createProcess", command_createProcess},
 	{(uint8_t *) "block", command_block}};
 
 int64_t commands(uint8_t *strBuffer);
