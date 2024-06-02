@@ -163,7 +163,15 @@ int command_snakeGame(int argc, char **argv) {
 }
 
 int ps(int argc, char **argv) {
-	SyscallPs();
+	ProcessInfo *info = SyscallProcessInfo();
+	printf("NAME\t\t\t\t PID   PARENT  MODE\t\tSTACK BASE\tSTACK POINTER\t STATUS\tPRIORITY\n");
+	printf("==================================================================================================\n");
+	while (info != NULL) {
+		printf("%-20s %5d %5d   %10s  0x%-8x\t0x%-8x\t\t%-9s %d\n", info->name, info->pid, info->parent_PID, (info->runMode == 'F') ? "Foreground" : "Background", info->stackBasePointer, info->stackPointer, info->processStatus, info->priority);
+		ProcessInfo *temp = info;
+		info = info->nextProcessInfo;
+		free(temp);
+	}
 	return 0;
 }
 

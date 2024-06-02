@@ -39,7 +39,7 @@ EXTERN syscall_free
 EXTERN syscall_meminfo
 EXTERN syscall_printMemory
 EXTERN syscall_execv
-EXTERN syscall_ps
+EXTERN syscall_processInfo
 EXTERN syscall_nice
 EXTERN syscall_block
 
@@ -122,9 +122,8 @@ SECTION .text
 	mov [regs + 18*8], rax
 	mov rax, [rsp + 20*8]	;ss
 	mov [regs + 19*8], rax
-	mov [stackSwitcharoo], rsp
-
 	pop rax
+	mov [stackSwitcharoo], rsp
 
 	mov rdi, %1  ; pasaje de parametro
 	mov r12, rax ; se mueven a estos registros porque deben ser preservados por funciones
@@ -136,8 +135,8 @@ SECTION .text
 	push rax
 	mov al, 20h
 	out 20h, al
-	mov rsp, [stackSwitcharoo]
 	pop rax
+	mov rsp, [stackSwitcharoo]
 	popState
 %endmacro
 
@@ -300,7 +299,7 @@ haltcpu:
 	ret
 
 SECTION .text
-	syscalls dq syscall_getRTC, syscall_clear, syscall_getRegisters, syscall_read, syscall_write, syscall_getFormat, syscall_setFormat, syscall_putBlock, syscall_getTicks, syscall_playSound, syscall_setTimer, syscall_malloc, syscall_free, syscall_meminfo, syscall_printMemory, syscall_execv, syscall_ps, syscall_nice, syscall_block
+	syscalls dq syscall_getRTC, syscall_clear, syscall_getRegisters, syscall_read, syscall_write, syscall_getFormat, syscall_setFormat, syscall_putBlock, syscall_getTicks, syscall_playSound, syscall_setTimer, syscall_malloc, syscall_free, syscall_meminfo, syscall_printMemory, syscall_execv, syscall_processInfo, syscall_nice, syscall_block
 
 SECTION .bss
 	aux resq 1

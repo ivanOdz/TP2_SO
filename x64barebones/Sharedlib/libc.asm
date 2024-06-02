@@ -15,7 +15,7 @@ GLOBAL SyscallFree
 GLOBAL SyscallMemInfo
 GLOBAL SyscallPrintMem
 GLOBAL SyscallExecv
-GLOBAL SyscallPs
+GLOBAL SyscallProcessInfo
 GLOBAL SyscallNice
 GLOBAL SyscallToggleBlockProcess
 ALIGN 16
@@ -226,7 +226,7 @@ SyscallExecv:
     pop rbp
     ret
 
-SyscallPs:
+SyscallProcessInfo:
     push rbp
     mov rbp, rsp    
 

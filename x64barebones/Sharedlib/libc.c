@@ -116,7 +116,13 @@ void fprintf_args(uint8_t fd, char *fmt, va_list args) {
 		if (fmt[i] == '%') {
 			SyscallWrite(fd, (uint8_t *) (fmt + j), i - j);
 			i++;
+			uint8_t padRight = 0;
+			if (fmt[i] == '-') {
+				i++;
+				padRight++;
+			}
 			j = i;
+
 			while (fmt[i] >= '0' && fmt[i] <= '9')
 				i++;
 			padding = 0;
@@ -130,19 +136,19 @@ void fprintf_args(uint8_t fd, char *fmt, va_list args) {
 				case 'd':
 				case 'i':
 					uintToBase(va_arg(args, uint64_t), (char *) buffer, 10);
-					printPadded(fd, buffer, '0', padding);
+					printPadded(fd, buffer, '0', padding, padRight);
 					break;
 				case 'c':
 				case '%':
 					fputchar(fd, va_arg(args, int));
 					break;
 				case 's':
-					printPadded(fd, va_arg(args, uint8_t *), ' ', padding);
+					printPadded(fd, va_arg(args, uint8_t *), ' ', padding, padRight);
 					break;
 				case 'x':
 				case 'X':
 					uintToBase(va_arg(args, uint64_t), (char *) buffer, 16);
-					printPadded(fd, buffer, '0', padding);
+					printPadded(fd, buffer, '0', padding, padRight);
 			}
 			j = ++i;
 		}
@@ -151,11 +157,22 @@ void fprintf_args(uint8_t fd, char *fmt, va_list args) {
 	return;
 }
 
-void printPadded(uint8_t fd, uint8_t *buffer, uint8_t pad, uint64_t totalLen) {
-	for (uint64_t i = strlen(buffer); i < totalLen; i++) {
-		fputchar(fd, pad);
+void printPadded(uint8_t fd, uint8_t *buffer, uint8_t pad, uint64_t totalLen, uint8_t padRight) {
+	uint32_t bufferLen = strlen(buffer);
+	if (!totalLen)
+		totalLen = bufferLen;
+	if (padRight) {
+		SyscallWrite(fd, buffer, (bufferLen < totalLen) ? bufferLen : totalLen);
+		for (uint64_t i = strlen(buffer); i < totalLen; i++) {
+			fputchar(fd, pad);
+		}
 	}
-	fputs(fd, buffer);
+	else {
+		for (uint64_t i = strlen(buffer); i < totalLen; i++) {
+			fputchar(fd, pad);
+		}
+		SyscallWrite(fd, buffer, (bufferLen < totalLen) ? bufferLen : totalLen);
+	}
 	return;
 }
 

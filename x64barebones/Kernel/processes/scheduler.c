@@ -31,6 +31,46 @@ void yield() {
 	}
 }
 
+void setProcessInfo(ProcessInfo *info, ProcessListNode *node) {
+	strcpy(info->name, node->process->name);
+	info->pid = node->process->pid;
+	info->parent_PID = node->process->parentPid;
+	info->runMode = (node->process->runMode == FOREGROUND) ? 'F' : 'B';
+	info->stackBasePointer = node->process->stackBasePointer;
+	info->stackPointer = node->process->stackPointer;
+	switch (node->process->status) {
+		case RUNNING:
+			strcpy(info->processStatus, "Running");
+			break;
+		case BLOCKED:
+			strcpy(info->processStatus, "Blocked");
+			break;
+		case READY:
+			strcpy(info->processStatus, "Ready");
+			break;
+		case ZOMBIE:
+			strcpy(info->processStatus, "Zombie");
+			break;
+		default:
+			strcpy(info->processStatus, "INVALID");
+	}
+	info->priority = node->process->priority;
+	info->nextProcessInfo = NULL;
+	return;
+}
+
+ProcessInfo *processInfo() {
+	ProcessInfo *currentProcessInfo = allocMemory(sizeof(ProcessInfo));
+	setProcessInfo(currentProcessInfo, currentProcess);
+	ProcessInfo *newProcessInfo = currentProcessInfo;
+	for (ProcessListNode *otherProcess = currentProcess->next; otherProcess != currentProcess; otherProcess = otherProcess->next) {
+		newProcessInfo->nextProcessInfo = allocMemory(sizeof(ProcessInfo));
+		newProcessInfo = newProcessInfo->nextProcessInfo;
+		setProcessInfo(newProcessInfo, otherProcess);
+	}
+	return currentProcessInfo;
+}
+
 // returns stack of next process to run
 uint8_t *pickNextProcess() {
 	uint16_t processCount = getProcessCount();

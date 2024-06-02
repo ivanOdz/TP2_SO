@@ -57,7 +57,6 @@ static PCB processes[MAX_PROCESSES] = {0};
 		.status = BLOCKED
 	}
 };*/
-static uint16_t numberOfProcesses = 0;
 
 // TODO copy argv to its own memory (on stack??)
 PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode) {
@@ -116,36 +115,6 @@ int8_t killProcess(uint16_t pid) {
 	processes[index].stackBasePointer = 0;
 	processes[index].stackPointer = 0;
 }*/
-
-uint64_t ps() {
-	int16_t i = 0, processesFound = 0;
-	char *status;
-	// printf("NOMBRE\t\t PID\tPID DEL PADRE\tMODO\tSTACK BASE POINTER\tSTACK POINTER\tESTADO\tPRIORIDAD\n");
-	// printf("=========================================================================================================\n");
-	while (i < MAX_PROCESSES && processesFound < numberOfProcesses) {
-		if (processes[i].stackBasePointer != NULL) {
-			switch (processes[i].status) {
-				case 0:
-					status = "BL";
-					break;
-				case 1:
-					status = "RD";
-					break;
-				case 2:
-					status = "RN";
-					break;
-				default:
-					status = "ZB";
-					break;
-			}
-			// printf("%s\t\t%d\t\t %d\t\t\t  %s\t\t\t%x\t\t\t%x\t\t  %s\t\t  %d\t\t\n", processes[i].name, processes[i].pid, processes[i].parentPid, ((processes[i].runMode == 0) ? "F" : "B"),
-			//	   processes[i].stackBasePointer, processes[i].stackPointer, status, processes[i].priority);
-			processesFound++;
-		}
-		i++;
-	}
-	return 0;
-}
 
 void setProcessPriority(uint16_t pid, int8_t priority) {
 	int8_t index = getProcessIndex(pid);

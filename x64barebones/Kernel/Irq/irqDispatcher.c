@@ -3,6 +3,7 @@
 #include <lib.h>
 #include <memoryManager.h>
 #include <processes.h>
+#include <scheduler.h>
 #include <sound.h>
 #include <stdint.h>
 #include <time.h>
@@ -119,9 +120,8 @@ uint64_t syscall_execv(int (*processMain)(int argc, char **argv), char **argv, P
 	return 0;
 }
 
-uint64_t syscall_ps() {
-	ps();
-	return 0;
+ProcessInfo *syscall_processInfo() {
+	return processInfo();
 }
 
 uint64_t syscall_nice(uint16_t pid, uint8_t newPriority) {

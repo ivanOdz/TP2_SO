@@ -58,6 +58,19 @@ typedef struct MemoryInfo {
 	uint8_t mmType;
 } MemoryInfo;
 
+typedef struct ProcessInfo {
+	char name[255];
+	PID_t pid;
+	PID_t parent_PID;
+	char runMode;
+	void *stackBasePointer;
+	void *stackPointer;
+	char processStatus[10];
+	uint8_t priority;
+	struct ProcessInfo *nextProcessInfo;
+
+} ProcessInfo;
+
 extern uint64_t SyscallWrite(uint8_t fd, uint8_t *buffer, uint64_t size);
 extern uint64_t SyscallRead(uint8_t fd, uint8_t *buffer, uint64_t size);
 extern uint64_t SyscallClear();
@@ -74,7 +87,7 @@ extern uint64_t SyscallFree(void *memory);
 extern uint64_t SyscallMemInfo(MemoryInfo *meminfo);
 extern uint64_t SyscallPrintMem();
 extern PID_t SyscallExecv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
-extern uint64_t SyscallPs();
+extern ProcessInfo *SyscallProcessInfo();
 extern uint64_t SyscallNice(uint16_t pid, uint8_t newPriority);
 extern uint64_t SyscallToggleBlockProcess(uint16_t pid);
 
@@ -96,7 +109,7 @@ void fprintf_args(uint8_t fd, char *fmt, va_list args);
 void text_color_set(uint32_t color);
 uint32_t text_color_get();
 int command_argvTest(int argc, char **argv);
-void printPadded(uint8_t fd, uint8_t *buffer, uint8_t pad, uint64_t totalLen);
+void printPadded(uint8_t fd, uint8_t *buffer, uint8_t pad, uint64_t totalLen, uint8_t padRight);
 extern void invalidOpcode();
 void *malloc(uint64_t size);
 void free(void *memory);

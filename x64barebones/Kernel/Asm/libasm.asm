@@ -182,7 +182,6 @@ fabricateProcessStack:
 	push rax	;3  r13
 	push rax	;2  r14
 	push rax	;1  r15
-	push rax	;0  rax
 	mov rax, rsp
 	mov rsp, r8 ;restore old stack
 	ret
