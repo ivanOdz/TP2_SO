@@ -1,4 +1,5 @@
 #include <idtLoader.h>
+#include <interrupts.h>
 #include <keyboard.h>
 #include <lib.h>
 #include <libc.h>
@@ -46,12 +47,15 @@ void *initializeKernelBinary() {
 }
 
 int main() {
+	_cli();
 	load_idt();
 	initializeVideoDriver();
 	createMemoryManager(heapStartAddress, 0x10000000);
 	char *argv[2] = {"Shell", NULL};
 	initScheduler();
 	execute((EntryPoint) shellModuleAddress, argv, FOREGROUND);
+	_sti();
+
 	// syscall_puts(STD_ERR, (uint8_t *) "Shell has quit, kernel halting", 31);
 	while (TRUE) {
 	}

@@ -82,7 +82,6 @@ SECTION .text
 %macro irqHandlerMaster 1
 	pushState
 	push rax
-	mov [stackSwitcharoo], rsp
 	mov rax, [rsp + 8]		;r15
 	mov [regs], rax
 	mov rax, [rsp + 2*8]	;r14
@@ -123,6 +122,8 @@ SECTION .text
 	mov [regs + 18*8], rax
 	mov rax, [rsp + 20*8]	;ss
 	mov [regs + 19*8], rax
+	mov [stackSwitcharoo], rsp
+
 	pop rax
 
 	mov rdi, %1  ; pasaje de parametro
@@ -135,7 +136,6 @@ SECTION .text
 	push rax
 	mov al, 20h
 	out 20h, al
-
 	mov rsp, [stackSwitcharoo]
 	pop rax
 	popState

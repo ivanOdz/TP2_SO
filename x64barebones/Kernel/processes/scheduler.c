@@ -7,6 +7,7 @@
 #include <time.h>
 
 static ProcessListNode *currentProcess;
+static uint8_t enableScheduler = FALSE;
 uint8_t checkRemoveNode(ProcessListNode *node, PID_t pid);
 uint64_t getProcessRunPriority(ProcessListNode *candidate, uint16_t distanceFromCurrent, uint16_t processCount);
 uint8_t *pickNextProcess();
@@ -19,10 +20,11 @@ void initScheduler() {
 	currentProcess->last = currentProcess;
 	char *argv[2] = {"System idle process", NULL};
 	currentProcess->process = createProcess(haltProcess, argv, BACKGROUND);
+	enableScheduler = TRUE;
 }
 
 void yield() {
-	if (currentProcess && currentProcess->process) {
+	if (enableScheduler && currentProcess && currentProcess->process) {
 		currentProcess->process->stackPointer = stackSwitcharoo;
 		currentProcess->process->lastTickRun = get_ticks();
 		stackSwitcharoo = pickNextProcess();
@@ -31,10 +33,10 @@ void yield() {
 
 // returns stack of next process to run
 uint8_t *pickNextProcess() {
-	uint64_t winningPriority = 0;
-	ProcessListNode *winningProcess = currentProcess;
 	uint16_t processCount = getProcessCount();
 	uint16_t distanceFromCurrent = 1;
+	uint64_t winningPriority = getProcessRunPriority(currentProcess, processCount, processCount);
+	ProcessListNode *winningProcess = currentProcess;
 	for (ProcessListNode *candidate = currentProcess->next; candidate != currentProcess; candidate = candidate->next) {
 		uint64_t myPriority = getProcessRunPriority(candidate, distanceFromCurrent++, processCount);
 		if (myPriority > winningPriority) {

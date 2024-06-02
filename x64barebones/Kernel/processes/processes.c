@@ -120,8 +120,8 @@ int8_t killProcess(uint16_t pid) {
 uint64_t ps() {
 	int16_t i = 0, processesFound = 0;
 	char *status;
-	printf("NOMBRE\t\t PID\tPID DEL PADRE\tMODO\tSTACK BASE POINTER\tSTACK POINTER\tESTADO\tPRIORIDAD\n");
-	printf("=========================================================================================================\n");
+	// printf("NOMBRE\t\t PID\tPID DEL PADRE\tMODO\tSTACK BASE POINTER\tSTACK POINTER\tESTADO\tPRIORIDAD\n");
+	// printf("=========================================================================================================\n");
 	while (i < MAX_PROCESSES && processesFound < numberOfProcesses) {
 		if (processes[i].stackBasePointer != NULL) {
 			switch (processes[i].status) {
@@ -138,8 +138,8 @@ uint64_t ps() {
 					status = "ZB";
 					break;
 			}
-			printf("%s\t\t%d\t\t %d\t\t\t  %s\t\t\t%x\t\t\t%x\t\t  %s\t\t  %d\t\t\n", processes[i].name, processes[i].pid, processes[i].parentPid, ((processes[i].runMode == 0) ? "F" : "B"),
-				   processes[i].stackBasePointer, processes[i].stackPointer, status, processes[i].priority);
+			// printf("%s\t\t%d\t\t %d\t\t\t  %s\t\t\t%x\t\t\t%x\t\t  %s\t\t  %d\t\t\n", processes[i].name, processes[i].pid, processes[i].parentPid, ((processes[i].runMode == 0) ? "F" : "B"),
+			//	   processes[i].stackBasePointer, processes[i].stackPointer, status, processes[i].priority);
 			processesFound++;
 		}
 		i++;

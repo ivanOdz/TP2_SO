@@ -130,7 +130,7 @@ int mm_test(int argc, char **argv) {
 				if (memSlot[position] != probe) {
 					fprintf(STD_ERR, "\nTest %d Error at 0x%x (pos %d of %d) (read %d, expected %d, previous %d)\n", testNum, memSlot + position, position, testsize[testNum], memSlot[position], memSlot[0], memSlot[position - 1]);
 					printf("Testing allocated memory for overlaps and corruption (0000)");
-					// break;
+					break;
 				}
 			}
 			printf("\b\b\b\b\b%4d)", testNum + 1);
