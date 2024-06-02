@@ -174,10 +174,15 @@ int command_nice(int argc, char **argv) {
 	}
 	int16_t pid = stringToInt(argv[1], strlen((uint8_t *) argv[1]));
 	int8_t newPriority = stringToInt(argv[2], strlen((uint8_t *) argv[2]));
-	if(newPriority < 0 || newPriority > 31){
+	if (newPriority < 0 || newPriority > 31) {
 		fprintf(STD_ERR, "Priority must be between 0 and 31...\n");
 		return 1;
 	}
 	SyscallNice(pid, newPriority);
+	return 0;
+}
+
+int command_createProcess(int argc, char **argv) {
+	SyscallCreateProcess(argc, argv);
 	return 0;
 }

@@ -8,10 +8,12 @@
 #define DEFAULT_QTY_FDS	   3
 #define STACK_DEFAULT_SIZE (1 << 12)
 
-static uint16_t nextPid = 1;
+static int16_t getNextPosition();
+static int8_t getProcessIndex(int16_t pid);
 
-//static PCB processes[MAX_PROCESSES] = {0};
-static PCB processes[MAX_PROCESSES] = {
+static uint16_t nextPid = 1;
+static PCB processes[MAX_PROCESSES] = {0};
+/*static PCB processes[MAX_PROCESSES] = {
 	{
 		.pid = 1,
 		.parentPid = 0,
@@ -54,29 +56,10 @@ static PCB processes[MAX_PROCESSES] = {
 		.priority = 1,
 		.status = BLOCKED
 	}
-};
-static uint16_t numberOfProcesses = 3;
+};*/
+static uint16_t numberOfProcesses = 0;
 
-static int16_t getNextPosition() {
-	int16_t availablePos = 0;
-	while (availablePos < MAX_PROCESSES && processes[availablePos].stackBasePointer != NULL) {
-		availablePos++;
-	}
-	if (availablePos == MAX_PROCESSES) {
-		return -1;
-	}
-	return availablePos;
-}
-
-int8_t getProcessIndex(int16_t pid) {
-	for (int i = 0; i < MAX_PROCESSES; i++) {
-		if (processes[i].pid == pid) {
-			return i;
-		}
-	}
-	return -1;
-}
-int8_t createProcess(uint8_t *name, uint8_t **argv, ProcessRunMode runMode) {
+int8_t createProcess(uint8_t *name, ProcessRunMode runMode) {
 	int16_t pos = getNextPosition();
 	if (pos < 0) {
 		return -1;
@@ -87,7 +70,7 @@ int8_t createProcess(uint8_t *name, uint8_t **argv, ProcessRunMode runMode) {
 	processes[pos].stackBasePointer = (uint8_t *) allocMemory(STACK_DEFAULT_SIZE) + STACK_DEFAULT_SIZE;
 	processes[pos].stackPointer = processes[pos].stackBasePointer;
 	processes[pos].status = READY;
-	processes[pos].argv = argv;
+	//processes[pos].argv = argv;
 	processes[pos].runMode = runMode;
 	processes[pos].returnValue = 0;
 
@@ -163,3 +146,23 @@ void setProcessState(uint16_t pid, ProcessStatus ps) {
 
 }
 */
+
+static int16_t getNextPosition() {
+	int16_t availablePos = 0;
+	while (availablePos < MAX_PROCESSES && processes[availablePos].stackBasePointer != NULL) {
+		availablePos++;
+	}
+	if (availablePos == MAX_PROCESSES) {
+		return -1;
+	}
+	return availablePos;
+}
+
+static int8_t getProcessIndex(int16_t pid) {
+	for (int i = 0; i < MAX_PROCESSES; i++) {
+		if (processes[i].pid == pid) {
+			return i;
+		}
+	}
+	return -1;
+}

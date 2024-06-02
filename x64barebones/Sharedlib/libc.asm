@@ -185,6 +185,7 @@ SyscallFree:
     mov rsp, rbp
     pop rbp
     ret
+
 SyscallMemInfo:
     push rbp
     mov rbp, rsp    
@@ -215,6 +216,9 @@ SyscallCreateProcess:
     mov rbp, rsp    
 
     mov rax, 0x0F
+    mov rbx, rdi    ; name
+    mov rcx, rsi    ; runMode
+                    ; en rdx queda el 4to parametro
     int 80h
 
     mov rsp, rbp

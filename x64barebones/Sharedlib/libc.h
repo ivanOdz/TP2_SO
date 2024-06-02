@@ -18,6 +18,9 @@
 #define COLORS_ORANGE 0x00EF3F00
 #define COLORS_CIAN	  0x0000E0FF
 
+typedef enum { FOREGROUND = 0,
+			   BACKGROUND } ProcessRunMode;
+
 typedef struct text_format {
 	uint32_t bg;
 	uint32_t fg;
@@ -67,7 +70,7 @@ extern void *SyscallMalloc(uint64_t size);
 extern uint64_t SyscallFree(void *memory);
 extern uint64_t SyscallMemInfo(MemoryInfo *meminfo);
 extern uint64_t SyscallPrintMem();
-extern uint64_t SyscallCreateProcess();
+extern uint64_t SyscallCreateProcess(int argc, char **argv);
 extern uint64_t SyscallPs();
 extern uint64_t SyscallNice(uint16_t pid, uint8_t newPriority);
 

@@ -5,6 +5,7 @@
 #define MAX_NAME_SIZE		 25
 
 #include <stdint.h>
+#include <libc.h>
 
 
 typedef enum { BLOCKED = 0,
@@ -12,8 +13,6 @@ typedef enum { BLOCKED = 0,
 			   RUNNING,
 			   ZOMBIE } ProcessStatus;
 
-typedef enum { FOREGROUND = 0,
-			   BACKGROUND } ProcessRunMode;
 
 typedef struct {
 	uint16_t pid;
@@ -30,7 +29,7 @@ typedef struct {
 	ProcessStatus status;	
 } PCB;
 
-int8_t createProcess(uint8_t *name, uint8_t **argv, ProcessRunMode runMode);
+int8_t createProcess(uint8_t *name, ProcessRunMode runMode);
 void setProcessPriority(uint16_t pid, int8_t priority);
 uint64_t ps();
 

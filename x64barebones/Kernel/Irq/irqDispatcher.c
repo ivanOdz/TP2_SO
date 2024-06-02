@@ -2,11 +2,12 @@
 #include <keyboard.h>
 #include <lib.h>
 #include <memoryManager.h>
+#include <processes.h>
 #include <sound.h>
 #include <stdint.h>
 #include <time.h>
 #include <videoDriver.h>
-#include <processes.h>
+
 
 #define MAX_INTS	 256
 #define MAX_SYSCALLS 338
@@ -114,21 +115,20 @@ uint64_t syscall_printMemory() {
 	return 0;
 }
 
-uint64_t syscall_createProcess(){
-	createProcess("My First Process", NULL, 0);
+uint64_t syscall_createProcess(int argc, char **argv) {
+	int8_t runMode = stringToInt(argv[2], strlen((uint8_t *) argv[2]));
+	createProcess((uint8_t *) argv[1], (ProcessRunMode) runMode);
 	return 0;
 }
 
-uint64_t syscall_ps(){
+uint64_t syscall_ps() {
 	ps();
 	return 0;
 }
 
-uint64_t syscall_nice(uint16_t pid, uint8_t newPriority){
+uint64_t syscall_nice(uint16_t pid, uint8_t newPriority) {
 	setProcessPriority(pid, newPriority);
 	return 0;
 }
-
-
 
 typedef int (*EntryPoint)();

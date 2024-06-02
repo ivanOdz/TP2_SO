@@ -28,6 +28,7 @@ int command_getRegisters();
 int command_tunes(int argc, char **argv);
 int command_argvTest(int argc, char **argv);
 int command_nice(int argc, char **argv);
+int command_createProcess(int argc, char **argv);
 // ---------------------------------------------------------------------------------
 
 typedef struct {
@@ -50,7 +51,8 @@ static const availableCommand avCommands[] = {
 	{(uint8_t *) "mm_test", mm_test},
 	{(uint8_t *) "test_processes", test_processes},
 	{(uint8_t *) "ps", ps},
-	{(uint8_t *) "nice", command_nice}};
+	{(uint8_t *) "nice", command_nice},
+	{(uint8_t *) "createProcess", command_createProcess}};
 
 int64_t commands(uint8_t *strBuffer);
 
