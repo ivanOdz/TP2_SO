@@ -84,7 +84,9 @@ uint8_t *pickNextProcess() {
 			winningProcess = candidate;
 		}
 	}
+	currentProcess->process->status = READY;
 	currentProcess = winningProcess;
+	currentProcess->process->status = RUNNING;
 	return currentProcess->process->stackPointer;
 }
 
