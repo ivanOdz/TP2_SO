@@ -216,9 +216,8 @@ SyscallCreateProcess:
     mov rbp, rsp    
 
     mov rax, 0x0F
-    mov rbx, rdi    ; name
-    mov rcx, rsi    ; runMode
-                    ; en rdx queda el 4to parametro
+    mov rbx, rdi    ; argc
+    mov rcx, rsi    ; argv
     int 80h
 
     mov rsp, rbp
