@@ -73,6 +73,7 @@ extern uint64_t SyscallPrintMem();
 extern uint64_t SyscallCreateProcess(int argc, char **argv);
 extern uint64_t SyscallPs();
 extern uint64_t SyscallNice(uint16_t pid, uint8_t newPriority);
+extern uint64_t SyscallToggleBlockProcess(uint16_t pid);
 
 int64_t strcpy(uint8_t *dest, const uint8_t *src);
 int64_t strcmp(const uint8_t *str1, const uint8_t *str2);

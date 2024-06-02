@@ -32,5 +32,6 @@ typedef struct {
 int8_t createProcess(uint8_t *name, ProcessRunMode runMode);
 void setProcessPriority(uint16_t pid, int8_t priority);
 uint64_t ps();
+void blockProcess(uint16_t pid);
 
 #endif

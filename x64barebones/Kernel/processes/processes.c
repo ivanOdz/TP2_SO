@@ -70,7 +70,7 @@ int8_t createProcess(uint8_t *name, ProcessRunMode runMode) {
 	processes[pos].stackBasePointer = (uint8_t *) allocMemory(STACK_DEFAULT_SIZE) + STACK_DEFAULT_SIZE;
 	processes[pos].stackPointer = processes[pos].stackBasePointer;
 	processes[pos].status = READY;
-	//processes[pos].argv = argv;
+	// processes[pos].argv = argv;
 	processes[pos].runMode = runMode;
 	processes[pos].returnValue = 0;
 
@@ -108,26 +108,26 @@ uint64_t ps() {
 	printf("NOMBRE\t\t PID\tPID DEL PADRE\tMODO\tSTACK BASE POINTER\tSTACK POINTER\tESTADO\tPRIORIDAD\n");
 	printf("=========================================================================================================\n");
 	while (i < MAX_PROCESSES && processesFound < numberOfProcesses) {
-		if(processes[i].stackBasePointer != NULL){
-		switch (processes[i].status) {
-			case 0:
-				status = "BL";
-				break;
-			case 1:
-				status = "RD";
-				break;
-			case 2:
-				status = "RN";
-				break;
-			default:
-				status = "ZB";
-				break;
+		if (processes[i].stackBasePointer != NULL) {
+			switch (processes[i].status) {
+				case 0:
+					status = "BL";
+					break;
+				case 1:
+					status = "RD";
+					break;
+				case 2:
+					status = "RN";
+					break;
+				default:
+					status = "ZB";
+					break;
+			}
+			printf("%s\t\t%d\t\t %d\t\t\t  %s\t\t\t%x\t\t\t%x\t\t  %s\t\t  %d\t\t\n", processes[i].name, processes[i].pid, processes[i].parentPid, ((processes[i].runMode == 0) ? "F" : "B"),
+				   processes[i].stackBasePointer, processes[i].stackPointer, status, processes[i].priority);
+			processesFound++;
 		}
-		printf("%s\t\t%d\t\t %d\t\t\t  %s\t\t\t%x\t\t\t%x\t\t  %s\t\t  %d\t\t\n", processes[i].name, processes[i].pid, processes[i].parentPid, ((processes[i].runMode == 0) ? "F" : "B"),
-			   processes[i].stackBasePointer, processes[i].stackPointer, status, processes[i].priority);
-			   processesFound++;
-		}
-		i++;	
+		i++;
 	}
 	return 0;
 }
@@ -140,12 +140,24 @@ void setProcessPriority(uint16_t pid, int8_t priority) {
 	processes[index].priority = priority;
 }
 
-
 /*
 void setProcessState(uint16_t pid, ProcessStatus ps) {
 
 }
 */
+
+void blockProcess(uint16_t pid) {
+	int8_t index = getProcessIndex(pid);
+	if (index < 0 /*|| pid == getCurrentProcessPid()*/) {
+		return;
+	}
+	if (processes[index].status == BLOCKED) {
+		processes[index].status = READY;
+	}
+	else if (processes[index].status == READY) {
+		processes[index].status = BLOCKED;
+	}
+}
 
 static int16_t getNextPosition() {
 	int16_t availablePos = 0;

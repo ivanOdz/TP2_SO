@@ -186,3 +186,13 @@ int command_createProcess(int argc, char **argv) {
 	SyscallCreateProcess(argc, argv);
 	return 0;
 }
+
+int command_block(int argc, char **argv) {
+	if(argc != 2){
+		fprintf(STD_ERR, "Wrong amount of arguments...\n");
+		return 1;
+	}
+	int16_t pid = stringToInt(argv[1], strlen((uint8_t *) argv[1]));
+	SyscallToggleBlockProcess(pid);
+	return 0;
+}

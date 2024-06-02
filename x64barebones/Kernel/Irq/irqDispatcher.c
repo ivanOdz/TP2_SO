@@ -131,4 +131,11 @@ uint64_t syscall_nice(uint16_t pid, uint8_t newPriority) {
 	return 0;
 }
 
+uint64_t syscall_block(uint16_t pid) {
+	blockProcess(pid);
+	return 0;
+}
+
+
+
 typedef int (*EntryPoint)();
