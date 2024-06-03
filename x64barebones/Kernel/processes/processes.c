@@ -8,11 +8,7 @@
 #define DEFAULT_QTY_FDS	   3
 #define STACK_DEFAULT_SIZE (1 << 12)
 
-static int16_t getNextPosition();
-static int8_t getProcessIndex(int16_t pid);
-
 static uint16_t nextPid = 0;
-static PCB processes[MAX_PROCESSES] = {0};
 /*static PCB processes[MAX_PROCESSES] = {
 	{
 		.pid = 1,
@@ -60,32 +56,38 @@ static PCB processes[MAX_PROCESSES] = {0};
 
 // TODO copy argv to its own memory (on stack??)
 PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode) {
-	int16_t pos = getNextPosition();
-	if (pos < 0) {
+	PCB *process = allocMemory(sizeof(PCB));
+	if (!process) {
 		return NULL;
 	}
-	processes[pos].stackBasePointer = (uint8_t *) allocMemory(STACK_DEFAULT_SIZE);
-	if (!processes[pos].stackBasePointer)
+	process->stackBasePointer = (uint8_t *) allocMemory(STACK_DEFAULT_SIZE);
+	if (!process->stackBasePointer) {
+		free(process);
 		return NULL;
-	processes[pos].stackBasePointer += STACK_DEFAULT_SIZE - 1; // stack works backwards
+	}
+	process->stackBasePointer += STACK_DEFAULT_SIZE - 1; // stack works backwards
 	int argc = 0;
 	while (argv[argc++]) {
 	}
-	processes[pos].stackPointer = fabricateProcessStack(processes[pos].stackBasePointer, argc, argv, processMain);
-	processes[pos].name = argv[0];
-	processes[pos].pid = nextPid++;
-	processes[pos].parentPid = getCurrentPID();
-	processes[pos].status = READY;
-	processes[pos].runMode = runMode;
-	processes[pos].returnValue = 0;
-	processes[pos].lastTickRun = get_ticks();
+	process->stackPointer = fabricateProcessStack(process->stackBasePointer, argc, argv, processMain);
+	process->name = argv[0];
+	process->pid = nextPid++;
+	process->parentPid = getCurrentPID();
+	process->status = READY;
+	process->runMode = runMode;
+	process->returnValue = 0;
+	process->killed = FALSE;
+	process->lastTickRun = get_ticks();
+	process->blockedOn.waitPID = NULL;
+	process->blockedOn.fd = 0;
+	process->blockedOn.timer = 0;
 
 	for (int i = 0; i < DEFAULT_QTY_FDS; i++) {
-		processes[pos].fileDescriptors[i] = i;
+		process->fileDescriptors[i] = i;
 	}
-	processes[pos].fileDescriptorsInUse = DEFAULT_QTY_FDS;
-	processes[pos].priority = 1;
-	return &processes[pos];
+	process->fileDescriptorsInUse = DEFAULT_QTY_FDS;
+	process->priority = 1;
+	return process;
 }
 
 PID_t execute(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode) {
@@ -101,11 +103,25 @@ void exitProcess(int returnValue) {
 	// removeProcess(process->pid);
 	process->returnValue = returnValue;
 	process->status = ZOMBIE;
-	free(process->stackBasePointer);
 	process->stackPointer = NULL;
-	yield();
+	schedyield();
+}
+void waitPID(PID_t PID, ReturnStatus *wstatus) {
+	PCB *process = getCurrentProcess();
+	PCB *child = getProcess(PID);
+	if (PID && child && child->parentPid == process->pid) {
+		process->blockedOn.waitPID = wstatus;
+		process->blockedOn.waitPID->pid = PID;
+		process->status = BLOCKED;
+		schedyield();
+	}
 }
 
+void freeProcess(PCB *process) {
+	free(process->stackBasePointer);
+	removeProcess(process);
+	free(process);
+}
 /*
 int8_t finishProcess() {
 	int8_t index = getCurrentIndex();
@@ -127,11 +143,11 @@ int8_t killProcess(uint16_t pid) {
 }*/
 
 void setProcessPriority(uint16_t pid, int8_t priority) {
-	int8_t index = getProcessIndex(pid);
-	if (index < 0 || priority < 0 || priority > 31) {
+	PCB *process = getProcess(pid);
+	if (process < 0 || priority < 0 || priority > 9) {
 		return;
 	}
-	processes[index].priority = priority;
+	process->priority = priority;
 }
 
 /*
@@ -141,34 +157,14 @@ void setProcessState(uint16_t pid, ProcessStatus ps) {
 */
 
 void blockProcess(uint16_t pid) {
-	int8_t index = getProcessIndex(pid);
-	if (index < 0 /*|| pid == getCurrentProcessPid()*/) {
+	PCB *process = getProcess(pid);
+	if (!process) {
 		return;
 	}
-	if (processes[index].status == BLOCKED) {
-		processes[index].status = READY;
+	if (process->status == BLOCKED && process->blockedOn.waitPID == NULL && process->blockedOn.fd == 0) {
+		process->status = READY;
 	}
-	else if (processes[index].status == READY) {
-		processes[index].status = BLOCKED;
+	else if (process->status == READY) {
+		process->status = BLOCKED;
 	}
-}
-
-static int16_t getNextPosition() {
-	int16_t availablePos = 0;
-	while (availablePos < MAX_PROCESSES && processes[availablePos].stackBasePointer != NULL) {
-		availablePos++;
-	}
-	if (availablePos == MAX_PROCESSES) {
-		return -1;
-	}
-	return availablePos;
-}
-
-static int8_t getProcessIndex(int16_t pid) {
-	for (int i = 0; i < MAX_PROCESSES; i++) {
-		if (processes[i].pid == pid) {
-			return i;
-		}
-	}
-	return -1;
 }

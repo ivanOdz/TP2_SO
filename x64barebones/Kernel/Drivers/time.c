@@ -13,7 +13,7 @@ void timer_handler() {
 	if (ticks % 9 == 0) {
 		printCursor();
 	}
-	yield();
+	schedyield();
 }
 
 int ticks_elapsed() {

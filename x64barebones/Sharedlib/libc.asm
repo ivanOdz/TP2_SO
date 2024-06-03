@@ -19,6 +19,8 @@ GLOBAL SyscallExit
 GLOBAL SyscallProcessInfo
 GLOBAL SyscallNice
 GLOBAL SyscallToggleBlockProcess
+GLOBAL SyscallWaitPID
+GLOBAL SyscallYield
 ALIGN 16
 
 
@@ -267,13 +269,35 @@ SyscallExit:
     mov rbp, rsp    
 
     mov rax, 0x13
-    mov rbx, rdi    ; pid
+    mov rbx, rdi    ; value
     int 80h
 
     mov rsp, rbp
     pop rbp
     ret
 
+SyscallWaitPID:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x14
+    mov rbx, rdi    ; pid
+    mov rcx, rsi    ; wstatus
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+SyscallYield:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x15
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
 invalidOpcode:
     ud2
     ret

@@ -6,7 +6,9 @@
 #define COLORS_DEFAULT	0x0020FF00
 #define BUFFER_MAX_SIZE 256
 
-static uint8_t shellBuffer[BUFFER_MAX_SIZE];
+static uint8_t shellBuffer[BUFFER_MAX_SIZE] = {0};
+static uint8_t lastBuffer[BUFFER_MAX_SIZE] = {0};
+
 static uint8_t index = 0;
 
 static void empty_command_buffer();
@@ -22,9 +24,16 @@ int shell() {
 		if (buf[0] != 0) {
 			for (int i = 0; i < read - 1; i++) {
 				if (buf[i] == '\n') {
-					putchar(buf[i]);
-					commands((uint8_t *) shellBuffer);
-					empty_command_buffer();
+					if (!index) {
+						printf("%s\n", lastBuffer);
+						commands(lastBuffer);
+						SyscallWrite(STD_OUT, (uint8_t *) ">> ", 3);
+					}
+					else {
+						putchar(buf[i]);
+						commands((uint8_t *) shellBuffer);
+						empty_command_buffer();
+					}
 				}
 				else if (buf[i] == '\b') {
 					if (index != 0) {
@@ -52,10 +61,10 @@ int shell() {
 }
 
 void empty_command_buffer() {
-	while (index) {
-		index--;
+	for (int i = 0; i < BUFFER_MAX_SIZE; i++) {
+		lastBuffer[i] = shellBuffer[i];
 		shellBuffer[index] = '\0';
 	}
-
+	index = 0;
 	SyscallWrite(STD_OUT, (uint8_t *) ">> ", 3);
 }

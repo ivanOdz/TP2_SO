@@ -71,7 +71,14 @@ typedef struct ProcessInfo {
 
 } ProcessInfo;
 
-extern uint64_t SyscallWrite(uint8_t fd, uint8_t *buffer, uint64_t size);
+typedef struct ReturnStatus {
+	int returnValue;
+	uint8_t aborted;
+	PID_t pid;
+} ReturnStatus;
+
+extern uint64_t
+SyscallWrite(uint8_t fd, uint8_t *buffer, uint64_t size);
 extern uint64_t SyscallRead(uint8_t fd, uint8_t *buffer, uint64_t size);
 extern uint64_t SyscallClear();
 extern uint64_t SyscallGetRegisters();
@@ -91,6 +98,8 @@ extern void SyscallExit(int returnValue);
 extern ProcessInfo *SyscallProcessInfo();
 extern uint64_t SyscallNice(uint16_t pid, uint8_t newPriority);
 extern uint64_t SyscallToggleBlockProcess(uint16_t pid);
+extern void SyscallWaitPID(PID_t PID, ReturnStatus *wstatus);
+extern void SyscallYield();
 
 int64_t strcpy(uint8_t *dest, const uint8_t *src);
 int64_t strcmp(const uint8_t *str1, const uint8_t *str2);
@@ -117,4 +126,7 @@ void free(void *memory);
 void memoryManagerStats(MemoryInfo *meminfo);
 PID_t execv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
 void exit(int returnValue);
+void waitpid(PID_t PID, ReturnStatus *wstatus);
+void yield();
+
 #endif

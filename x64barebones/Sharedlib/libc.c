@@ -250,3 +250,11 @@ PID_t execv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMo
 void exit(int returnValue) {
 	SyscallExit(returnValue);
 }
+
+void waitpid(PID_t PID, ReturnStatus *wstatus) {
+	SyscallWaitPID(PID, wstatus);
+}
+
+void yield() {
+	SyscallYield();
+}

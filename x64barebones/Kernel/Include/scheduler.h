@@ -8,9 +8,11 @@ typedef struct ProcessListNode {
 
 void initScheduler();
 uint8_t addProcess(PCB *pcb);
-uint8_t removeProcess(PID_t pid);
+uint8_t removeProcess(PCB *process);
 PID_t getCurrentPID();
 PCB *getCurrentProcess();
-void yield();
+PCB *getProcess(PID_t pid);
+void schedyield();
 ProcessInfo *processInfo();
 extern uint8_t *stackSwitcharoo;
+extern uint8_t *yieldInterrupt(uint8_t *preserveStack);

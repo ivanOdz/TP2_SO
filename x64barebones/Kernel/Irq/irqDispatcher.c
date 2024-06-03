@@ -116,12 +116,15 @@ uint64_t syscall_printMemory() {
 }
 
 uint64_t syscall_execv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode) {
-	execute(processMain, argv, runMode);
-	return 0;
+	return execute(processMain, argv, runMode);
 }
 
 uint64_t syscall_exit(int returnValue) {
 	exitProcess(returnValue);
+	return 0;
+}
+uint64_t syscall_waitpid(uint64_t PID, ReturnStatus *wstatus) {
+	waitPID(PID, wstatus);
 	return 0;
 }
 
@@ -136,6 +139,11 @@ uint64_t syscall_nice(uint16_t pid, uint8_t newPriority) {
 
 uint64_t syscall_block(uint16_t pid) {
 	blockProcess(pid);
+	return 0;
+}
+
+uint64_t syscall_yield(uint16_t pid) {
+	schedyield();
 	return 0;
 }
 

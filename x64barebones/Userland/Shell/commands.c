@@ -47,7 +47,18 @@ int64_t commands(uint8_t *strBuffer) {
 					retValue = avCommands[cont].function(argc, (char **) argv);
 				}
 				else {
-					execv(avCommands[cont].function, argv, FOREGROUND);
+					PID_t childPID = execv(avCommands[cont].function, argv, FOREGROUND);
+					ReturnStatus *wstatus = malloc(sizeof(ReturnStatus));
+					if (childPID) {
+						waitpid(childPID, wstatus);
+						printf("I'm back, PID %d has taken an L\n", wstatus->pid);
+						if (wstatus->aborted)
+							fprintf(STD_ERR, "%s was killed\n", strBuffer);
+						retValue = wstatus->returnValue;
+					}
+					else {
+						fprintf(STD_ERR, "Couldn't execute %s\n", strBuffer);
+					}
 					retValue = 0;
 				}
 				SyscallSetFormat(&shell_fmt);

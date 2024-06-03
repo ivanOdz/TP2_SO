@@ -8,11 +8,11 @@
 
 static ProcessListNode *currentProcess;
 static uint8_t enableScheduler = FALSE;
-uint8_t checkRemoveNode(ProcessListNode *node, PID_t pid);
+uint8_t checkRemoveNode(ProcessListNode *node, PCB *pcb);
 uint64_t getProcessRunPriority(ProcessListNode *candidate, uint16_t distanceFromCurrent, uint16_t processCount);
 uint8_t *pickNextProcess();
 uint16_t getProcessCount();
-
+ProcessListNode *getZombieChild(PID_t parentPID, PID_t childPID);
 void initScheduler() {
 	// hardwire halt process
 	currentProcess = allocMemory(sizeof(ProcessListNode));
@@ -23,7 +23,7 @@ void initScheduler() {
 	enableScheduler = TRUE;
 }
 
-void yield() {
+void schedyield() {
 	if (enableScheduler && currentProcess && currentProcess->process) {
 		currentProcess->process->stackPointer = stackSwitcharoo;
 		currentProcess->process->lastTickRun = get_ticks();
@@ -102,14 +102,36 @@ uint16_t getProcessCount() {
 // round-robin w/ priorities doesn't necessarily have to be many lists. It can be only one but with magic.
 // basically returns how worthy a process is to run now based on its priority, list position relative to current, and time since last run
 uint64_t getProcessRunPriority(ProcessListNode *candidate, uint16_t distanceFromCurrent, uint16_t processCount) {
-	if (candidate->process->status == BLOCKED || candidate->process->status == ZOMBIE) {
+	if (candidate->process->status == ZOMBIE) {
 		return 0;
 	}
 	// is hlt
 	if (candidate->process->pid == 0) {
 		return 1;
 	}
+	if (candidate->process->status == BLOCKED) {
+		ProcessListNode *zombieChild = getZombieChild(candidate->process->pid, candidate->process->blockedOn.waitPID->pid);
+		if (zombieChild) {
+			candidate->process->status = READY;
+			candidate->process->blockedOn.waitPID->pid = zombieChild->process->pid;
+			candidate->process->blockedOn.waitPID->aborted = zombieChild->process->killed;
+			candidate->process->blockedOn.waitPID->returnValue = zombieChild->process->returnValue;
+			freeProcess(zombieChild->process);
+			candidate->process->blockedOn.waitPID = NULL;
+		}
+		else {
+			return 0;
+		}
+	}
 	return (uint64_t) ((1 << candidate->process->priority) * ((double) processCount / distanceFromCurrent)) + (1 << (get_ticks() - candidate->process->lastTickRun));
+}
+
+ProcessListNode *getZombieChild(PID_t parentPID, PID_t childPID) {
+	for (ProcessListNode *child = currentProcess->next; child != currentProcess; child = child->next) {
+		if (child->process->status == ZOMBIE && child->process->parentPid == parentPID && (childPID == 0 || child->process->pid == childPID))
+			return child;
+	}
+	return NULL;
 }
 
 uint8_t addProcess(PCB *pcb) {
@@ -133,23 +155,32 @@ PID_t getCurrentPID() {
 PCB *getCurrentProcess() {
 	return currentProcess->process;
 }
-uint8_t removeProcess(PID_t pid) {
+PCB *getProcess(PID_t pid) {
+	ProcessListNode *candidate = currentProcess;
+	do {
+		if (candidate->process->pid == pid)
+			return candidate->process;
+		candidate = candidate->next;
+	} while (candidate != currentProcess);
+}
+uint8_t removeProcess(PCB *process) {
 	ProcessListNode *nextNode = currentProcess->next;
-	if (checkRemoveNode(currentProcess, pid)) {
+	if (checkRemoveNode(currentProcess, process)) {
 		currentProcess = nextNode;
 		return TRUE;
 	}
 	while (nextNode != currentProcess) {
-		if (checkRemoveNode(nextNode, pid)) {
+		if (checkRemoveNode(nextNode, process)) {
 			return TRUE;
 		}
+		nextNode = nextNode->next;
 	}
 	return FALSE;
 }
 
 // removes node from the list if matches PID. Returns TRUE if deleted, FALSE if not.
-uint8_t checkRemoveNode(ProcessListNode *node, PID_t pid) {
-	if (node->process && node->process->pid == pid) {
+uint8_t checkRemoveNode(ProcessListNode *node, PCB *pcb) {
+	if (node->process->pid == pcb->pid) {
 		node->last->next = node->next;
 		node->next->last = node->last;
 		free(node);
