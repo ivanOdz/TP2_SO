@@ -8,6 +8,7 @@ GLOBAL getPIT2Freq
 GLOBAL spkStop
 GLOBAL haltProcess
 GLOBAL fabricateProcessStack
+GLOBAL atomicExchange
 
 ALIGN 16
 
@@ -185,3 +186,7 @@ fabricateProcessStack:
 	mov rax, rsp
 	mov rsp, r8 ;restore old stack
 	ret
+
+atomicExchange:
+lock	xchg [rdi], rsi
+		ret
