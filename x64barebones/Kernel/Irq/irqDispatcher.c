@@ -124,8 +124,7 @@ uint64_t syscall_exit(int returnValue) {
 	return 0;
 }
 uint64_t syscall_waitpid(uint64_t PID, ReturnStatus *wstatus) {
-	waitPID(PID, wstatus);
-	return 0;
+	return waitPID(PID, wstatus);
 }
 
 ProcessInfo *syscall_processInfo() {

@@ -46,6 +46,7 @@ EXTERN syscall_block
 EXTERN syscall_exit
 EXTERN syscall_waitpid
 EXTERN syscall_yield
+EXTERN forceyield
 
 SECTION .text
 
@@ -159,6 +160,14 @@ SECTION .text
 	
 	iretq
 %endmacro
+
+forceyield:
+	push rdi
+	mov rax, 0x15
+	int 0x80
+	pop rax
+	mov [stackSwitcharoo], rax
+	ret
 
 _hlt:
 	sti

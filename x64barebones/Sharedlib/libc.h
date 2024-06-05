@@ -98,7 +98,7 @@ extern void SyscallExit(int returnValue);
 extern ProcessInfo *SyscallProcessInfo();
 extern uint64_t SyscallNice(uint16_t pid, uint8_t newPriority);
 extern uint64_t SyscallToggleBlockProcess(uint16_t pid);
-extern void SyscallWaitPID(PID_t PID, ReturnStatus *wstatus);
+extern PID_t SyscallWaitPID(PID_t PID, ReturnStatus *wstatus);
 extern void SyscallYield();
 
 int64_t strcpy(uint8_t *dest, const uint8_t *src);
@@ -126,7 +126,7 @@ void free(void *memory);
 void memoryManagerStats(MemoryInfo *meminfo);
 PID_t execv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
 void exit(int returnValue);
-void waitpid(PID_t PID, ReturnStatus *wstatus);
+PID_t waitpid(PID_t PID, ReturnStatus *wstatus);
 void yield();
 
 #endif

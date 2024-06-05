@@ -106,14 +106,16 @@ void exitProcess(int returnValue) {
 	process->stackPointer = NULL;
 	schedyield();
 }
-void waitPID(PID_t PID, ReturnStatus *wstatus) {
+PID_t waitPID(PID_t PID, ReturnStatus *wstatus) {
 	PCB *process = getCurrentProcess();
 	PCB *child = getProcess(PID);
 	if (PID && child && child->parentPid == process->pid) {
 		process->blockedOn.waitPID = wstatus;
 		process->blockedOn.waitPID->pid = PID;
 		process->status = BLOCKED;
-		schedyield();
+		process->stackPointer = forceyield(stackSwitcharoo);
+		process->blockedOn.waitPID = NULL;
+		return wstatus->pid;
 	}
 }
 

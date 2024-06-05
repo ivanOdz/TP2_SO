@@ -117,7 +117,6 @@ uint64_t getProcessRunPriority(ProcessListNode *candidate, uint16_t distanceFrom
 			candidate->process->blockedOn.waitPID->aborted = zombieChild->process->killed;
 			candidate->process->blockedOn.waitPID->returnValue = zombieChild->process->returnValue;
 			freeProcess(zombieChild->process);
-			candidate->process->blockedOn.waitPID = NULL;
 		}
 		else {
 			return 0;
@@ -127,6 +126,8 @@ uint64_t getProcessRunPriority(ProcessListNode *candidate, uint16_t distanceFrom
 }
 
 ProcessListNode *getZombieChild(PID_t parentPID, PID_t childPID) {
+	if (currentProcess->process->status == ZOMBIE)
+		return currentProcess;
 	for (ProcessListNode *child = currentProcess->next; child != currentProcess; child = child->next) {
 		if (child->process->status == ZOMBIE && child->process->parentPid == parentPID && (childPID == 0 || child->process->pid == childPID))
 			return child;

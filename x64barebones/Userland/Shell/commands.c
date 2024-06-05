@@ -50,8 +50,8 @@ int64_t commands(uint8_t *strBuffer) {
 					PID_t childPID = execv(avCommands[cont].function, argv, FOREGROUND);
 					ReturnStatus *wstatus = malloc(sizeof(ReturnStatus));
 					if (childPID) {
-						waitpid(childPID, wstatus);
-						printf("I'm back, PID %d has taken an L\n", wstatus->pid);
+						PID_t exited = waitpid(childPID, wstatus);
+						printf("I'm back, PID %d has taken an L\n", exited);
 						if (wstatus->aborted)
 							fprintf(STD_ERR, "%s was killed\n", strBuffer);
 						retValue = wstatus->returnValue;

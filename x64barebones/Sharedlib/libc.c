@@ -251,8 +251,8 @@ void exit(int returnValue) {
 	SyscallExit(returnValue);
 }
 
-void waitpid(PID_t PID, ReturnStatus *wstatus) {
-	SyscallWaitPID(PID, wstatus);
+PID_t waitpid(PID_t PID, ReturnStatus *wstatus) {
+	return SyscallWaitPID(PID, wstatus);
 }
 
 void yield() {
