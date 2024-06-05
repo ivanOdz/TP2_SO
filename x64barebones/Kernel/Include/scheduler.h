@@ -14,7 +14,7 @@ PCB *getCurrentProcess();
 PCB *getProcess(PID_t pid);
 void schedyield();
 PCB *getForegroundProcess();
-void *forceyield(void *stackPointer);
+void *forceyield();
 ProcessInfo *processInfo();
 extern uint8_t *stackSwitcharoo;
 extern uint8_t *yieldInterrupt(uint8_t *preserveStack);

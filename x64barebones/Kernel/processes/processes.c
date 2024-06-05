@@ -123,7 +123,7 @@ PID_t waitPID(PID_t PID, ReturnStatus *wstatus) {
 		process->blockedOn.waitPID = wstatus;
 		process->blockedOn.waitPID->pid = PID;
 		process->status = BLOCKED;
-		process->stackPointer = forceyield(stackSwitcharoo);
+		process->stackPointer = forceyield();
 		process->blockedOn.waitPID = NULL;
 		return wstatus->pid;
 	}

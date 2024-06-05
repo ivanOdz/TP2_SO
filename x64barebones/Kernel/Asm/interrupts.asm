@@ -162,7 +162,8 @@ SECTION .text
 %endmacro
 
 forceyield:
-	push rdi
+	mov rax, [stackSwitcharoo]
+	push rax
 	mov rax, 0x15
 	int 0x80
 	pop rax
