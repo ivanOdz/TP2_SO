@@ -63,7 +63,7 @@ int shell() {
 void empty_command_buffer() {
 	for (int i = 0; i < BUFFER_MAX_SIZE; i++) {
 		lastBuffer[i] = shellBuffer[i];
-		shellBuffer[index] = '\0';
+		shellBuffer[i] = '\0';
 	}
 	index = 0;
 	SyscallWrite(STD_OUT, (uint8_t *) ">> ", 3);

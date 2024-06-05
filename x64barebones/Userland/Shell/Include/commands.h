@@ -30,6 +30,7 @@ int command_argvTest(int argc, char **argv);
 int command_nice(int argc, char **argv);
 int command_createProcess(int argc, char **argv);
 int command_block(int argc, char **argv);
+void ps(int argc, char **argv);
 // ---------------------------------------------------------------------------------
 
 typedef struct {

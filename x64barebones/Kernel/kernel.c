@@ -58,6 +58,7 @@ int main() {
 
 	// syscall_puts(STD_ERR, (uint8_t *) "Shell has quit, kernel halting", 31);
 	while (TRUE) {
+		haltProcess(0, NULL);
 	}
 	return 0;
 }

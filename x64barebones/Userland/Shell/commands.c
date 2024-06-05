@@ -51,7 +51,7 @@ int64_t commands(uint8_t *strBuffer) {
 					ReturnStatus *wstatus = malloc(sizeof(ReturnStatus));
 					if (childPID) {
 						PID_t exited = waitpid(childPID, wstatus);
-						printf("I'm back, PID %d has taken an L\n", exited);
+						printf("I'm back, PID %d has taken an L and returned %d\n", exited, wstatus->returnValue);
 						if (wstatus->aborted)
 							fprintf(STD_ERR, "%s was killed\n", strBuffer);
 						retValue = wstatus->returnValue;
@@ -180,12 +180,12 @@ int command_snakeGame(int argc, char **argv) {
 	return 0;
 }
 
-int ps(int argc, char **argv) {
+void ps(int argc, char **argv) {
 	ProcessInfo *info = SyscallProcessInfo();
 	printf("NAME\t\t\t\t PID   PARENT  MODE\t\tSTACK BASE\tSTACK POINTER\t STATUS\tPRIORITY\n");
 	printf("==================================================================================================\n");
 	while (info != NULL) {
-		printf("%-20s %5d %5d   %10s  0x%8x\t0x%8x\t\t%-9s %d\n", info->name, info->pid, info->parent_PID, (info->runMode == 'F') ? "Foreground" : "Background", info->stackBasePointer, info->stackPointer, info->processStatus, info->priority);
+		printf("%-20s %5d %5d   %-10s  0x%8x\t0x%8x\t\t%-9s %d\n", info->name, info->pid, info->parent_PID, (info->runMode == 'F') ? "Foreground" : ((info->runMode == 'B') ? "Background" : "Relegated"), info->stackBasePointer, info->stackPointer, info->processStatus, info->priority);
 		ProcessInfo *temp = info;
 		info = info->nextProcessInfo;
 		free(temp);

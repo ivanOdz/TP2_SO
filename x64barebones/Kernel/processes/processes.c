@@ -73,6 +73,11 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	process->name = argv[0];
 	process->pid = nextPid++;
 	process->parentPid = getCurrentPID();
+	if (process->parentPid) {
+		PCB *parent = getProcess(process->parentPid);
+		if (parent->runMode == FOREGROUND)
+			parent->runMode = RELEGATED;
+	}
 	process->status = READY;
 	process->runMode = runMode;
 	process->returnValue = 0;
@@ -81,6 +86,7 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	process->blockedOn.waitPID = NULL;
 	process->blockedOn.fd = 0;
 	process->blockedOn.timer = 0;
+	process->blockedOn.manual = FALSE;
 
 	for (int i = 0; i < DEFAULT_QTY_FDS; i++) {
 		process->fileDescriptors[i] = i;
@@ -103,7 +109,11 @@ void exitProcess(int returnValue) {
 	// removeProcess(process->pid);
 	process->returnValue = returnValue;
 	process->status = ZOMBIE;
-	process->stackPointer = NULL;
+	if (process->parentPid) {
+		PCB *parent = getProcess(process->parentPid);
+		if (parent->runMode == RELEGATED)
+			parent->runMode = FOREGROUND;
+	}
 	schedyield();
 }
 PID_t waitPID(PID_t PID, ReturnStatus *wstatus) {
@@ -117,6 +127,7 @@ PID_t waitPID(PID_t PID, ReturnStatus *wstatus) {
 		process->blockedOn.waitPID = NULL;
 		return wstatus->pid;
 	}
+	return 0;
 }
 
 void freeProcess(PCB *process) {
@@ -124,25 +135,25 @@ void freeProcess(PCB *process) {
 	removeProcess(process);
 	free(process);
 }
-/*
-int8_t finishProcess() {
-	int8_t index = getCurrentIndex();
-	freeMemory(processes[index].stackBasePointer);
-	processes[index].status = ZOMBIE;
-	processes[index].stackBasePointer = 0;
-	processes[index].stackPointer = 0;
+
+PID_t killProcess(PID_t PID) {
+	PCB *process = getProcess(PID);
+	if (!process)
+		return 0;
+	process->returnValue = -1;
+	process->killed = TRUE;
+	process->status = ZOMBIE;
+	if (process == getCurrentProcess())
+		schedyield();
+	return PID;
 }
 
-int8_t killProcess(uint16_t pid) {
-	int8_t index = getProcessIndex(pid);
-	if (index < 0) {
-		return;
+void killRunningForegroundProcess() {
+	PCB *process = getForegroundProcess();
+	if (process || process->pid >= 2) {
+		killProcess(process->pid);
 	}
-	freeMemory(processes[index].stackBasePointer);
-	processes[index].status = ZOMBIE;
-	processes[index].stackBasePointer = 0;
-	processes[index].stackPointer = 0;
-}*/
+}
 
 void setProcessPriority(uint16_t pid, int8_t priority) {
 	PCB *process = getProcess(pid);
@@ -163,10 +174,13 @@ void blockProcess(uint16_t pid) {
 	if (!process) {
 		return;
 	}
-	if (process->status == BLOCKED && process->blockedOn.waitPID == NULL && process->blockedOn.fd == 0) {
-		process->status = READY;
+	if (process->status == BLOCKED) {
+		if (process->blockedOn.waitPID == NULL && process->blockedOn.fd == 0)
+			process->status = READY;
+		process->blockedOn.manual = FALSE;
 	}
 	else if (process->status == READY) {
 		process->status = BLOCKED;
+		process->blockedOn.manual = TRUE;
 	}
 }

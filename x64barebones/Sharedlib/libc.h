@@ -21,7 +21,8 @@
 #define COLORS_CIAN	  0x0000E0FF
 
 typedef enum { FOREGROUND = 0,
-			   BACKGROUND } ProcessRunMode;
+			   BACKGROUND,
+			   RELEGATED } ProcessRunMode;
 typedef uint16_t PID_t;
 
 typedef struct text_format {
@@ -65,7 +66,7 @@ typedef struct ProcessInfo {
 	char runMode;
 	void *stackBasePointer;
 	void *stackPointer;
-	char processStatus[10];
+	char *processStatus;
 	uint8_t priority;
 	struct ProcessInfo *nextProcessInfo;
 

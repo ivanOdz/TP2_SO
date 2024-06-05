@@ -35,24 +35,24 @@ void setProcessInfo(ProcessInfo *info, ProcessListNode *node) {
 	strcpy(info->name, node->process->name);
 	info->pid = node->process->pid;
 	info->parent_PID = node->process->parentPid;
-	info->runMode = (node->process->runMode == FOREGROUND) ? 'F' : 'B';
+	info->runMode = (node->process->runMode == FOREGROUND) ? 'F' : ((node->process->runMode == BACKGROUND) ? 'B' : 'R');
 	info->stackBasePointer = node->process->stackBasePointer;
 	info->stackPointer = node->process->stackPointer;
 	switch (node->process->status) {
 		case RUNNING:
-			strcpy(info->processStatus, "Running");
+			info->processStatus = "Running";
 			break;
 		case BLOCKED:
-			strcpy(info->processStatus, "Blocked");
+			info->processStatus = "Blocked";
 			break;
 		case READY:
-			strcpy(info->processStatus, "Ready");
+			info->processStatus = "Ready";
 			break;
 		case ZOMBIE:
-			strcpy(info->processStatus, "Zombie");
+			info->processStatus = "Zombie";
 			break;
 		default:
-			strcpy(info->processStatus, "INVALID");
+			info->processStatus = "INVALID";
 	}
 	info->priority = node->process->priority;
 	info->nextProcessInfo = NULL;
@@ -156,6 +156,15 @@ PID_t getCurrentPID() {
 PCB *getCurrentProcess() {
 	return currentProcess->process;
 }
+PCB *getForegroundProcess() {
+	ProcessListNode *candidate = currentProcess;
+	do {
+		if (candidate->process->runMode == FOREGROUND)
+			return candidate->process;
+		candidate = candidate->next;
+	} while (candidate != currentProcess);
+	return NULL;
+}
 PCB *getProcess(PID_t pid) {
 	ProcessListNode *candidate = currentProcess;
 	do {
@@ -163,6 +172,7 @@ PCB *getProcess(PID_t pid) {
 			return candidate->process;
 		candidate = candidate->next;
 	} while (candidate != currentProcess);
+	return NULL;
 }
 uint8_t removeProcess(PCB *process) {
 	ProcessListNode *nextNode = currentProcess->next;

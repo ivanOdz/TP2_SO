@@ -18,6 +18,7 @@ typedef struct BlockedOn {
 	ReturnStatus *waitPID; // NULL means not blocked on PID, internal PID == 0 means any child, internal PID > 0 means that one
 	int64_t fd;
 	int64_t timer;
+	uint8_t manual;
 	// sem_t semaphore;
 } BlockedOn;
 
@@ -40,8 +41,11 @@ typedef struct PCB {
 } PCB;
 
 PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
+void freeProcess(PCB *process);
 PID_t execute(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
 void exitProcess(int returnValue);
+PID_t killProcess(PID_t PID);
+void killRunningForegroundProcess();
 PID_t waitPID(PID_t PID, ReturnStatus *wstatus);
 void setProcessPriority(uint16_t pid, int8_t priority);
 void blockProcess(uint16_t pid);

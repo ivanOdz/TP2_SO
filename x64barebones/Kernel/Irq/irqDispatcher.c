@@ -123,6 +123,9 @@ uint64_t syscall_exit(int returnValue) {
 	exitProcess(returnValue);
 	return 0;
 }
+PID_t syscall_kill(PID_t PID) {
+	return killProcess(PID);
+}
 uint64_t syscall_waitpid(uint64_t PID, ReturnStatus *wstatus) {
 	return waitPID(PID, wstatus);
 }
