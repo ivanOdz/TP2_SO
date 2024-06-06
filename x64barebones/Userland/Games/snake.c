@@ -47,7 +47,7 @@ static position apple;
 static uint64_t margenEnX;
 static uint64_t margenEnY;
 
-int snake(int argc, char **argv) {
+void snake(int argc, char **argv) {
 	text_format fmt = {0x00000000, 0x00C0C0C0, 3, 0};
 	SyscallSetFormat(&fmt);
 	SyscallSetTimer(30000);
@@ -77,7 +77,7 @@ int snake(int argc, char **argv) {
 	}
 	SyscallAudio(0, 0, 0);
 	putchar('\e');
-	return status;
+	exit(status);
 }
 
 void reset_positions() {

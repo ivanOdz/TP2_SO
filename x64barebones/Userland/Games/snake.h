@@ -1,3 +1,6 @@
+#ifndef SNAKEGAME
+#define SNAKEGAME
+
 #include <libc.h>
 #include <stdint.h>
 
@@ -157,4 +160,6 @@ static const uint16_t texture_apple[TEXTURE_SIZE_X][TEXTURE_SIZE_Y] = {
 	{POINTS_COLOR, POINTS_COLOR, POINTS_COLOR, POINTS_COLOR, POINTS_COLOR, POINTS_COLOR, POINTS_COLOR, POINTS_COLOR},
 	{ALPHA_MASK, POINTS_COLOR, POINTS_COLOR, POINTS_COLOR, POINTS_COLOR, POINTS_COLOR, POINTS_COLOR, ALPHA_MASK}};
 
-int snake(int argc, char **argv);
+void snake(int argc, char **argv);
+
+#endif

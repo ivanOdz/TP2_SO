@@ -36,6 +36,14 @@ int64_t strcmp(const uint8_t *str1, const uint8_t *str2) {
 	return 0; // str1 equals str2 (same content)
 }
 
+int64_t strincludes(const uint8_t *contains, const uint8_t *contained) {
+	while (*contained != '\0') {
+		if (*(contains++) != *(contained++))
+			return FALSE;
+	}
+	return TRUE;
+}
+
 int64_t stringToInt(char *str, uint32_t strlen) {
 	int64_t ans = 0;
 	int8_t sign = 1;
@@ -209,14 +217,6 @@ uint32_t text_color_get() {
 	SyscallGetFormat(&format);
 
 	return format.fg;
-}
-
-int command_argvTest(int argc, char **argv) {
-	printf("received %d arguments:\n", argc);
-	for (uint32_t i = 0; i < argc; i++) {
-		printf("argument %d = \'%s\'\n", i, argv[i]);
-	}
-	return 0;
 }
 
 void srand(uint32_t seed) {

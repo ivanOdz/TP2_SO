@@ -1,4 +1,5 @@
 #include <libc.h>
+#include <stdint.h>
 #define MAX_BLOCKS_DEFAULT	   4000
 #define MAX_BLOCK_SIZE_DEFAULT 30000000
 #define MIN_BLOCK_SIZE_DEFAULT 10
@@ -29,46 +30,50 @@ uint64_t argumentParse(int arg, int argc, char **argv) {
 	}
 }
 
-int mm_test(int argc, char **argv) {
+void mm_test(int argc, char **argv) {
 	uint64_t maxBlocks = MAX_BLOCKS_DEFAULT;
 	uint64_t maxMemSize = 0;
 	uint64_t maxBlockSize = MAX_BLOCK_SIZE_DEFAULT;
 	uint64_t minBlockSize = MIN_BLOCK_SIZE_DEFAULT;
 	uint64_t burnin = BURN_IN_DEFAULT;
 	for (int arg = 1; arg < argc; arg++) {
+		printf("%s", argv[arg]);
+	}
+	putchar('\n');
+	for (int arg = 1; arg < argc; arg++) {
 		printf("Parsing %s\n", argv[arg]);
 		if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-help") == 0) {
 			printf(HELP_STRING, MAX_BLOCK_SIZE_DEFAULT, MIN_BLOCK_SIZE_DEFAULT, BURN_IN_DEFAULT, MAX_BLOCKS_DEFAULT);
-			return 0;
+			exit(0);
 		}
 		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-maxmemsize") == 0) {
 			maxMemSize = argumentParse(arg++, argc, argv);
 			if (!maxMemSize)
-				return -1;
+				exit(1);
 		}
 		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-maxblocksize") == 0) {
 			maxBlockSize = argumentParse(arg++, argc, argv);
 			if (!maxBlockSize)
-				return -1;
+				exit(1);
 		}
 		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-minblocksize") == 0) {
 			minBlockSize = argumentParse(arg++, argc, argv);
 			if (!minBlockSize)
-				return -1;
+				exit(1);
 		}
 		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-burnin") == 0) {
 			burnin = argumentParse(arg++, argc, argv);
 			if (!burnin)
-				return -1;
+				exit(1);
 		}
 		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-maxblocks") == 0) {
 			maxBlocks = argumentParse(arg++, argc, argv);
 			if (!maxBlocks)
-				return -1;
+				exit(1);
 		}
 		else {
 			fprintf(STD_ERR, "Invalid argument provided (got %s)\n", argv[arg]);
-			return -1;
+			exit(1);
 		}
 	}
 	SyscallClear();
@@ -145,7 +150,7 @@ int mm_test(int argc, char **argv) {
 	}
 	free(test);
 	free(testsize);
-	return 0;
+	exit(0);
 }
 
 int test_processes(int argc, char **argv) {

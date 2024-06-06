@@ -104,6 +104,7 @@ extern void SyscallYield();
 
 int64_t strcpy(uint8_t *dest, const uint8_t *src);
 int64_t strcmp(const uint8_t *str1, const uint8_t *str2);
+int64_t strincludes(const uint8_t *contains, const uint8_t *contained);
 uint64_t strlen(const uint8_t *str);
 int64_t stringToInt(char *str, uint32_t strlen);
 uint32_t rand();

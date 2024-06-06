@@ -54,7 +54,6 @@ static uint16_t nextPid = 0;
 	}
 };*/
 
-// TODO copy argv to its own memory (on stack??)
 PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode) {
 	PCB *process = allocMemory(sizeof(PCB));
 	if (!process) {
@@ -66,10 +65,14 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 		return NULL;
 	}
 	process->stackBasePointer += STACK_DEFAULT_SIZE - 1; // stack works backwards
+	process->stackPointer = process->stackBasePointer;
 	int argc = 0;
-	while (argv[argc++]) {
+	while (argv[argc]) {
+		process->stackPointer -= strlen(argv[argc]) + 1;
+		strcpy(process->stackPointer, argv[argc]);
+		argv[argc++] = process->stackPointer;
 	}
-	process->stackPointer = fabricateProcessStack(process->stackBasePointer, argc, argv, processMain);
+	process->stackPointer = fabricateProcessStack(process->stackPointer, argc, argv, processMain);
 	process->name = argv[0];
 	process->pid = nextPid++;
 	process->parentPid = getCurrentPID();

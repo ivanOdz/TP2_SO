@@ -86,7 +86,15 @@ uint8_t *pickNextProcess() {
 	}
 	if (currentProcess->process->status == RUNNING)
 		currentProcess->process->status = READY;
-	currentProcess = winningProcess;
+	if (winningProcess != currentProcess) {
+		winningProcess->next->last = winningProcess->last;
+		winningProcess->last->next = winningProcess->next;
+		winningProcess->next = currentProcess->next;
+		winningProcess->last = currentProcess;
+		currentProcess->next->last = winningProcess;
+		currentProcess->next = winningProcess;
+		currentProcess = currentProcess->next;
+	}
 	currentProcess->process->status = RUNNING;
 	return currentProcess->process->stackPointer;
 }
