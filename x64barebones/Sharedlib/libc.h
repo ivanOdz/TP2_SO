@@ -12,6 +12,8 @@
 #define STD_OUT 1
 #define STD_ERR 2
 
+#define HZ 100
+
 #define COLORS_BLUE	  0x000000FF
 #define COLORS_GREEN  0x0000FF00
 #define COLORS_RED	  0x00FF0000

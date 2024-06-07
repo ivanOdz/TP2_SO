@@ -7,10 +7,13 @@
 static unsigned long ticks = 0;
 
 void timer_handler() {
-	soundNext();
+	if ((ticks % (HZ / 35) == 0)) {
+		soundNext();
+	}
+
 	ticks++;
 
-	if (ticks % 9 == 0) {
+	if ((ticks % (HZ / 2)) == 0) {
 		printCursor();
 	}
 	schedyield();
@@ -21,7 +24,7 @@ int ticks_elapsed() {
 }
 
 int seconds_elapsed() {
-	return ticks / 18;
+	return ticks / HZ;
 }
 
 uint64_t get_ticks() {

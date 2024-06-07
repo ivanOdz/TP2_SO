@@ -157,7 +157,6 @@ int64_t runCommand(uint8_t *run) {
 					if (childPID) {
 						PID_t exited = waitpid(childPID, wstatus);
 						SyscallSetFormat(&shell_fmt);
-						SyscallSetTimer(SHELL_TIMER);
 						printf("\nI'm back, PID %d has taken an L and returned %d\n", exited, wstatus->returnValue);
 						if (wstatus->aborted)
 							fprintf(STD_ERR, "%s was killed\n", strBuffer);

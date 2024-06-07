@@ -54,6 +54,7 @@ int main() {
 	char *argv[2] = {"Shell", NULL};
 	initScheduler();
 	execute((EntryPoint) shellModuleAddress, argv, FOREGROUND);
+	setPIT0Freq(1193182 / HZ);
 	_sti();
 
 	// syscall_puts(STD_ERR, (uint8_t *) "Shell has quit, kernel halting", 31);

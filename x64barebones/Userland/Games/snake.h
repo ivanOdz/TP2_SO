@@ -12,10 +12,10 @@
 #define POINTS_COLOR	  0x0F00
 #define ALPHA_MASK		  0xF000
 #define EYE_COLOR		  0x0CC7
-#define PIXELS_BLOCK_X	  16
-#define PIXELS_BLOCK_Y	  16
-#define BLOCKS_X		  60
-#define BLOCKS_Y		  40
+#define PIXELS_BLOCK_X	  24
+#define PIXELS_BLOCK_Y	  24
+#define BLOCKS_X		  35
+#define BLOCKS_Y		  25
 
 #define DIR_S ((int8_t) 1)	// 0b00000001
 #define DIR_E ((int8_t) 2)	// 0b00000010
@@ -23,11 +23,11 @@
 #define DIR_W ((int8_t) -2) // 0b11111110
 
 #define MAX_SNAKE_SIZE	512
-#define TICKS_PER_FRAME 2
+#define TICKS_PER_FRAME 5
 #define START_LEN		5
 
-#define TEXTURE_COMPACT_X 2
-#define TEXTURE_COMPACT_Y 2
+#define TEXTURE_COMPACT_X 3
+#define TEXTURE_COMPACT_Y 3
 
 #define TEXTURE_SIZE_X (PIXELS_BLOCK_X / TEXTURE_COMPACT_X)
 #define TEXTURE_SIZE_Y (PIXELS_BLOCK_Y / TEXTURE_COMPACT_Y)
