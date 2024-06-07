@@ -19,9 +19,10 @@ void clearBuffer(uint8_t *buffer);
 
 extern int haltProcess(int argc, char **argv);
 
-extern void atomicExchange(void *a, void *b);
+extern uint64_t atomicAdd(uint64_t *a, uint64_t b);
+extern uint64_t atomicExchange(void *a, uint64_t b);
 extern void *atomicCompareExchange(void **value, void *expected, void *newValue);
-extern void atomicHighValueCheck(void **value, void *top, void *resetValue);
-extern void atomicLowValueCheck(void **value, void *bottom, void *resetValue);
+extern void atomicHighValueCheck(uint64_t *value, uint64_t top, uint64_t resetValue);
+extern void atomicLowValueCheck(uint64_t *value, uint64_t bottom, uint64_t resetValue);
 
 #endif

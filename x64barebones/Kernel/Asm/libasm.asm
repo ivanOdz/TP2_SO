@@ -191,7 +191,8 @@ fabricateProcessStack:
 	ret
 
 atomicExchange:
-lock	xchg [rdi], rsi
+		mov rax, rsi
+lock	xchg [rdi], rax
 		ret
 
 atomicCompareExchange: ; (&value, expectedValue, newValue)

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "./processes.h"
 #include "./../Include/lib.h"
+#include "./../Include/scheduler.h"
 #include "./../memoryManagers/memoryManager.h"
 
 #define SEMAPHORES_MAX           128
@@ -13,10 +14,10 @@ static semaphore semaphores[SEMAPHORES_MAX] = {0};
 
 typedef struct {
 
-    uint16_t pids[SEM_BLK_PRC_ARR_SIZE];
+    PID_t pids[SEM_BLK_PRC_ARR_SIZE];
     uint16_t first;
     uint16_t last;
-    uint16_t lastPid;
+    PID_t lastPid;
 
 } sem_blk_prc;
 

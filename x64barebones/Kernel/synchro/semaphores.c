@@ -1,8 +1,17 @@
 #include "./../Include/semaphores.h"
 
-static uint16_t semaphoreCheckId(uint16_t id) {
+static semaphore *semaphoreGetById(uint16_t id) {
 
-    return (id && semaphores[id] != NULL && semaphores[id].blockedProcessesAccess != NULL); // && semaphores[id].blockedProcessescounter != NULL)
+    semaphore *sem = NULL;
+
+    if (id) {
+        sem = semaphores[id];
+    }
+    if (sem->blockedProcessesAccess == NULL) {
+        sem = NULL;    
+    }
+
+    return sem;
 }
 
 static uint16_t semaphoreFindFirstFree() {
@@ -43,15 +52,52 @@ static void semaphoresInitialize() {   // semaphores[0] puede servir para tener 
 
 void semaphoreBinaryPost(uint16_t id) {
 
-    if (semaphoreCheckId(id)) {
+    semaphore *sem = semaphoreGetById(id);
 
+    if (sem != NULL && sem->access == 0) {
+
+        PID_t luckyPid;
+        uint16_t actualPosition = sem->blockedProcessesAccess->first;
         
+        while (actualPosition != sem->blockedProcessesAccess->last) {
+            
+            actualPosition = atomicCompareExchange(&sem->blockedProcessesAccess->first, actualPosition, actualPosition+1);
+            luckyPid = atomicExchange(&sem->blockedProcessesAccess->pids[actualPosition], 0);
+
+            if (luckyPid) {
+                // change status to RUN if everything is OK
+            }
+        }
 
     }
 }
 
 void semaphoreBinaryWait(uint16_t id) {
 
+    semaphore *sem = semaphoreGetById(id);
+
+    if (sem != NULL) {
+
+        while (atomicExchange(&sem->access, 1)) {
+
+            PID_t myPid = getCurrentPID();
+            atomicHighValueCheck(&sem->blockedProcessesAccess->last, SEM_BLK_PRC_ARR_SIZE, 0);
+
+            if (sem->blockedProcessesAccess->last +1 != sem->blockedProcessesAccess->first) {
+
+                uint16_t myPosition = (uint16_t)atomicAdd(&sem->blockedProcessesAccess->last, 1);
+                atomicHighValueCheck(&sem->blockedProcessesAccess->last, SEM_BLK_PRC_ARR_SIZE, 0);
+// Si no estaba en 0, es posible que se haya llegado a llenar el arreglo! No hace falta decrementar last, porque funciona como un fin de carrera
+                if (sem->blockedProcessesAccess->pids[myPosition] == 0) { 
+                    sem->blockedProcessesAccess->pids[myPosition] = myPid;
+                    blockProcess(myPid);
+                }
+            }
+            else {
+                yield();
+            }
+        }
+    }
 }
 
 uint16_t semaphoreCreate(uint32_t initialValue) {
