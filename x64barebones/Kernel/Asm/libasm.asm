@@ -17,7 +17,6 @@ GLOBAL atomicLowValueCheck
 ALIGN 16
 
 section .text
- ; rdi 1° | rsi 2° | rdx 3° | rcx 4°
 
 cpuVendor:
 	push rbp
@@ -195,9 +194,9 @@ atomicExchange:
 lock	xchg [rdi], rsi
 		ret
 
-atomicCompareExchange: ; (expectedValue, &value, newValue)
-		mov rax, rdi
-lock	cmpxchg [rsi], rdx
+atomicCompareExchange: ; (&value, expectedValue, newValue)
+		mov rax, rsi
+lock	cmpxchg [rdi], rdx
 		ret
 
 atomicAdd:

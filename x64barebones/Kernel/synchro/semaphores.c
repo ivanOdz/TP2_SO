@@ -1,12 +1,11 @@
 #include "./../Include/semaphores.h"
 
+static uint16_t semaphoreCheckId(uint16_t id) {
 
-static uint16_t semaphore_check_id(uint16_t id) {
-
-    return (semaphores[id] != NULL && semaphores[id].blockedProcessesAccess != NULL); // && semaphores[id].blockedProcessescounter != NULL)
+    return (id && semaphores[id] != NULL && semaphores[id].blockedProcessesAccess != NULL); // && semaphores[id].blockedProcessescounter != NULL)
 }
 
-static uint16_t semaphore_find_first_free() {
+static uint16_t semaphoreFindFirstFree() {
 
     for (uint16_t cont=1; cont < SEMAPHORES_MAX; cont++) {
         if (semaphores[cont] == NULL) {
@@ -16,7 +15,7 @@ static uint16_t semaphore_find_first_free() {
     return 0;
 }
 
-static void semaphore_clear_block_processes(sem_blk_prc *blkPrc) {
+static void semaphoreClearBlockProcesses(sem_blk_prc *blkPrc) {
 
     blkPrc->first = 0;
     blkPrc->last = 0;
@@ -27,7 +26,7 @@ static void semaphore_clear_block_processes(sem_blk_prc *blkPrc) {
     }
 }
 
-void semaphores_initialize() {
+static void semaphoresInitialize() {   // semaphores[0] puede servir para tener mutex sobre la misma estructura. Puede servir si se quiere hacer de tamaño dinámico
 
     semaphore *candidate = allocMemory(sizeof(semaphores[0]));
     candidate->access = 0;
@@ -35,39 +34,69 @@ void semaphores_initialize() {
     candidate->blockedProcessesCounter = NULL;
     candidate->blockedProcessesAccess = allocMemory(sizeof(semaphores[0]->blockedProcessesAccess));
 
-    semaphore_clear_block_processes(candidate->blockedProcessesAccess);
-/*
-    if (atomicCompareExchange(NULL, semaphores[0], candidate) != canditate) {
+    semaphoreClearBlockProcesses(candidate->blockedProcessesAccess);
+
+    if (atomicCompareExchange(semaphores[0], NULL, candidate) != candidate) {
         freeMemory(candidate);
-    }*/
+    }
 }
 
-uint16_t semaphore_create(uint32_t initialValue) {
+void semaphoreBinaryPost(uint16_t id) {
 
+    if (semaphoreCheckId(id)) {
+
+        
+
+    }
+}
+
+void semaphoreBinaryWait(uint16_t id) {
+
+}
+
+uint16_t semaphoreCreate(uint32_t initialValue) {
+
+    if (semaphores[0] == NULL) {
+        semaphoresInitialize();
+    }
+
+    semaphore *newSem = allocMemory(sizeof(semaphores[0]));
+    newSem->access = 0;
+    newSem->counter = initialValue;
+    newSem->blockedProcessesAccess = allocMemory(sizeof(newSem->blockedProcessesAccess));
+    newSem->blockedProcessesCounter = allocMemory(sizeof(newSem->blockedProcessesCounter));
+
+    semaphoreClearBlockProcesses(newSem->blockedProcessesAccess);
+    semaphoreClearBlockProcesses(newSem->blockedProcessesCounter);
+    
+    uint16_t newSemId;
+
+    do {
+        newSemId = semaphoreFindFirstFree();
+    } while (newSemId && (atomicCompareExchange(semaphores[newSemId], NULL, newSem) != newSem));
+
+    if (newSemId) {
+        semaphoreBinaryPost(newSemId);
+    }
+    else {
+        freeMemory(newSem);
+    }
+
+    return newSemId;
+}
+
+uint16_t semaphoreOpen(uint16_t id) {
     return 0;
 }
 
-uint16_t semaphore_open(uint16_t id) {
+uint16_t semaphoreClose(uint16_t id) {
     return 0;
 }
 
-uint16_t semaphore_close(uint16_t id) {
-    return 0;
-}
-
-void semaphore_binary_post(uint16_t id) {
-
-
-}
-
-void semaphore_binary_wait(uint16_t id) {
-
-}
-
-void semaphore_post(uint16_t id) {
+void semaphorePost(uint16_t id) {
     return; 
 }
 
-void semaphore_wait(uint16_t id) {
+void semaphoreWait(uint16_t id) {
     return;
 }

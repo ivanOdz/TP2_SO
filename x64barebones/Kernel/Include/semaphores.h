@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include "./processes.h"
-#include "./../Asm/libasm.asm"
+#include "./../Include/lib.h"
 #include "./../memoryManagers/memoryManager.h"
 
 #define SEMAPHORES_MAX           128
@@ -29,20 +29,18 @@ typedef struct {
 
 } semaphore;
 
-void semaphore_initialize();
+uint16_t semaphoreCreate(uint32_t initialValue);
 
-uint16_t semaphore_create(uint32_t initialValue);
+uint16_t semaphoreOpen(uint16_t id);
 
-uint16_t semaphore_open(uint16_t id);
+uint16_t semaphoreClose(uint16_t id);
 
-uint16_t semaphore_close(uint16_t id);
+void semaphoreBinaryPost(uint16_t id);
 
-void semaphore_binary_post(uint16_t id);
+void semaphoreBinaryWait(uint16_t id);
 
-void semaphore_binary_wait(uint16_t id);
+void semaphorePost(uint16_t id);
 
-void semaphore_post(uint16_t id);
-
-void semaphore_wait(uint16_t id);
+void semaphoreWait(uint16_t id);
 
 #endif  // SEMAPHORES_H_
