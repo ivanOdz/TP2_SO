@@ -8,7 +8,7 @@
 #define DEFAULT_QTY_FDS	   3
 #define STACK_DEFAULT_SIZE (1 << 12)
 
-static uint16_t nextPid = 0;
+static uint16_t nextPid = 1;
 /*static PCB processes[MAX_PROCESSES] = {
 	{
 		.pid = 1,
@@ -54,6 +54,33 @@ static uint16_t nextPid = 0;
 	}
 };*/
 
+PCB *initProcess() {
+	PCB *process = allocMemory(sizeof(PCB));
+	if (!process) {
+		return NULL;
+	}
+	process->stackBasePointer = getStackBase();
+	if (!process->stackBasePointer) {
+		free(process);
+		return NULL;
+	}
+	process->name = "System Idle Process";
+	process->pid = 0;
+	process->parentPid = 0;
+	process->status = RUNNING;
+	process->runMode = BACKGROUND;
+	process->returnValue = 0;
+	process->killed = FALSE;
+	process->lastTickRun = get_ticks();
+	process->blockedOn.waitPID = NULL;
+	process->blockedOn.fd = 0;
+	process->blockedOn.timer = 0;
+	process->blockedOn.manual = FALSE;
+	process->fileDescriptorsInUse = 0;
+	process->priority = 1;
+	return process;
+}
+
 PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode) {
 	PCB *process = allocMemory(sizeof(PCB));
 	if (!process) {
@@ -64,7 +91,7 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 		free(process);
 		return NULL;
 	}
-	process->stackBasePointer += STACK_DEFAULT_SIZE - 1; // stack works backwards
+	process->stackBasePointer += STACK_DEFAULT_SIZE - sizeof(uint64_t); // stack works backwards
 	process->stackPointer = process->stackBasePointer;
 	int argc = 0;
 	while (argv[argc]) {

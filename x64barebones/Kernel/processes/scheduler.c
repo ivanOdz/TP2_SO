@@ -18,8 +18,7 @@ void initScheduler() {
 	currentProcess = allocMemory(sizeof(ProcessListNode));
 	currentProcess->next = currentProcess;
 	currentProcess->last = currentProcess;
-	char *argv[2] = {"System idle process", NULL};
-	currentProcess->process = createProcess(haltProcess, argv, BACKGROUND);
+	currentProcess->process = initProcess();
 	enableScheduler = TRUE;
 }
 

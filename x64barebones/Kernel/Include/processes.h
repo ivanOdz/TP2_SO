@@ -40,6 +40,7 @@ typedef struct PCB {
 	uint64_t lastTickRun;
 } PCB;
 
+PCB *initProcess();
 PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
 void freeProcess(PCB *process);
 PID_t execute(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
