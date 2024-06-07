@@ -433,56 +433,54 @@ uint8_t get_directions() {
 	uint64_t read = SyscallRead(STD_IN, keyboard_buffer, 254);
 	uint8_t newDir1 = 0;
 	uint8_t newDir2 = 0;
-	if (keyboard_buffer[0] != 0) {
-		for (uint8_t i = 0; i < read - 1; i++) {
-			switch (keyboard_buffer[i]) {
-				case 'w':
-				case 'W':
-					if (snake1[snakePos1.head].dir != DIR_S)
-						newDir1 = DIR_N;
-					break;
-				case 'a':
-				case 'A':
-					if (snake1[snakePos1.head].dir != DIR_E)
-						newDir1 = DIR_W;
-					break;
-				case 's':
-				case 'S':
-					if (snake1[snakePos1.head].dir != DIR_N)
-						newDir1 = DIR_S;
-					break;
-				case 'd':
-				case 'D':
-					if (snake1[snakePos1.head].dir != DIR_W)
-						newDir1 = DIR_E;
-					break;
-				case 'i':
-				case 'I':
-					if (snake2[snakePos2.head].dir != DIR_S)
-						newDir2 = DIR_N;
-					break;
-				case 'j':
-				case 'J':
-					if (snake2[snakePos2.head].dir != DIR_E)
-						newDir2 = DIR_W;
-					break;
-				case 'k':
-				case 'K':
-					if (snake2[snakePos2.head].dir != DIR_N)
-						newDir2 = DIR_S;
-					break;
-				case 'l':
-				case 'L':
-					if (snake2[snakePos2.head].dir != DIR_W)
-						newDir2 = DIR_E;
-					break;
-				case 'y':
-				case 'Y':
-					return 2;
-				case 'n':
-				case 'N':
-					return 1;
-			}
+	for (uint8_t i = 0; i < read; i++) {
+		switch (keyboard_buffer[i]) {
+			case 'w':
+			case 'W':
+				if (snake1[snakePos1.head].dir != DIR_S)
+					newDir1 = DIR_N;
+				break;
+			case 'a':
+			case 'A':
+				if (snake1[snakePos1.head].dir != DIR_E)
+					newDir1 = DIR_W;
+				break;
+			case 's':
+			case 'S':
+				if (snake1[snakePos1.head].dir != DIR_N)
+					newDir1 = DIR_S;
+				break;
+			case 'd':
+			case 'D':
+				if (snake1[snakePos1.head].dir != DIR_W)
+					newDir1 = DIR_E;
+				break;
+			case 'i':
+			case 'I':
+				if (snake2[snakePos2.head].dir != DIR_S)
+					newDir2 = DIR_N;
+				break;
+			case 'j':
+			case 'J':
+				if (snake2[snakePos2.head].dir != DIR_E)
+					newDir2 = DIR_W;
+				break;
+			case 'k':
+			case 'K':
+				if (snake2[snakePos2.head].dir != DIR_N)
+					newDir2 = DIR_S;
+				break;
+			case 'l':
+			case 'L':
+				if (snake2[snakePos2.head].dir != DIR_W)
+					newDir2 = DIR_E;
+				break;
+			case 'y':
+			case 'Y':
+				return 2;
+			case 'n':
+			case 'N':
+				return 1;
 		}
 	}
 	if (newDir1)

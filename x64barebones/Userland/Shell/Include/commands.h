@@ -10,8 +10,7 @@
 // ------------------------------- TEXTS -------------------------------------------
 #define STR_PREAMBLE_FOR_COMANDS "Estos son los comandos disponibles para ejecutar:\n"
 // ---------------------------------------------------------------------------------
-#define BUFFER_DEFAULT_SIZE 255
-#define AVAILABLE_COMMANDS	(sizeof(avCommands) / sizeof(availableCommand))
+#define AVAILABLE_COMMANDS (sizeof(avCommands) / sizeof(availableCommand))
 
 #define COMMAND_EXCECUTED			0
 #define COMMAND_NOT_FOUND			1
@@ -33,8 +32,9 @@ typedef struct {
 	const uint8_t *name;
 	uint8_t builtin;
 	int (*function)(int, char **); // argc, argv
-
 } availableCommand;
+
+static text_format shell_fmt = {0x00000000, 0x0000FF00, 1, 1};
 
 static const availableCommand avCommands[] = {
 
@@ -52,7 +52,5 @@ static const availableCommand avCommands[] = {
 	{(uint8_t *) "ps", FALSE, ps},
 	{(uint8_t *) "nice", TRUE, nice},
 	{(uint8_t *) "block", TRUE, block}};
-
-int64_t commands(uint8_t *strBuffer);
 
 #endif

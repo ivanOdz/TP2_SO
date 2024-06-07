@@ -17,7 +17,7 @@ GLOBAL atomicLowValueCheck
 ALIGN 16
 
 section .text
- // rdi 1° | rsi 2° | rdx 3° | rcx 4°
+ ; rdi 1° | rsi 2° | rdx 3° | rcx 4°
 
 cpuVendor:
 	push rbp
@@ -203,20 +203,17 @@ atomicAdd:
 lock	xadd [rdi], rsi
 		ret
 
-atomicHighValueCheck: // (&value, top, resetValue)
+atomicHighValueCheck: ; (&value, top, resetValue)
+		mov ebx, [rdi]
+		;cmp ebx, rsi
+		jng end_highcheck
+lock	cmpxchg [rdi], rdx
+end_highcheck		ret
+
+atomicLowValueCheck: ; (&value, bottom, resetValue)
 
 		mov ebx, [rdi]
-		cmp ebx, rsi
-		jng end
+		;cmp rsi, ebx
+		jng end_lowcheck
 lock	cmpxchg [rdi], rdx
-end:
-		ret
-
-atomicLowValueCheck: // (&value, bottom, resetValue)
-
-		mov ebx, [rdi]
-		cmp rsi, ebx
-		jng end
-lock	cmpxchg [rdi], rdx
-end:
-		ret
+end_lowcheck		ret

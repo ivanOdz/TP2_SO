@@ -13,22 +13,19 @@ static uint8_t flags = 0; // bit 0 shift left, bit 1 shift right, bit 2 caps loc
 
 uint8_t isAlpha(uint8_t c) {
 	if (c >= 0x41 && c <= 0x5A)
-		return 1;
+		return TRUE;
 	if (c >= 0x61 && c <= 0x7A)
-		return 1;
+		return TRUE;
 
-	return 0;
+	return FALSE;
 }
 
 uint64_t consume_keys(uint8_t *buf, uint64_t size) {
 	uint64_t i = 0;
-
-	while ((i < size - 1) && (readCursor != writeCursor)) {
+	while ((i < size) && (readCursor != writeCursor)) {
 		buf[i++] = buffer[readCursor++];
 		readCursor &= 0xFF;
 	}
-	buf[i++] = 0;
-
 	return i;
 }
 

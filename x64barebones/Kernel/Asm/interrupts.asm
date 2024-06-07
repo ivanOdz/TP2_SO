@@ -148,15 +148,15 @@ SECTION .text
 %macro exceptionHandler 1
 	push rax
 	pushState
+	mov [stackSwitcharoo], rsp
+
+
 	mov rdi, %1 		; pasaje de parametro
 	call exceptionDispatcher
+	mov rsp, [stackSwitcharoo]
 
 	popState
 	pop rax
-    call getStackBase	
-	mov [rsp+24], rax
-    mov rax, userland
-	mov [rsp], rax		; PISO la dirección de retorno
 	
 	iretq
 %endmacro
@@ -277,7 +277,6 @@ int80_handler:
     ret
 
 syscall_getRegisters:
-	push QWORD[regs + 8*20]
 	push QWORD[regs + 8*19]
 	push QWORD[regs + 8*18]
 	push QWORD[regs + 8*17]
@@ -300,7 +299,7 @@ syscall_getRegisters:
 	push QWORD[regs + 8*0]
 	mov rdi, 1
 	call printRegs
-	add rsp, 21*8
+	add rsp, 20*8
 	mov rax, 0
 	ret
 
@@ -314,7 +313,7 @@ SECTION .text
 
 SECTION .bss
 	aux resq 1
-    regs resq 21
+    regs resq 20
 	stackSwitcharoo resq 1
 
 SECTION .rodata

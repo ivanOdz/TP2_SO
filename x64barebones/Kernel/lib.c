@@ -135,7 +135,7 @@ void printRegs(stack_registers regs, uint64_t fd) {
 	clearBuffer(buffer);
 	drawWord(fd, (uint8_t *) "  FLAGS: 0x");
 	syscall_puts(fd, (uint8_t *) (buffer + uintToBase(regs.rflags, (char *) (buffer + 16), 16)), 16);
-	putchar('\n');
+	drawWord(fd, "\n");
 }
 
 void clearBuffer(uint8_t *buffer) {
