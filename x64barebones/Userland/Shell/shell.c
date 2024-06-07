@@ -10,8 +10,6 @@
 typedef struct commandBuffer {
 	char buffer[BUFFER_SIZE];
 	uint8_t position;
-	struct commandBuffer *next;
-	struct commandBuffer *last;
 } commandBuffer;
 
 void emptyCommandBuffer(commandBuffer *buffer);
@@ -20,7 +18,11 @@ int64_t runCommand(uint8_t *strBuffer);
 commandBuffer *initBuffers();
 
 int shell() {
-	commandBuffer *command = initBuffers();
+	commandBuffer *command = malloc(sizeof(commandBuffer));
+	commandBuffer **history = malloc(HISTORY_SIZE * sizeof(commandBuffer *));
+	for (int i = 0; i < HISTORY_SIZE; i++)
+		history[i] = NULL;
+	int historyIndex = 0;
 	emptyCommandBuffer(command);
 	runCommand((uint8_t *) "help");
 	char incoming;
@@ -30,23 +32,29 @@ int shell() {
 			switch (incoming) {
 				case '\n':
 					if (!command->position) {
-						printf("%s\n", command->last->buffer);
-						runCommand(command->last->buffer);
+						printf("%s\n", history[0]->buffer);
+						runCommand(history[0]->buffer);
 						emptyCommandBuffer(command);
-						break;
 					}
 					else {
-						putchar(incoming);
+						putchar('\n');
 						command->buffer[command->position] = 0;
 						runCommand((uint8_t *) command->buffer);
-						command = command->next;
+						if (history[HISTORY_SIZE - 1])
+							free(history[HISTORY_SIZE - 1]);
+						for (int i = HISTORY_SIZE - 1; i; i--) {
+							history[i] = history[i - 1];
+						}
+						history[0] = command;
+						historyIndex = 0;
+						command = malloc(sizeof(commandBuffer));
 						emptyCommandBuffer(command);
 					}
 					break;
 				case '\b':
-					if (command->position != 0) {
-						command->buffer[--command->position] = 0;
-						putchar(incoming);
+					if (command->position) {
+						command->buffer[--(command->position)] = 0;
+						putchar('\b');
 					}
 					break;
 				case '\e':
@@ -65,14 +73,22 @@ int shell() {
 					}
 					break;
 				case 0x1E: // up arrow
-					deleteChars(command);
-					command = command->last;
-					puts(command->buffer);
+					if (historyIndex + 1 < HISTORY_SIZE && history[historyIndex + 1]) {
+						deleteChars(command);
+						command->position = strcpy(command->buffer, history[++historyIndex - 1]->buffer);
+						puts(command->buffer);
+					}
 					break;
 				case 0x1F: // down arrow
-					deleteChars(command);
-					command = command->next;
-					puts(command->buffer);
+					if (historyIndex) {
+						deleteChars(command);
+						command->position = strcpy(command->buffer, history[historyIndex-- - 1]->buffer);
+						puts(command->buffer);
+					}
+					else {
+						deleteChars(command);
+						emptyCommandBuffer(command);
+					}
 					break;
 				default:
 					if (command->position < BUFFER_SIZE - 2) {
@@ -97,23 +113,10 @@ void emptyCommandBuffer(commandBuffer *command) {
 	command->position = 0;
 }
 void deleteChars(commandBuffer *command) {
-	for (int i = command->position; i; i--) {
-		putchar('\b');
-	}
-}
-
-commandBuffer *initBuffers() {
-	commandBuffer *first = malloc(sizeof(commandBuffer));
-	commandBuffer *current = first;
-	for (int i = 1; i < HISTORY_SIZE; i++) {
-		commandBuffer *new = malloc(sizeof(commandBuffer));
-		current->next = new;
-		new->last = current;
-		current = new;
-	}
-	current->next = first;
-	first->last = current;
-	return first;
+	if (command->position)
+		for (int i = command->position; i; i--) {
+			putchar('\b');
+		}
 }
 
 int64_t runCommand(uint8_t *run) {

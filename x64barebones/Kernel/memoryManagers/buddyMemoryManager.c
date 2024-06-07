@@ -127,7 +127,7 @@ void *allocMemory(uint64_t size) {
 		return NULL;
 
 	uint64_t size_pow2 = 1;
-	while (size / BLOCK_SIZE > size_pow2)
+	while (((size - 1) / BLOCK_SIZE) >= size_pow2)
 		size_pow2 <<= 1;
 
 	if (!memMan.root) {
