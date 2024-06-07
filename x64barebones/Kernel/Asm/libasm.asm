@@ -195,8 +195,9 @@ atomicExchange:
 lock	xchg [rdi], rsi
 		ret
 
-atomicCompareExchange:
-lock	cmpxchg [rdi], rsi
+atomicCompareExchange: ; (expectedValue, &value, newValue)
+		mov rax, rdi
+lock	cmpxchg [rsi], rdx
 		ret
 
 atomicAdd:
@@ -204,16 +205,19 @@ lock	xadd [rdi], rsi
 		ret
 
 atomicHighValueCheck: ; (&value, top, resetValue)
-		mov ebx, [rdi]
-		;cmp ebx, rsi
-		jng end_highcheck
+
+		mov rbx, [rdi]
+		cmp rbx, rsi
+		jng atomicHighValueCheckEnd
 lock	cmpxchg [rdi], rdx
-end_highcheck		ret
+atomicHighValueCheckEnd:
+		ret
 
 atomicLowValueCheck: ; (&value, bottom, resetValue)
 
-		mov ebx, [rdi]
-		;cmp rsi, ebx
-		jng end_lowcheck
+		mov rbx, [rdi]
+		cmp rsi, rbx
+		jng atomicLowValueCheckEnd
 lock	cmpxchg [rdi], rdx
-end_lowcheck		ret
+atomicLowValueCheckEnd:
+		ret
