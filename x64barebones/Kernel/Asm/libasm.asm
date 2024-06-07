@@ -9,11 +9,15 @@ GLOBAL spkStop
 GLOBAL haltProcess
 GLOBAL fabricateProcessStack
 GLOBAL atomicExchange
+GLOBAL atomicCompareExchange
+GLOBAL atomicAdd
+GLOBAL atomicHighValueCheck
+GLOBAL atomicLowValueCheck
 
 ALIGN 16
 
 section .text
-	
+ // rdi 1° | rsi 2° | rdx 3° | rcx 4°
 
 cpuVendor:
 	push rbp
@@ -189,4 +193,30 @@ fabricateProcessStack:
 
 atomicExchange:
 lock	xchg [rdi], rsi
+		ret
+
+atomicCompareExchange:
+lock	cmpxchg [rdi], rsi
+		ret
+
+atomicAdd:
+lock	xadd [rdi], rsi
+		ret
+
+atomicHighValueCheck: // (&value, top, resetValue)
+
+		mov ebx, [rdi]
+		cmp ebx, rsi
+		jng end
+lock	cmpxchg [rdi], rdx
+end:
+		ret
+
+atomicLowValueCheck: // (&value, bottom, resetValue)
+
+		mov ebx, [rdi]
+		cmp rsi, ebx
+		jng end
+lock	cmpxchg [rdi], rdx
+end:
 		ret
