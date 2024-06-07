@@ -17,7 +17,6 @@ typedef struct {
     PID_t pids[SEM_BLK_PRC_ARR_SIZE];
     uint16_t first;
     uint16_t last;
-    PID_t lastPid;
 
 } sem_blk_prc;
 

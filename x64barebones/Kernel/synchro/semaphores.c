@@ -30,12 +30,12 @@ static void semaphoreClearBlockProcesses(sem_blk_prc *blkPrc) {
     blkPrc->last = 0;
     blkPrc->lastPid = 0;
 
-    for (uint16_t cont=0; cont < SEM_BLK_PRC_ARR_SIZE; cont++) {    // [!] Se podria usar memcpy, quizá más eficiente..
+    for (uint16_t cont=0; cont < SEM_BLK_PRC_ARR_SIZE; cont++) { // [!] Se podria usar memcpy, quizá más eficiente..
         blkPrc->pids[cont] = 0;
     }
 }
 
-static void semaphoresInitialize() {   // semaphores[0] puede servir para tener mutex sobre la misma estructura. Puede servir si se quiere hacer de tamaño dinámico
+static void semaphoresInitialize() {                             // [!] semaphores[0] puede servir para tener mutex sobre la misma estructura. Puede servir si se quiere hacer de tamaño dinámico
 
     semaphore *candidate = allocMemory(sizeof(semaphores[0]));
     candidate->access = 0;
@@ -58,17 +58,24 @@ void semaphoreBinaryPost(uint16_t id) {
 
         PID_t luckyPid;
         uint16_t actualPosition = sem->blockedProcessesAccess->first;
-        
-        while (actualPosition != sem->blockedProcessesAccess->last) {
+        uint16_t nextPosition;
+
+        while (actualPosition != sem->blockedProcessesAccess->last || sem->blockedProcessesAccess->pids[actualPosition]) {
             
-            actualPosition = atomicCompareExchange(&sem->blockedProcessesAccess->first, actualPosition, actualPosition+1);
+            nextPosition = actualPosition + 1;
+            if (nextPosition >= SEM_BLK_PRC_ARR_SIZE) {
+                nextPosition = 0;
+            }
+            actualPosition = atomicCompareExchange(&sem->blockedProcessesAccess->first, actualPosition, nextPosition);
             luckyPid = atomicExchange(&sem->blockedProcessesAccess->pids[actualPosition], 0);
 
             if (luckyPid) {
                 // change status to RUN if everything is OK
             }
+            else {
+                yield(); // [!] Proceso que iba a bloquearse no llegó a anotarse!
+            }
         }
-
     }
 }
 
@@ -81,14 +88,14 @@ void semaphoreBinaryWait(uint16_t id) {
         while (atomicExchange(&sem->access, 1)) {
 
             PID_t myPid = getCurrentPID();
-            atomicHighValueCheck(&sem->blockedProcessesAccess->last, SEM_BLK_PRC_ARR_SIZE, 0);
+            atomicHighValueCheck(&sem->blockedProcessesAccess->last, SEM_BLK_PRC_ARR_SIZE-1, 0);
 
             if (sem->blockedProcessesAccess->last +1 != sem->blockedProcessesAccess->first) {
 
                 uint16_t myPosition = (uint16_t)atomicAdd(&sem->blockedProcessesAccess->last, 1);
-                atomicHighValueCheck(&sem->blockedProcessesAccess->last, SEM_BLK_PRC_ARR_SIZE, 0);
-// Si no estaba en 0, es posible que se haya llegado a llenar el arreglo! No hace falta decrementar last, porque funciona como un fin de carrera
-                if (sem->blockedProcessesAccess->pids[myPosition] == 0) { 
+                atomicHighValueCheck(&sem->blockedProcessesAccess->last, SEM_BLK_PRC_ARR_SIZE-1, 0);
+// [!] Si no estaba en 0, es posible que se haya llegado a llenar el arreglo o no se haya despejado el PID en el binaryPost! No hace falta decrementar last, porque funciona como un fin de carrera
+                if (sem->blockedProcessesAccess->pids[myPosition] == 0) {
                     sem->blockedProcessesAccess->pids[myPosition] = myPid;
                     blockProcess(myPid);
                 }
@@ -132,15 +139,36 @@ uint16_t semaphoreCreate(uint32_t initialValue) {
 }
 
 uint16_t semaphoreOpen(uint16_t id) {
-    return 0;
+
+    return semaphoreGetById(id) != NULL;
 }
 
 uint16_t semaphoreClose(uint16_t id) {
-    return 0;
+
+    semaphore *sem = semaphoreGetById(id);
+
+    if (sem != NULL) {  // [?] Liberar si es que quedan procesos en los arreglos?
+        semaphoreBinaryWait(id);
+        semaphores[id] = NULL;
+        freeMemory(sem->blockedProcessesAccess->pids);
+        freeMemory(sem->blockedProcessesCounter->pids);
+        freeMemory(sem);
+    }
+
+    return sem != NULL;
 }
 
 void semaphorePost(uint16_t id) {
-    return; 
+
+    semaphoreBinaryWait(id);
+    semaphore *sem = semaphoreGetById(id);
+
+    if (sem != NULL && sem->blockedProcessesCounter != NULL) {
+
+        sem->counter++;
+        // while ()
+    }
+    semaphoreBinaryPost(id);
 }
 
 void semaphoreWait(uint16_t id) {
