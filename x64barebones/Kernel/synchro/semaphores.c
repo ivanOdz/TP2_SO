@@ -28,14 +28,13 @@ static void semaphoreClearBlockProcesses(sem_blk_prc *blkPrc) {
 
     blkPrc->first = 0;
     blkPrc->last = 0;
-    blkPrc->lastPid = 0;
 
-    for (uint16_t cont=0; cont < SEM_BLK_PRC_ARR_SIZE; cont++) { // [!] Se podria usar memcpy, quizá más eficiente..
+    for (uint16_t cont=0; cont < SEM_BLK_PRC_ARR_SIZE; cont++) {
         blkPrc->pids[cont] = 0;
     }
 }
 
-static void semaphoresInitialize() {                             // [!] semaphores[0] puede servir para tener mutex sobre la misma estructura. Puede servir si se quiere hacer de tamaño dinámico
+static void semaphoresInitialize() { // [!] semaphores[0] puede servir para tener mutex sobre la misma estructura. Puede servir si se quiere hacer de tamaño dinámico
 
     semaphore *candidate = allocMemory(sizeof(semaphores[0]));
     candidate->access = 0;
@@ -56,26 +55,31 @@ void semaphoreBinaryPost(uint16_t id) {
 
     if (sem != NULL && sem->access == 0) {
 
-        PID_t luckyPid;
+        PID_t luckyPid = 0;
         uint16_t actualPosition = sem->blockedProcessesAccess->first;
         uint16_t nextPosition;
 
-        while (actualPosition != sem->blockedProcessesAccess->last || sem->blockedProcessesAccess->pids[actualPosition]) {
-            
-            nextPosition = actualPosition + 1;
-            if (nextPosition >= SEM_BLK_PRC_ARR_SIZE) {
-                nextPosition = 0;
-            }
-            actualPosition = atomicCompareExchange(&sem->blockedProcessesAccess->first, actualPosition, nextPosition);
-            luckyPid = atomicExchange(&sem->blockedProcessesAccess->pids[actualPosition], 0);
+        do {
+            if (actualPosition != sem->blockedProcessesAccess->last || sem->blockedProcessesAccess->pids[actualPosition]) {
 
-            if (luckyPid) {
-                // change status to RUN if everything is OK
+                nextPosition = actualPosition + 1;
+                if (nextPosition >= SEM_BLK_PRC_ARR_SIZE) {
+                    nextPosition = 0;
+                }
+                actualPosition = atomicCompareExchange(&sem->blockedProcessesAccess->first, actualPosition, nextPosition);
+                luckyPid = atomicExchange(&sem->blockedProcessesAccess->pids[actualPosition], 0);
+
+                if (luckyPid) {
+                    // change status to RUN if everything is OK
+                }
+                else {
+                    yield(); // [!] Proceso que iba a bloquearse no llegó a anotarse!
+                }
             }
             else {
-                yield(); // [!] Proceso que iba a bloquearse no llegó a anotarse!
+                break;
             }
-        }
+        } while (luckyPid == 0);
     }
 }
 
@@ -98,6 +102,7 @@ void semaphoreBinaryWait(uint16_t id) {
                 if (sem->blockedProcessesAccess->pids[myPosition] == 0) {
                     sem->blockedProcessesAccess->pids[myPosition] = myPid;
                     blockProcess(myPid);
+                    yield();
                 }
             }
             else {
@@ -166,11 +171,45 @@ void semaphorePost(uint16_t id) {
     if (sem != NULL && sem->blockedProcessesCounter != NULL) {
 
         sem->counter++;
-        // while ()
+        PID_t luckyPid;
+        uint16_t actualPosition = sem->blockedProcessesCounter->first;
+
+        if (actualPosition != sem->blockedProcessesCounter->last) {
+            
+            luckyPid = sem->blockedProcessesCounter->pids[actualPosition];
+            actualPosition++;
+            if (actualPosition >= SEM_BLK_PRC_ARR_SIZE) {
+                actualPosition = 0;
+            }
+            // change process status
+        }
+        sem->blockedProcessesCounter->first = actualPosition;
     }
     semaphoreBinaryPost(id);
 }
 
 void semaphoreWait(uint16_t id) {
-    return;
+
+    semaphoreBinaryWait(id);
+    semaphore *sem = semaphoreGetById(id);
+
+    if (sem != NULL && sem->blockedProcessesCounter != NULL) {
+
+        PID_t myPid = getCurrentPID();
+
+        while (!sem->counter) {
+            
+            sem->blockedProcessesCounter->pids[sem->blockedProcessesCounter->last] = myPid;
+            sem->blockedProcessesCounter->last++;
+            if (sem->blockedProcessesCounter->last > SEM_BLK_PRC_ARR_SIZE) {
+                sem->blockedProcessesCounter->last = 0;
+            }
+            // change process status
+            semaphoreBinaryPost(id);
+            yield();
+            semaphoreBinaryWait(id);
+        }
+        sem->counter--;
+    }
+    semaphoreBinaryPost(id);
 }
