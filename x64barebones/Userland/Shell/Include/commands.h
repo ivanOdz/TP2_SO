@@ -25,6 +25,7 @@ int command_setFontSize(int argc, char **argv);
 int command_getRegisters();
 int command_tunes(int argc, char **argv);
 int command_argvTest(int argc, char **argv);
+int command_kill(int argc, char **argv);
 
 // ---------------------------------------------------------------------------------
 
@@ -48,9 +49,10 @@ static const availableCommand avCommands[] = {
 	{(uint8_t *) "argvTest", FALSE, testArgv},
 	{(uint8_t *) "tunes", TRUE, command_tunes},
 	{(uint8_t *) "mm_test", FALSE, mm_test},
-	{(uint8_t *) "test_processes", TRUE, test_processes},
+	{(uint8_t *) "test_processes", FALSE, test_processes},
 	{(uint8_t *) "ps", FALSE, ps},
-	{(uint8_t *) "nice", TRUE, nice},
+	{(uint8_t *) "nice", FALSE, nice},
+	{(uint8_t *) "kill", TRUE, command_kill},
 	{(uint8_t *) "block", TRUE, block}};
 
 #endif

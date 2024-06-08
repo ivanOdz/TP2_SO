@@ -103,6 +103,8 @@ extern uint64_t SyscallNice(uint16_t pid, uint8_t newPriority);
 extern uint64_t SyscallToggleBlockProcess(uint16_t pid);
 extern PID_t SyscallWaitPID(PID_t PID, ReturnStatus *wstatus);
 extern void SyscallYield();
+extern PID_t SyscallGetPID();
+extern PID_t SyscallKill(PID_t PID);
 
 int64_t strcpy(uint8_t *dest, const uint8_t *src);
 int64_t strcmp(const uint8_t *str1, const uint8_t *str2);
@@ -120,6 +122,7 @@ void fputs(uint8_t fd, uint8_t *str);
 void printf(char *fmt, ...);
 void fprintf(uint8_t fd, char *fmt, ...);
 void fprintf_args(uint8_t fd, char *fmt, va_list args);
+uint64_t argumentParse(int arg, int argc, char **argv);
 void text_color_set(uint32_t color);
 uint32_t text_color_get();
 int command_argvTest(int argc, char **argv);
@@ -132,5 +135,7 @@ PID_t execv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMo
 void exit(int returnValue);
 PID_t waitpid(PID_t PID, ReturnStatus *wstatus);
 void yield();
+PID_t getPID();
+PID_t kill(PID_t PID);
 
 #endif

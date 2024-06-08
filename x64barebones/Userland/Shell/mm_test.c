@@ -10,25 +10,13 @@ by reserving a bunch of memory in blocks and ensuring \nthese dont overlap by fi
 probe value and testing for it. If a block fails, you'll see a red warning, \n\
 though the test will proceed.\nArguments:\n\n\
 -help\t\t\tdisplays this help message\n\n\
--maxmemsize x\tsets maximum memory usage in MiB (defaults to all available free memory. May use less memory than what's set\n\t\t\t\t here if malloc cant allocate a random size block anymore because of internal fragmentation) (ex. -mem 128)\n\n\
+-maxmemsize x\tsets maximum memory usage in MiB (defaults to all available free memory. May use less memory than what's set\n\t\t\t\t \
+here if malloc cant allocate a random size block anymore because of internal fragmentation) (ex. -mem 128)\n\n\
 -maxblocksize x  sets maximum memory block size in bytes (defaults to %d) (ex. -maxblocksize 200)\n\n\
 -minblocksize x  sets minimum memory block size in bytes (defaults to %d) (ex. -minblocksize 20)\n\n\
 -burnin x\t\tsets how many times the test will loop over (defaults to %d) (ex. -burn-in 4)\n\n\
 -maxblocks x\t sets maximum amount of blocks to allocate (defaults to %d) (ex. -max-blocks 1000)\n\n\
 Usage example:\n\t\t mm_test -maxmemsize 256 -maxblocks 4000 -burnin 5\n\n"
-
-uint64_t argumentParse(int arg, int argc, char **argv) {
-	if (arg + 1 >= argc) {
-		fprintf(STD_ERR, "Argument error, missing value\n");
-		return 0;
-	}
-	else {
-		uint64_t result = stringToInt(argv[arg + 1], strlen((uint8_t *) argv[arg + 1]));
-		if (!result)
-			fprintf(STD_ERR, "Argument error, expected value for %s, got %s\n", argv[arg], argv[arg + 1]);
-		return result;
-	}
-}
 
 void mm_test(int argc, char **argv) {
 	uint64_t maxBlocks = MAX_BLOCKS_DEFAULT;
@@ -37,11 +25,6 @@ void mm_test(int argc, char **argv) {
 	uint64_t minBlockSize = MIN_BLOCK_SIZE_DEFAULT;
 	uint64_t burnin = BURN_IN_DEFAULT;
 	for (int arg = 1; arg < argc; arg++) {
-		printf("%s", argv[arg]);
-	}
-	putchar('\n');
-	for (int arg = 1; arg < argc; arg++) {
-		printf("Parsing %s\n", argv[arg]);
 		if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-help") == 0) {
 			printf(HELP_STRING, MAX_BLOCK_SIZE_DEFAULT, MIN_BLOCK_SIZE_DEFAULT, BURN_IN_DEFAULT, MAX_BLOCKS_DEFAULT);
 			exit(0);
@@ -73,6 +56,7 @@ void mm_test(int argc, char **argv) {
 		}
 		else {
 			fprintf(STD_ERR, "Invalid argument provided (got %s)\n", argv[arg]);
+			printf(HELP_STRING, MAX_BLOCK_SIZE_DEFAULT, MIN_BLOCK_SIZE_DEFAULT, BURN_IN_DEFAULT, MAX_BLOCKS_DEFAULT);
 			exit(1);
 		}
 	}
@@ -151,8 +135,4 @@ void mm_test(int argc, char **argv) {
 	free(test);
 	free(testsize);
 	exit(0);
-}
-
-int test_processes(int argc, char **argv) {
-	return 0;
 }

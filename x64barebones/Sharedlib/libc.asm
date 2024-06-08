@@ -21,6 +21,8 @@ GLOBAL SyscallNice
 GLOBAL SyscallToggleBlockProcess
 GLOBAL SyscallWaitPID
 GLOBAL SyscallYield
+GLOBAL SyscallGetPID
+GLOBAL SyscallKill
 ALIGN 16
 
 
@@ -293,6 +295,28 @@ SyscallYield:
     mov rbp, rsp    
 
     mov rax, 0x15
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+SyscallGetPID:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x16
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+SyscallKill:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x17
+    mov rbx, rdi    ; pid
     int 80h
 
     mov rsp, rbp

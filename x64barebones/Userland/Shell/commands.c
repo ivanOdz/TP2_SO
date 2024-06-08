@@ -61,3 +61,16 @@ int command_getRegisters(int argc, char **argv) {
 	SyscallGetRegisters();
 	return 0;
 }
+
+int command_kill(int argc, char **argv) {
+	if (argc != 2 || !argv[1]) {
+		fprintf(STD_ERR, "Please provide a PID to obliterate.\n");
+		return 1;
+	}
+	PID_t PID = stringToInt(argv[1], strlen(argv[1]));
+	if (PID && kill(PID)) {
+		return 0;
+	}
+	fprintf(STD_ERR, "Couldn't kill process %d\n", PID);
+	return 1;
+}

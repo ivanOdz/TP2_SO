@@ -17,7 +17,7 @@ PCB *initProcess() {
 	}
 	process->stackBasePointer = getStackBase();
 	if (!process->stackBasePointer) {
-		free(process);
+		freeMemory(process);
 		return NULL;
 	}
 	process->name = "System Idle Process";
@@ -32,7 +32,7 @@ PCB *initProcess() {
 	process->blockedOn.fd = 0;
 	process->blockedOn.timer = 0;
 	process->blockedOn.manual = FALSE;
-	//process->fileDescriptorsInUse = 0;
+	// process->fileDescriptorsInUse = 0;
 	process->priority = 1;
 	return process;
 }
@@ -44,7 +44,7 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	}
 	process->stackBasePointer = (uint8_t *) allocMemory(STACK_DEFAULT_SIZE);
 	if (!process->stackBasePointer) {
-		free(process);
+		freeMemory(process);
 		return NULL;
 	}
 	process->stackBasePointer += STACK_DEFAULT_SIZE - sizeof(uint64_t); // stack works backwards
@@ -59,13 +59,16 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	process->name = argv[0];
 	process->pid = nextPid++;
 	process->parentPid = getCurrentPID();
-	if (process->parentPid) {
-		PCB *parent = getProcess(process->parentPid);
-		if (parent->runMode == FOREGROUND)
-			parent->runMode = RELEGATED;
-	}
 	process->status = READY;
 	process->runMode = runMode;
+	process->priority = 5;
+
+	if (process->parentPid && process->runMode == FOREGROUND) {
+		PCB *parent = getProcess(process->parentPid);
+		if (parent && parent->runMode == FOREGROUND)
+			parent->runMode = RELEGATED;
+	}
+
 	process->returnValue = 0;
 	process->killed = FALSE;
 	process->lastTickRun = get_ticks();
@@ -81,9 +84,9 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 
 	*/
 
-	//defineDefaultFileDescriptors(process);
+	// defineDefaultFileDescriptors(process);
 
-	process->priority = 1;
+	process->priority = 5;
 	return process;
 }
 
@@ -91,8 +94,11 @@ PID_t execute(int (*processMain)(int argc, char **argv), char **argv, ProcessRun
 	PCB *process = createProcess(processMain, argv, runMode);
 	if (!process)
 		return 0;
-	if (!addProcess(process))
+	if (!addProcess(process)) {
+		freeMemory(process->stackBasePointer);
+		freeMemory(process);
 		return 0;
+	}
 	return process->pid;
 }
 void exitProcess(int returnValue) {
@@ -122,9 +128,9 @@ PID_t waitPID(PID_t PID, ReturnStatus *wstatus) {
 }
 
 void freeProcess(PCB *process) {
-	free(process->stackBasePointer);
+	freeMemory(process->stackBasePointer);
 	removeProcess(process);
-	free(process);
+	freeMemory(process);
 }
 
 PID_t killProcess(PID_t PID) {
@@ -136,6 +142,10 @@ PID_t killProcess(PID_t PID) {
 	process->status = ZOMBIE;
 	if (process == getCurrentProcess())
 		schedyield();
+	PCB *parent = getProcess(process->parentPid);
+	if (!parent) {
+		freeProcess(process);
+	}
 	return PID;
 }
 
@@ -148,7 +158,7 @@ void killRunningForegroundProcess() {
 
 void setProcessPriority(uint16_t pid, int8_t priority) {
 	PCB *process = getProcess(pid);
-	if (process < 0 || priority < 0 || priority > 9) {
+	if (process || priority < 1 || priority > 9) {
 		return;
 	}
 	process->priority = priority;
@@ -156,7 +166,6 @@ void setProcessPriority(uint16_t pid, int8_t priority) {
 
 /*
 void setProcessState(uint16_t pid, ProcessStatus ps) {
-
 }
 */
 

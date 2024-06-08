@@ -46,6 +46,8 @@ EXTERN syscall_block
 EXTERN syscall_exit
 EXTERN syscall_waitpid
 EXTERN syscall_yield
+EXTERN syscall_getPID
+EXTERN syscall_kill
 EXTERN forceyield
 
 SECTION .text
@@ -85,6 +87,7 @@ SECTION .text
 %endmacro
 
 %macro irqHandlerMaster 1
+	cli
 	pushState
 	push rax
 	mov rax, [rsp + 8]		;r15
@@ -143,6 +146,7 @@ SECTION .text
 	pop rax
 	mov rsp, [stackSwitcharoo]
 	popState
+	sti
 %endmacro
 
 %macro exceptionHandler 1
@@ -309,7 +313,7 @@ haltcpu:
 	ret
 
 SECTION .text
-	syscalls dq syscall_getRTC, syscall_clear, syscall_getRegisters, syscall_read, syscall_write, syscall_getFormat, syscall_setFormat, syscall_putBlock, syscall_getTicks, syscall_playSound, syscall_setTimer, syscall_malloc, syscall_free, syscall_meminfo, syscall_printMemory, syscall_execv, syscall_processInfo, syscall_nice, syscall_block, syscall_exit, syscall_waitpid, syscall_yield
+	syscalls dq syscall_getRTC, syscall_clear, syscall_getRegisters, syscall_read, syscall_write, syscall_getFormat, syscall_setFormat, syscall_putBlock, syscall_getTicks, syscall_playSound, syscall_setTimer, syscall_malloc, syscall_free, syscall_meminfo, syscall_printMemory, syscall_execv, syscall_processInfo, syscall_nice, syscall_block, syscall_exit, syscall_waitpid, syscall_yield, syscall_getPID, syscall_kill
 
 SECTION .bss
 	aux resq 1

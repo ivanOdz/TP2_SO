@@ -64,8 +64,10 @@ ProcessInfo *processInfo() {
 	ProcessInfo *newProcessInfo = currentProcessInfo;
 	for (ProcessListNode *otherProcess = currentProcess->next; otherProcess != currentProcess; otherProcess = otherProcess->next) {
 		newProcessInfo->nextProcessInfo = allocMemory(sizeof(ProcessInfo));
-		newProcessInfo = newProcessInfo->nextProcessInfo;
-		setProcessInfo(newProcessInfo, otherProcess);
+		if (newProcessInfo->nextProcessInfo) {
+			newProcessInfo = newProcessInfo->nextProcessInfo;
+			setProcessInfo(newProcessInfo, otherProcess);
+		}
 	}
 	return currentProcessInfo;
 }
@@ -201,7 +203,7 @@ uint8_t checkRemoveNode(ProcessListNode *node, PCB *pcb) {
 	if (node->process->pid == pcb->pid) {
 		node->last->next = node->next;
 		node->next->last = node->last;
-		free(node);
+		freeMemory(node);
 		return TRUE;
 	}
 	return FALSE;

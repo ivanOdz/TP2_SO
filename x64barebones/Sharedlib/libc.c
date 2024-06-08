@@ -165,6 +165,19 @@ void fprintf_args(uint8_t fd, char *fmt, va_list args) {
 	return;
 }
 
+uint64_t argumentParse(int arg, int argc, char **argv) {
+	if (arg + 1 >= argc) {
+		fprintf(STD_ERR, "Argument error, missing value\n");
+		return 0;
+	}
+	else {
+		uint64_t result = stringToInt(argv[arg + 1], strlen((uint8_t *) argv[arg + 1]));
+		if (!result)
+			fprintf(STD_ERR, "Argument error, expected value for %s, got %s\n", argv[arg], argv[arg + 1]);
+		return result;
+	}
+}
+
 void printPadded(uint8_t fd, uint8_t *buffer, uint8_t pad, uint64_t totalLen, uint8_t padRight) {
 	uint32_t bufferLen = strlen(buffer);
 	if (!totalLen)
@@ -257,4 +270,12 @@ PID_t waitpid(PID_t PID, ReturnStatus *wstatus) {
 
 void yield() {
 	SyscallYield();
+}
+
+PID_t getPID() {
+	return SyscallGetPID();
+}
+
+PID_t kill(PID_t PID) {
+	return SyscallKill(PID);
 }
