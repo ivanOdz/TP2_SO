@@ -9,50 +9,6 @@
 #define STACK_DEFAULT_SIZE (1 << 12)
 
 static uint16_t nextPid = 1;
-/*static PCB processes[MAX_PROCESSES] = {
-	{
-		.pid = 1,
-		.parentPid = 0,
-		.stackBasePointer = 0x400000,
-		.stackPointer = 0x500000,
-		.name = (uint8_t*)"Process1",
-		.argv = NULL,
-		.runMode = FOREGROUND,
-		.returnValue = 0,
-		.fileDescriptors = {0},
-		.fileDescriptorsInUse = 0,
-		.priority = 5,
-		.status = READY
-	},
-	{
-		.pid = 2,
-		.parentPid = 0,
-		.stackBasePointer = 0x300000,
-		.stackPointer = 0x200000,
-		.name = (uint8_t*)"Process2",
-		.argv = NULL,
-		.runMode = BACKGROUND,
-		.returnValue = 0,
-		.fileDescriptors = {0},
-		.fileDescriptorsInUse = 0,
-		.priority = 10,
-		.status = RUNNING
-	},
-	{
-		.pid = 3,
-		.parentPid = 1,
-		.stackBasePointer = 0x100000,
-		.stackPointer = 0x200000,
-		.name = (uint8_t*)"Process3",
-		.argv = NULL,
-		.runMode = FOREGROUND,
-		.returnValue = -1,
-		.fileDescriptors = {0},
-		.fileDescriptorsInUse = 0,
-		.priority = 1,
-		.status = BLOCKED
-	}
-};*/
 
 PCB *initProcess() {
 	PCB *process = allocMemory(sizeof(PCB));
@@ -119,7 +75,7 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	process->blockedOn.manual = FALSE;
 
 	for (int i = 0; i < DEFAULT_QTY_FDS; i++) {
-		process->fileDescriptors[i] = i;
+		//process->fileDescriptors[i].fd = i;
 	}
 	process->fileDescriptorsInUse = DEFAULT_QTY_FDS;
 	process->priority = 1;

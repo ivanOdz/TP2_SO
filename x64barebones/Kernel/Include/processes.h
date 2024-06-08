@@ -7,6 +7,7 @@
 
 #include <libc.h>
 #include <stdint.h>
+#include <pipesManager.h>
 
 typedef enum { BLOCKED = 0,
 			   READY,
@@ -21,6 +22,12 @@ typedef struct BlockedOn {
 	uint8_t manual;
 	// sem_t semaphore;
 } BlockedOn;
+
+typedef struct {
+	uint16_t fd;
+	uint8_t mode;
+	FifoBuffer *pipe;
+} FileDescriptors;
 
 typedef struct PCB {
 	PID_t pid;
