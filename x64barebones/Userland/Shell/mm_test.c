@@ -77,17 +77,17 @@ void mm_test(int argc, char **argv) {
 	if (!maxMemSize)
 		maxMemSize = mminfoo.freeMemory >> 20;
 	printf("Starting memtest - abuse...\n");
-	printf("MM Type: %c, Max memory: %d MiB, Max Blocks: %d, Max Block Size: %d bytes, Min Block Size: %d bytes, Burn-in: %d\n", mminfoo.mmType, maxMemSize, maxBlocks, maxBlockSize, minBlockSize, burnin);
+	printf("MM Type: %c, Max memory: %lu MiB, Max Blocks: %lu, Max Block Size: %lu bytes, Min Block Size: %lu bytes, Burn-in: %lu\n", mminfoo.mmType, maxMemSize, maxBlocks, maxBlockSize, minBlockSize, burnin);
 	memoryManagerStats(&mminfoo);
 	while (burnin--) {
-		printf("\nNew iteration (%d left)\n", burnin);
+		printf("\nNew iteration (%lu left)\n", burnin);
 		memoryManagerStats(&mminfoo);
-		printf("Free Memory: 0x%x\tOcupied Memory: 0x%x\tAssigned Nodes:%d\n", mminfoo.freeMemory, mminfoo.occupiedMemory, mminfoo.assignedNodes);
+		printf("Free Memory: 0x%lx\tOcupied Memory: 0x%lx\tAssigned Nodes:%lu\n", mminfoo.freeMemory, mminfoo.occupiedMemory, mminfoo.assignedNodes);
 		for (int i = 0; i < maxBlocks; i++) {
 			test[i] = NULL;
 			testsize[i] = 0;
 		}
-		printf("Allocating memory slots and writing probe data (0000 of %4d blocks) (000MiB of %3dMiB)", maxBlocks, maxMemSize);
+		printf("Allocating memory slots and writing probe data (0000 of %4lu blocks) (000MiB of %3luMiB)", maxBlocks, maxMemSize);
 		int assigned = 0;
 		uint64_t assignedBytes = 0;
 		uint8_t tries = 0;
@@ -107,19 +107,19 @@ void mm_test(int argc, char **argv) {
 				}
 				assigned++;
 			}
-			printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4d blocks) (%3dMiB of %3dMiB)", assigned, maxBlocks, assignedBytes >> 20, maxMemSize);
+			printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4lu blocks) (%3luMiB of %3luMiB)", assigned, maxBlocks, assignedBytes >> 20, maxMemSize);
 		} while (assigned < maxBlocks && assignedBytes <= maxMemSize << 20 && tries < NULL_MALLOC_RETRY);
 
-		printf("\nAssigned %d slots out of %d\n", assigned, maxBlocks);
+		printf("\nAssigned %d slots out of %lu\n", assigned, maxBlocks);
 		memoryManagerStats(&mminfoo);
-		printf("Free Memory: 0x%x\tOcupied Memory: 0x%x\tFragmented Memory: 0x%x\tMax Frag Block Size:%x\nMin Frag Block Size:%x\tAssigned Nodes:%d\n", mminfoo.freeMemory, mminfoo.occupiedMemory, mminfoo.fragmentedMemory, mminfoo.maxFragmentedSize, mminfoo.minFragmentedSize, mminfoo.assignedNodes);
+		printf("Free Memory: 0x%lx\tOcupied Memory: 0x%lx\tFragmented Memory: 0x%lx\tMax Frag Block Size:%lx\nMin Frag Block Size:%lx\tAssigned Nodes:%lu\n", mminfoo.freeMemory, mminfoo.occupiedMemory, mminfoo.fragmentedMemory, mminfoo.maxFragmentedSize, mminfoo.minFragmentedSize, mminfoo.assignedNodes);
 		printf("Testing allocated memory for overlaps and corruption (0000)");
 		for (int testNum = 0; testNum < assigned; testNum++) {
 			uint8_t *memSlot = test[testNum];
 			uint8_t probe = memSlot[0];
 			for (uint64_t position = 1; position < testsize[testNum]; position++) {
 				if (memSlot[position] != probe) {
-					fprintf(STD_ERR, "\nTest %d Error at 0x%x (pos %d of %d) (read %d, expected %d, previous %d)\n", testNum, memSlot + position, position, testsize[testNum], memSlot[position], memSlot[0], memSlot[position - 1]);
+					fprintf(STD_ERR, "\nTest %ld Error at 0x%lx (pos %lu of %lu) (read %lu, expected %lu, previous %lu)\n", testNum, memSlot + position, position, testsize[testNum], (uint64_t) memSlot[position], (uint64_t) memSlot[0], (uint64_t) memSlot[position - 1]);
 					printf("Testing allocated memory for overlaps and corruption (0000)");
 					break;
 				}
@@ -132,7 +132,7 @@ void mm_test(int argc, char **argv) {
 			free(test[i]);
 		}
 		memoryManagerStats(&mminfoo);
-		printf("Free Memory: 0x%x\tOcupied Memory: 0x%x\tAssigned Nodes:%d\n", mminfoo.freeMemory, mminfoo.occupiedMemory, mminfoo.assignedNodes);
+		printf("Free Memory: 0x%lx\tOcupied Memory: 0x%lx\tAssigned Nodes:%lu\n", mminfoo.freeMemory, mminfoo.occupiedMemory, mminfoo.assignedNodes);
 	}
 	free(test);
 	free(testsize);

@@ -433,8 +433,8 @@ uint8_t check_limits(playersFlags *flags, position *nextHead1, position *nextHea
 uint8_t get_directions() {
 	static char keyboard_buffer[256] = {0};
 	uint64_t read = SyscallRead(STD_IN, keyboard_buffer, 254);
-	uint8_t newDir1 = 0;
-	uint8_t newDir2 = 0;
+	int8_t newDir1 = 0;
+	int8_t newDir2 = 0;
 	for (uint8_t i = 0; i < read; i++) {
 		switch (keyboard_buffer[i]) {
 			case 'w':

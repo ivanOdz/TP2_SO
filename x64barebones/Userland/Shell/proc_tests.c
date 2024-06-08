@@ -15,7 +15,7 @@ Arguments:\n\n\
 \t\t\t\t processes, it will become quite slow (ex. -maxprocesses 200) (default %d)\n\n\
 -bias x\t\t  sets the randomness bias from 0-100, where 0 means always kill and 100 means kill once every 100 times. This\n\
 \t\t\t\t is useful to stress-test the blocking operations (ex. -bias 50 meaning half the time) (default %d)\n\n\
--burnin x\t\tsets how many times this test should loop (ex. -burnin 3) (default 3)\n\n\
+-burnin x\t\tsets how many times this test should loop (ex. -burnin 3) (default %d)\n\n\
 Usage example:\n\t\ttest_processes -maxprocesses 100 -bias 20 -burnin 1\n\n"
 
 typedef struct ProcessTestType {
@@ -67,7 +67,7 @@ void test_processes(int argc, char **argv) {
 	if (!processes)
 		exit(1);
 	char *args[2];
-	printf("Instantiating processes (0000 of %4d processes)", maxProcesses);
+	printf("Instantiating processes (0000 of %4lu processes)", maxProcesses);
 	for (int spawned = 0; spawned < maxProcesses; spawned++) {
 		args[0] = "Test process";
 		args[1] = NULL;
@@ -80,13 +80,13 @@ void test_processes(int argc, char **argv) {
 			processes[spawned].PID = newProcess;
 			processes[spawned].status = RUNNING;
 		}
-		printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4d processes)", spawned + 1, maxProcesses);
+		printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4lu processes)", spawned + 1, maxProcesses);
 		yield();
 	}
 	for (int i = 0; i < 100; i++) {
 		yield();
 	}
-	printf("\n\nKilling processes (0000 of %4d processes)", maxProcesses);
+	printf("\n\nKilling processes (0000 of %4lu processes)", maxProcesses);
 	for (int spawned = 0; spawned < maxProcesses; spawned++) {
 		PID_t newProcess = kill(processes[spawned].PID);
 		if (!newProcess) {
@@ -99,7 +99,7 @@ void test_processes(int argc, char **argv) {
 			processes[spawned].PID = newProcess;
 			processes[spawned].status = KILLED;
 		}
-		printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4d processes)", spawned + 1, maxProcesses);
+		printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4lu processes)", spawned + 1, maxProcesses);
 		yield();
 	}
 	puts("\n\n");

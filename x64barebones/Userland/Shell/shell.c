@@ -18,9 +18,13 @@ void deleteChars(commandBuffer *command);
 int64_t runCommand(char *strBuffer);
 commandBuffer *initBuffers();
 
-int shell() {
+void shell(int argc, char **argv) {
 	commandBuffer *command = malloc(sizeof(commandBuffer));
-	commandBuffer **history = malloc(HISTORY_SIZE * sizeof(commandBuffer *));
+	if (!command) {
+		fprintf(STD_ERR, "SHELL ERROR\n");
+		exit(1);
+	}
+	commandBuffer *history[10];
 	for (int i = 0; i < HISTORY_SIZE; i++)
 		history[i] = NULL;
 	int historyIndex = 0;
@@ -104,7 +108,7 @@ int shell() {
 		}
 		yield();
 	}
-	return 0;
+	exit(0);
 }
 
 void emptyCommandBuffer(commandBuffer *command) {
@@ -123,25 +127,25 @@ void deleteChars(commandBuffer *command) {
 int64_t runCommand(char *run) {
 	char strBuffer[BUFFER_SIZE];
 	strcpy(strBuffer, run);
-	int i, argc;
+	int argc;
 	char *argv[BUFFER_SIZE];
 
 	// trim whitespace & get command
-	i = 0;
-	while (strBuffer[i] == ' ') {
-		i++;
+	int position = 0;
+	while (strBuffer[position] == ' ') {
+		position++;
 	}
-	argv[0] = strBuffer + i;
+	argv[0] = strBuffer + position;
 
 	// Get arguments
-	for (argc = 1; i < BUFFER_SIZE && strBuffer[i] != 0; i++) {
-		if (strBuffer[i] == ' ') {
-			strBuffer[i] = 0;
-			i++;
-			while (strBuffer[i] == ' ' && i < BUFFER_SIZE) {
-				i++;
+	for (argc = 1; position < BUFFER_SIZE && strBuffer[position] != 0; position++) {
+		if (strBuffer[position] == ' ') {
+			strBuffer[position] = 0;
+			position++;
+			while (position < BUFFER_SIZE && strBuffer[position] == ' ') {
+				position++;
 			}
-			argv[argc] = strBuffer + i;
+			argv[argc] = strBuffer + position;
 			argc++;
 		}
 	}
@@ -157,19 +161,19 @@ int64_t runCommand(char *run) {
 				}
 				else {
 					PID_t childPID = execv((void (*)(int, char **)) avCommands[cont].function, argv, FOREGROUND);
-					ReturnStatus *wstatus = malloc(sizeof(ReturnStatus));
+					ReturnStatus wstatus;
 					if (childPID) {
-						PID_t exited = waitpid(childPID, wstatus);
+						PID_t exited = waitpid(childPID, &wstatus);
 						SyscallSetFormat(&shell_fmt);
-						printf("\nI'm back, PID %d has taken an L and returned %d\n", exited, wstatus->returnValue);
-						if (wstatus->aborted)
+						printf("\nI'm back, PID %d has taken an L and returned %d\n", exited, wstatus.returnValue);
+						if (wstatus.aborted)
 							fprintf(STD_ERR, "%s was killed\n", strBuffer);
-						retValue = wstatus->returnValue;
+						retValue = wstatus.returnValue;
 					}
 					else {
 						fprintf(STD_ERR, "Couldn't execute %s\n", strBuffer);
+						retValue = 0;
 					}
-					retValue = 0;
 				}
 				if (retValue)
 					printf("Command %s exited with code %d\n", avCommands[cont].name, retValue);

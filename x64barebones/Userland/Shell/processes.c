@@ -7,7 +7,7 @@ void ps(int argc, char **argv) {
 	printf("NAME\t\t\t\t PID   PARENT  MODE\t\tSTACK BASE\tSTACK POINTER\t STATUS\tPRIORITY\n");
 	printf("==================================================================================================\n");
 	while (info != NULL) {
-		printf("%-20s %5d %5d   %-10s  0x%8x\t0x%8x\t\t%-9s %d\n", info->name, info->pid, info->parent_PID, (info->runMode == 'F') ? "Foreground" : ((info->runMode == 'B') ? "Background" : "Relegated"), info->stackBasePointer, info->stackPointer, info->processStatus, info->priority);
+		printf("%-20s %5d %5d   %-10s  0x%8lx\t0x%8lx\t\t%-9s %d\n", info->name, info->pid, info->parent_PID, (info->runMode == 'F') ? "Foreground" : ((info->runMode == 'B') ? "Background" : "Relegated"), (uint64_t) info->stackBasePointer, (uint64_t) info->stackPointer, info->processStatus, info->priority);
 		ProcessInfo *temp = info;
 		info = info->nextProcessInfo;
 		free(temp);
@@ -25,7 +25,7 @@ void time(int argc, char **argv) {
 		offset = 0;
 	}
 	if (SyscallGetRTC(&time)) {
-		time.hora -= 6 * time.hora >> 4;
+		time.hora -= 6 * (time.hora >> 4);
 		if (offset != 0) {
 			time.hora += 24;
 			time.hora += offset;

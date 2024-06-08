@@ -157,7 +157,7 @@ void backSpace() {
 
 	if (cursor_x < charSpacing + X_OFFSET) {
 		cursor_x = VBE_mode_info->width - ((VBE_mode_info->width - X_OFFSET) % charSpacing) - charSpacing;
-		if (cursor_y < charHeight + Y_OFFSET) {
+		if (cursor_y < charHeight + Y_OFFSET && cursor_x > 0) {
 			cursor_y = Y_OFFSET;
 			cursor_x = X_OFFSET;
 		}

@@ -88,7 +88,6 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 
 	// defineDefaultFileDescriptors(process);
 
-	process->priority = 5;
 	return process;
 }
 
@@ -153,14 +152,14 @@ PID_t killProcess(PID_t PID) {
 
 void killRunningForegroundProcess() {
 	PCB *process = getForegroundProcess();
-	if (process || process->pid >= 2) {
+	if (process && process->pid >= 2) {
 		killProcess(process->pid);
 	}
 }
 
 void setProcessPriority(uint16_t pid, int8_t priority) {
 	PCB *process = getProcess(pid);
-	if (process || priority < 1 || priority > 9) {
+	if (!process || priority < 1 || priority > 9) {
 		return;
 	}
 	process->priority = priority;

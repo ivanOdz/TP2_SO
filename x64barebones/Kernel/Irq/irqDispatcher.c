@@ -114,7 +114,6 @@ uint64_t syscall_meminfo(MemoryInfo *meminfo) {
 }
 
 uint64_t syscall_printMemory() {
-	printMem();
 	return 0;
 }
 

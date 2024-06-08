@@ -135,12 +135,12 @@ void fprintf_args(uint8_t fd, char *fmt, va_list args) {
 
 			while (fmt[i] >= '0' && fmt[i] <= '9')
 				i++;
-			padding = 0;
 			padding = stringToInt((fmt + j), i - j);
 			if (padding >= 100)
 				padding = 99;
-			if (padding < 0)
-				padding = 0;
+			if (fmt[i] == 'l') {
+				i++;
+			}
 			switch (fmt[i]) {
 				case 'u':
 				case 'd':
@@ -159,7 +159,10 @@ void fprintf_args(uint8_t fd, char *fmt, va_list args) {
 				case 'X':
 					uintToBase(va_arg(args, uint64_t), buffer, 16);
 					printPadded(fd, buffer, '0', padding, padRight);
+				case 'l':
+					break; // we ignore this because we always print as uint64_t but PVS wants the l
 			}
+
 			j = ++i;
 		}
 	}

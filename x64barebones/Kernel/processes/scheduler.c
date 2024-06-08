@@ -137,7 +137,7 @@ uint64_t getProcessRunPriority(ProcessListNode *candidate, uint16_t distanceFrom
 			return 0;
 		}
 	}
-	return (uint64_t) ((1 << candidate->process->priority) * ((double) processCount / distanceFromCurrent)) + (1 << (get_ticks() - candidate->process->lastTickRun));
+	return (uint64_t) ((1L << candidate->process->priority) * ((double) processCount / distanceFromCurrent)) + (1L << (get_ticks() - candidate->process->lastTickRun));
 }
 
 ProcessListNode *getZombieChild(PID_t parentPID, PID_t childPID) {

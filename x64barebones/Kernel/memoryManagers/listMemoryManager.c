@@ -101,7 +101,6 @@ void getMemoryInfo(MemoryInfo *mminfo) {
 	/// Si el primer nodo es NULL, tengo toda la memoria libre, sin fragmentacion.
 	if (current == NULL) {
 		mminfo->freeMemory = memMan.totalMemory;
-		mminfo->fragmentedMemory = 0;
 		mminfo->endAddress = memMan.first;
 		return;
 	}
@@ -157,23 +156,6 @@ uint8_t freeMemory(void *ptrAllocatedMemory) {
 		current = current->next;
 	}
 	return 0;
-}
-
-void printMem() {
-	if (!memMan.first) {
-		printf("No nodes\n");
-		return;
-	}
-	printf("MemMan start %x size %x next %x\n", memMan.startAddress, memMan.totalMemory, memMan.first);
-	BlockNode *current = memMan.first;
-	while (current) {
-		printf("Node %x start %x size %x next %x\n", current, current->base, current->blocks * BLOCK_SIZE, current->next);
-		if (current == current->next) {
-			printf("ERROR\n");
-			return;
-		}
-		current = current->next;
-	}
 }
 
 #endif
