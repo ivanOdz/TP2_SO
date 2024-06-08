@@ -32,7 +32,7 @@ PCB *initProcess() {
 	process->blockedOn.fd = 0;
 	process->blockedOn.timer = 0;
 	process->blockedOn.manual = FALSE;
-	process->fileDescriptorsInUse = 0;
+	//process->fileDescriptorsInUse = 0;
 	process->priority = 1;
 	return process;
 }
@@ -74,10 +74,15 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	process->blockedOn.timer = 0;
 	process->blockedOn.manual = FALSE;
 
-	for (int i = 0; i < DEFAULT_QTY_FDS; i++) {
-		//process->fileDescriptors[i].fd = i;
+	/*for (int i = 0; i < DEFAULT_QTY_FDS; i++) {
+		//process->fileDescriptors[i] = i;
 	}
 	process->fileDescriptorsInUse = DEFAULT_QTY_FDS;
+
+	*/
+
+	//defineDefaultFileDescriptors(process);
+
 	process->priority = 1;
 	return process;
 }

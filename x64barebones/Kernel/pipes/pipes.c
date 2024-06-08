@@ -4,5 +4,8 @@
 #include <scheduler.h>
 #include <stdint.h>
 
+FifoBuffer * pipesList = NULL;
+static uint64_t pipesInUse;
 
-FifoBuffer **pipes;
+
+void defineDefaultFileDescriptors(PCB * process);

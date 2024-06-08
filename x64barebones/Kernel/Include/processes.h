@@ -24,9 +24,9 @@ typedef struct BlockedOn {
 } BlockedOn;
 
 typedef struct {
-	uint16_t fd;
-	uint8_t mode;
 	FifoBuffer *pipe;
+	uint8_t mode;
+	uint8_t isBeingUsed;
 } FileDescriptors;
 
 typedef struct PCB {
@@ -40,6 +40,7 @@ typedef struct PCB {
 	int8_t returnValue;
 	uint8_t killed;
 	uint16_t fileDescriptors[MAX_FILE_DESCRIPTORS];
+	//FileDescriptors fileDescriptors[MAX_FILE_DESCRIPTORS];
 	uint16_t fileDescriptorsInUse;
 	int8_t priority;
 	ProcessStatus status;
