@@ -12,7 +12,7 @@
 #define STD_OUT 1
 #define STD_ERR 2
 
-#define HZ 100
+#define HZ 50
 
 #define COLORS_BLUE	  0x000000FF
 #define COLORS_GREEN  0x0000FF00
@@ -80,9 +80,8 @@ typedef struct ReturnStatus {
 	PID_t pid;
 } ReturnStatus;
 
-extern uint64_t
-SyscallWrite(uint8_t fd, uint8_t *buffer, uint64_t size);
-extern uint64_t SyscallRead(uint8_t fd, uint8_t *buffer, uint64_t size);
+extern uint64_t SyscallWrite(uint8_t fd, char *buffer, uint64_t size);
+extern uint64_t SyscallRead(uint8_t fd, char *buffer, uint64_t size);
 extern uint64_t SyscallClear();
 extern uint64_t SyscallGetRegisters();
 extern uint64_t SyscallGetRTC(time_t *buffer);
@@ -92,33 +91,25 @@ extern uint64_t SyscallPutBlock(draw_type *draw);
 extern uint64_t SyscallGetTicks();
 extern uint64_t SyscallAudio(uint8_t isLoop, const uint8_t *buffer, uint64_t size);
 extern uint64_t SyscallSetTimer(uint16_t delay);
-extern void *SyscallMalloc(uint64_t size);
-extern uint64_t SyscallFree(void *memory);
 extern uint64_t SyscallMemInfo(MemoryInfo *meminfo);
 extern uint64_t SyscallPrintMem();
-extern PID_t SyscallExecv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
-extern void SyscallExit(int returnValue);
 extern ProcessInfo *SyscallProcessInfo();
 extern uint64_t SyscallNice(uint16_t pid, uint8_t newPriority);
 extern uint64_t SyscallToggleBlockProcess(uint16_t pid);
-extern PID_t SyscallWaitPID(PID_t PID, ReturnStatus *wstatus);
-extern void SyscallYield();
-extern PID_t SyscallGetPID();
-extern PID_t SyscallKill(PID_t PID);
 
-int64_t strcpy(uint8_t *dest, const uint8_t *src);
-int64_t strcmp(const uint8_t *str1, const uint8_t *str2);
-int64_t strincludes(const uint8_t *contains, const uint8_t *contained);
-uint64_t strlen(const uint8_t *str);
+int64_t strcpy(char *dest, const char *src);
+int64_t strcmp(const char *str1, const char *str2);
+int64_t strincludes(const char *contains, const char *contained);
+uint64_t strlen(const char *str);
 int64_t stringToInt(char *str, uint32_t strlen);
 uint32_t rand();
 void srand(uint32_t seed);
 uint32_t randBetween(uint32_t start, uint32_t end);
 
-void puts(uint8_t *str);
-void putchar(uint8_t c);
-void fputchar(uint8_t fd, uint8_t c);
-void fputs(uint8_t fd, uint8_t *str);
+void puts(char *str);
+void putchar(char c);
+void fputchar(uint8_t fd, char c);
+void fputs(uint8_t fd, char *str);
 void printf(char *fmt, ...);
 void fprintf(uint8_t fd, char *fmt, ...);
 void fprintf_args(uint8_t fd, char *fmt, va_list args);
@@ -126,12 +117,12 @@ uint64_t argumentParse(int arg, int argc, char **argv);
 void text_color_set(uint32_t color);
 uint32_t text_color_get();
 int command_argvTest(int argc, char **argv);
-void printPadded(uint8_t fd, uint8_t *buffer, uint8_t pad, uint64_t totalLen, uint8_t padRight);
+void printPadded(uint8_t fd, char *buffer, uint8_t pad, uint64_t totalLen, uint8_t padRight);
 extern void invalidOpcode();
 void *malloc(uint64_t size);
 void free(void *memory);
 void memoryManagerStats(MemoryInfo *meminfo);
-PID_t execv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
+PID_t execv(void (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
 void exit(int returnValue);
 PID_t waitpid(PID_t PID, ReturnStatus *wstatus);
 void yield();

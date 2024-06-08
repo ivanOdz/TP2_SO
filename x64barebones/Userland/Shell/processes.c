@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <libc.h>
 
 void ps(int argc, char **argv) {
@@ -17,7 +19,7 @@ void time(int argc, char **argv) {
 	time_t time;
 	int8_t offset = 0;
 	if (argc > 1)
-		offset = stringToInt(argv[1], strlen((uint8_t *) argv[1]));
+		offset = stringToInt(argv[1], strlen(argv[1]));
 	if (offset > 12 || offset < -12) {
 		fprintf(STD_ERR, "invalid offset\n");
 		offset = 0;
@@ -40,8 +42,8 @@ void nice(int argc, char **argv) {
 		fprintf(STD_ERR, "Wrong amount of arguments...\n");
 		exit(1);
 	}
-	int16_t pid = stringToInt(argv[1], strlen((uint8_t *) argv[1]));
-	int8_t newPriority = stringToInt(argv[2], strlen((uint8_t *) argv[2]));
+	int16_t pid = stringToInt(argv[1], strlen(argv[1]));
+	int8_t newPriority = stringToInt(argv[2], strlen(argv[2]));
 	if (newPriority < 0 || newPriority > 31) {
 		fprintf(STD_ERR, "Priority must be between 0 and 31...\n");
 		exit(1);
@@ -55,7 +57,7 @@ void block(int argc, char **argv) {
 		fprintf(STD_ERR, "Wrong amount of arguments...\n");
 		exit(1);
 	}
-	int16_t pid = stringToInt(argv[1], strlen((uint8_t *) argv[1]));
+	int16_t pid = stringToInt(argv[1], strlen(argv[1]));
 	SyscallToggleBlockProcess(pid);
 	exit(0);
 }

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <defs.h>
 #include <keyboard.h>
 #include <lib.h>
@@ -46,17 +48,17 @@ uint64_t int_80() {
 	return int80_handler();
 }
 
-uint64_t syscall_write(uint8_t fd, uint8_t *buf, uint64_t size) {
+uint64_t syscall_write(uint8_t fd, char *buf, uint64_t size) {
 	switch (fd) {
 		case STD_OUT:
 		case STD_ERR:
-			return syscall_puts(fd, (uint8_t *) buf, size);
+			return syscall_puts(fd, buf, size);
 		default:
 			return 0;
 	}
 }
 
-uint64_t syscall_read(uint8_t fd, uint8_t *buf, uint64_t size) {
+uint64_t syscall_read(uint8_t fd, char *buf, uint64_t size) {
 	switch (fd) {
 		case STD_IN:
 			return consume_keys(buf, size);

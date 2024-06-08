@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <lib.h>
 #include <libc.h>
 #include <memoryManager.h>
@@ -13,12 +15,12 @@ uint64_t getProcessRunPriority(ProcessListNode *candidate, uint16_t distanceFrom
 uint8_t *pickNextProcess();
 uint16_t getProcessCount();
 ProcessListNode *getZombieChild(PID_t parentPID, PID_t childPID);
-void initScheduler() {
+void initScheduler(void *kernelStack) {
 	// hardwire halt process
 	currentProcess = allocMemory(sizeof(ProcessListNode));
 	currentProcess->next = currentProcess;
 	currentProcess->last = currentProcess;
-	currentProcess->process = initProcess();
+	currentProcess->process = initProcess(kernelStack);
 	enableScheduler = TRUE;
 }
 

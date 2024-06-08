@@ -1,22 +1,25 @@
-#include "videoDriver.h"
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <keyboard.h>
 #include <scheduler.h>
 #include <sound.h>
 #include <time.h>
+#include <videoDriver.h>
 
 static unsigned long ticks = 0;
 
 void timer_handler() {
-	if ((ticks % (HZ / 35) == 0)) {
+	ticks++;
+	if ((ticks % (HZ / 24) == 0)) {
 		soundNext();
 	}
-
-	ticks++;
 
 	if ((ticks % (HZ / 2)) == 0) {
 		printCursor();
 	}
-	schedyield();
+
+	if (stackSwitcharoo)
+		schedyield();
 }
 
 int ticks_elapsed() {

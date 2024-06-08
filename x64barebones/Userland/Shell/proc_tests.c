@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <libc.h>
 #include <stdint.h>
 
@@ -30,21 +32,21 @@ void test_processes(int argc, char **argv) {
 	uint64_t bias = BIAS_DEFAULT;
 	uint64_t burnin = BURN_IN_DEFAULT;
 	for (int arg = 1; arg < argc; arg++) {
-		if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-help") == 0) {
+		if (strcmp(argv[arg], "-help") == 0) {
 			printf(HELP_STRING_PROC, MAX_PROCESSES_DEFAULT, BIAS_DEFAULT, BURN_IN_DEFAULT);
 			exit(0);
 		}
-		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-maxprocesses") == 0) {
+		else if (strcmp(argv[arg], "-maxprocesses") == 0) {
 			maxProcesses = argumentParse(arg++, argc, argv);
 			if (!maxProcesses)
 				exit(1);
 		}
-		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-bias") == 0) {
+		else if (strcmp(argv[arg], "-bias") == 0) {
 			bias = argumentParse(arg++, argc, argv);
 			if (!bias)
 				exit(1);
 		}
-		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-burnin") == 0) {
+		else if (strcmp(argv[arg], "-burnin") == 0) {
 			burnin = argumentParse(arg++, argc, argv);
 			if (!burnin)
 				exit(1);
@@ -79,6 +81,7 @@ void test_processes(int argc, char **argv) {
 			processes[spawned].status = RUNNING;
 		}
 		printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4d processes)", spawned + 1, maxProcesses);
+		yield();
 	}
 	for (int i = 0; i < 100; i++) {
 		yield();
@@ -97,6 +100,7 @@ void test_processes(int argc, char **argv) {
 			processes[spawned].status = KILLED;
 		}
 		printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4d processes)", spawned + 1, maxProcesses);
+		yield();
 	}
 	puts("\n\n");
 	exit(0);

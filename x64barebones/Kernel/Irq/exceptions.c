@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <defs.h>
 #include <lib.h>
 #include <processes.h>
@@ -21,13 +23,13 @@ void exceptionDispatcher(int exception, stack_registers regs) {
 }
 
 static void zero_division(stack_registers regs) {
-	drawWord(STD_ERR, (uint8_t *) "EXCEPTION 00 - DIVIDE BY ZERO\nRegistry Dump:\n");
+	drawWord(STD_ERR, "EXCEPTION 00 - DIVIDE BY ZERO\nRegistry Dump:\n");
 	printRegs(regs, STD_ERR);
-	drawWord(STD_ERR, (uint8_t *) "\nProgram has aborted. Returning to shell...\n");
+	drawWord(STD_ERR, "\nProgram has aborted. Returning to shell...\n");
 }
 
 static void invalid_opcode(stack_registers regs) {
-	drawWord(STD_ERR, (uint8_t *) "EXCEPTION 06 - INVALID OP-CODE\nRegistry Dump:\n");
+	drawWord(STD_ERR, "EXCEPTION 06 - INVALID OP-CODE\nRegistry Dump:\n");
 	printRegs(regs, STD_ERR);
-	drawWord(STD_ERR, (uint8_t *) "\nProgram has aborted. Returning to shell...\n");
+	drawWord(STD_ERR, "\nProgram has aborted. Returning to shell...\n");
 }

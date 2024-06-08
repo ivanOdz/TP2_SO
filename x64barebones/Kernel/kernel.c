@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <idtLoader.h>
 #include <interrupts.h>
 #include <keyboard.h>
@@ -52,7 +54,7 @@ int main() {
 	initializeVideoDriver();
 	createMemoryManager(heapStartAddress, 0x10000000);
 	char *argv[2] = {"Shell", NULL};
-	initScheduler();
+	initScheduler(getStackBase());
 	execute((EntryPoint) shellModuleAddress, argv, FOREGROUND);
 	setPIT0Freq(1193182 / HZ);
 	_sti();

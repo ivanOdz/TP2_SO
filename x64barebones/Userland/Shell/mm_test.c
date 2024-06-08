@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <libc.h>
 #include <stdint.h>
 #define MAX_BLOCKS_DEFAULT	   4000
@@ -25,31 +27,31 @@ void mm_test(int argc, char **argv) {
 	uint64_t minBlockSize = MIN_BLOCK_SIZE_DEFAULT;
 	uint64_t burnin = BURN_IN_DEFAULT;
 	for (int arg = 1; arg < argc; arg++) {
-		if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-help") == 0) {
+		if (strcmp(argv[arg], "-help") == 0) {
 			printf(HELP_STRING, MAX_BLOCK_SIZE_DEFAULT, MIN_BLOCK_SIZE_DEFAULT, BURN_IN_DEFAULT, MAX_BLOCKS_DEFAULT);
 			exit(0);
 		}
-		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-maxmemsize") == 0) {
+		else if (strcmp(argv[arg], "-maxmemsize") == 0) {
 			maxMemSize = argumentParse(arg++, argc, argv);
 			if (!maxMemSize)
 				exit(1);
 		}
-		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-maxblocksize") == 0) {
+		else if (strcmp(argv[arg], "-maxblocksize") == 0) {
 			maxBlockSize = argumentParse(arg++, argc, argv);
 			if (!maxBlockSize)
 				exit(1);
 		}
-		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-minblocksize") == 0) {
+		else if (strcmp(argv[arg], "-minblocksize") == 0) {
 			minBlockSize = argumentParse(arg++, argc, argv);
 			if (!minBlockSize)
 				exit(1);
 		}
-		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-burnin") == 0) {
+		else if (strcmp(argv[arg], "-burnin") == 0) {
 			burnin = argumentParse(arg++, argc, argv);
 			if (!burnin)
 				exit(1);
 		}
-		else if (strcmp((uint8_t *) argv[arg], (uint8_t *) "-maxblocks") == 0) {
+		else if (strcmp(argv[arg], "-maxblocks") == 0) {
 			maxBlocks = argumentParse(arg++, argc, argv);
 			if (!maxBlocks)
 				exit(1);

@@ -30,7 +30,7 @@ int command_kill(int argc, char **argv);
 // ---------------------------------------------------------------------------------
 
 typedef struct {
-	const uint8_t *name;
+	const char *name;
 	uint8_t builtin;
 	int (*function)(int, char **); // argc, argv
 } availableCommand;
@@ -38,21 +38,19 @@ typedef struct {
 static text_format shell_fmt = {0x00000000, 0x0000FF00, 1, 1};
 
 static const availableCommand avCommands[] = {
-
-	{(uint8_t *) "help", TRUE, command_help},
-	{(uint8_t *) "clear", TRUE, command_clear},
-	{(uint8_t *) "snake", FALSE, snake},
-	{(uint8_t *) "ex", FALSE, testExceptions},
-	{(uint8_t *) "setFontSize", TRUE, command_setFontSize},
-	{(uint8_t *) "getTime", FALSE, time},
-	{(uint8_t *) "getRegisters", TRUE, command_getRegisters}, // false
-	{(uint8_t *) "argvTest", FALSE, testArgv},
-	{(uint8_t *) "tunes", TRUE, command_tunes},
-	{(uint8_t *) "mm_test", FALSE, mm_test},
-	{(uint8_t *) "test_processes", FALSE, test_processes},
-	{(uint8_t *) "ps", FALSE, ps},
-	{(uint8_t *) "nice", FALSE, nice},
-	{(uint8_t *) "kill", TRUE, command_kill},
-	{(uint8_t *) "block", TRUE, block}};
-
+	{"help", TRUE, command_help},
+	{"clear", TRUE, command_clear},
+	{"snake", FALSE, (int (*)(int, char **)) snake},
+	{"ex", FALSE, (int (*)(int, char **)) testExceptions},
+	{"setFontSize", TRUE, command_setFontSize},
+	{"getTime", FALSE, (int (*)(int, char **)) time},
+	{"getRegisters", TRUE, command_getRegisters},
+	{"argvTest", FALSE, (int (*)(int, char **)) testArgv},
+	{"tunes", TRUE, command_tunes},
+	{"mm_test", FALSE, (int (*)(int, char **)) mm_test},
+	{"test_processes", FALSE, (int (*)(int, char **)) test_processes},
+	{"ps", FALSE, (int (*)(int, char **)) ps},
+	{"nice", FALSE, (int (*)(int, char **)) nice},
+	{"kill", TRUE, command_kill},
+	{"block", FALSE, (int (*)(int, char **)) block}};
 #endif

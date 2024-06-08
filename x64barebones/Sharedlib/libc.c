@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <libc.h>
 #include <stdarg.h>
 static uint32_t rand_seed = 1;
@@ -10,7 +12,7 @@ uint64_t pow(uint64_t base, uint64_t exp) {
 	return ans;
 }
 
-int64_t strcpy(uint8_t *dest, const uint8_t *src) {
+int64_t strcpy(char *dest, const char *src) {
 	int64_t i = 0;
 	while (*src != 0) {
 		*dest++ = *src++;
@@ -20,7 +22,7 @@ int64_t strcpy(uint8_t *dest, const uint8_t *src) {
 	return i;
 }
 
-int64_t strcmp(const uint8_t *str1, const uint8_t *str2) {
+int64_t strcmp(const char *str1, const char *str2) {
 	while (*str1 != '\0' || *str2 != '\0') {
 		if (*str1 < *str2) {
 			return -1;
@@ -36,7 +38,7 @@ int64_t strcmp(const uint8_t *str1, const uint8_t *str2) {
 	return 0; // str1 equals str2 (same content)
 }
 
-int64_t strincludes(const uint8_t *contains, const uint8_t *contained) {
+int64_t strincludes(const char *contains, const char *contained) {
 	while (*contained != '\0') {
 		if (*(contains++) != *(contained++))
 			return FALSE;
@@ -60,7 +62,7 @@ int64_t stringToInt(char *str, uint32_t strlen) {
 	return ans * sign;
 }
 
-uint64_t strlen(const uint8_t *str) {
+uint64_t strlen(const char *str) {
 	uint64_t cont;
 
 	for (cont = 0; str[cont] != '\0'; cont++) {
@@ -116,13 +118,13 @@ void fprintf(uint8_t fd, char *fmt, ...) {
 }
 
 void fprintf_args(uint8_t fd, char *fmt, va_list args) {
-	uint8_t buffer[0xFF] = {0};
+	char buffer[0xFF] = {0};
 
 	uint64_t i, j;
 	uint64_t padding;
 	for (i = 0, j = 0; fmt[i] != 0; i++) {
 		if (fmt[i] == '%') {
-			SyscallWrite(fd, (uint8_t *) (fmt + j), i - j);
+			SyscallWrite(fd, (fmt + j), i - j);
 			i++;
 			uint8_t padRight = 0;
 			if (fmt[i] == '-') {
@@ -143,7 +145,7 @@ void fprintf_args(uint8_t fd, char *fmt, va_list args) {
 				case 'u':
 				case 'd':
 				case 'i':
-					uintToBase(va_arg(args, uint64_t), (char *) buffer, 10);
+					uintToBase(va_arg(args, uint64_t), buffer, 10);
 					printPadded(fd, buffer, '0', padding, padRight);
 					break;
 				case 'c':
@@ -151,17 +153,17 @@ void fprintf_args(uint8_t fd, char *fmt, va_list args) {
 					fputchar(fd, va_arg(args, int));
 					break;
 				case 's':
-					printPadded(fd, va_arg(args, uint8_t *), ' ', padding, padRight);
+					printPadded(fd, va_arg(args, char *), ' ', padding, padRight);
 					break;
 				case 'x':
 				case 'X':
-					uintToBase(va_arg(args, uint64_t), (char *) buffer, 16);
+					uintToBase(va_arg(args, uint64_t), buffer, 16);
 					printPadded(fd, buffer, '0', padding, padRight);
 			}
 			j = ++i;
 		}
 	}
-	SyscallWrite(fd, (uint8_t *) (fmt + j), i - j);
+	SyscallWrite(fd, (fmt + j), i - j);
 	return;
 }
 
@@ -171,14 +173,14 @@ uint64_t argumentParse(int arg, int argc, char **argv) {
 		return 0;
 	}
 	else {
-		uint64_t result = stringToInt(argv[arg + 1], strlen((uint8_t *) argv[arg + 1]));
+		uint64_t result = stringToInt(argv[arg + 1], strlen(argv[arg + 1]));
 		if (!result)
 			fprintf(STD_ERR, "Argument error, expected value for %s, got %s\n", argv[arg], argv[arg + 1]);
 		return result;
 	}
 }
 
-void printPadded(uint8_t fd, uint8_t *buffer, uint8_t pad, uint64_t totalLen, uint8_t padRight) {
+void printPadded(uint8_t fd, char *buffer, uint8_t pad, uint64_t totalLen, uint8_t padRight) {
 	uint32_t bufferLen = strlen(buffer);
 	if (!totalLen)
 		totalLen = bufferLen;
@@ -197,19 +199,19 @@ void printPadded(uint8_t fd, uint8_t *buffer, uint8_t pad, uint64_t totalLen, ui
 	return;
 }
 
-void putchar(uint8_t c) {
+void putchar(char c) {
 	fputchar(STD_OUT, c);
 }
 
-void fputchar(uint8_t fd, uint8_t c) {
+void fputchar(uint8_t fd, char c) {
 	SyscallWrite(fd, &c, 1);
 }
 
-void fputs(uint8_t fd, uint8_t *str) {
+void fputs(uint8_t fd, char *str) {
 	SyscallWrite(fd, str, strlen(str));
 }
 
-void puts(uint8_t *str) {
+void puts(char *str) {
 	fputs(STD_OUT, str);
 }
 
@@ -246,36 +248,6 @@ uint32_t randBetween(uint32_t start, uint32_t end) {
 	return rand() % (end - start) + start;
 }
 
-void *malloc(uint64_t size) {
-	return SyscallMalloc(size);
-}
-void free(void *memory) {
-	SyscallFree(memory);
-}
 void memoryManagerStats(MemoryInfo *meminfo) {
 	SyscallMemInfo(meminfo);
-}
-
-PID_t execv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode) {
-	return SyscallExecv(processMain, argv, runMode);
-}
-
-void exit(int returnValue) {
-	SyscallExit(returnValue);
-}
-
-PID_t waitpid(PID_t PID, ReturnStatus *wstatus) {
-	return SyscallWaitPID(PID, wstatus);
-}
-
-void yield() {
-	SyscallYield();
-}
-
-PID_t getPID() {
-	return SyscallGetPID();
-}
-
-PID_t kill(PID_t PID) {
-	return SyscallKill(PID);
 }

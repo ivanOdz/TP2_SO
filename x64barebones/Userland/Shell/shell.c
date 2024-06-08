@@ -1,4 +1,5 @@
-/* shellCodeModule.c */
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <commands.h>
 #include <libc.h>
 #include <stdint.h>
@@ -14,7 +15,7 @@ typedef struct commandBuffer {
 
 void emptyCommandBuffer(commandBuffer *buffer);
 void deleteChars(commandBuffer *command);
-int64_t runCommand(uint8_t *strBuffer);
+int64_t runCommand(char *strBuffer);
 commandBuffer *initBuffers();
 
 int shell() {
@@ -24,7 +25,7 @@ int shell() {
 		history[i] = NULL;
 	int historyIndex = 0;
 	emptyCommandBuffer(command);
-	runCommand((uint8_t *) "help");
+	runCommand("help");
 	char incoming;
 	while (TRUE) {
 		uint64_t read = SyscallRead(STD_IN, &incoming, 1);
@@ -39,7 +40,7 @@ int shell() {
 					else {
 						putchar('\n');
 						command->buffer[command->position] = 0;
-						runCommand((uint8_t *) command->buffer);
+						runCommand(command->buffer);
 						if (history[HISTORY_SIZE - 1])
 							free(history[HISTORY_SIZE - 1]);
 						for (int i = HISTORY_SIZE - 1; i; i--) {
@@ -119,11 +120,11 @@ void deleteChars(commandBuffer *command) {
 		}
 }
 
-int64_t runCommand(uint8_t *run) {
-	uint8_t strBuffer[BUFFER_SIZE];
+int64_t runCommand(char *run) {
+	char strBuffer[BUFFER_SIZE];
 	strcpy(strBuffer, run);
 	int i, argc;
-	uint8_t *argv[BUFFER_SIZE];
+	char *argv[BUFFER_SIZE];
 
 	// trim whitespace & get command
 	i = 0;
@@ -155,7 +156,7 @@ int64_t runCommand(uint8_t *run) {
 					retValue = avCommands[cont].function(argc, (char **) argv);
 				}
 				else {
-					PID_t childPID = execv(avCommands[cont].function, argv, FOREGROUND);
+					PID_t childPID = execv((void (*)(int, char **)) avCommands[cont].function, argv, FOREGROUND);
 					ReturnStatus *wstatus = malloc(sizeof(ReturnStatus));
 					if (childPID) {
 						PID_t exited = waitpid(childPID, wstatus);

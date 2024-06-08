@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <libc.h>
 #include <memoryManager.h>
 #include <processes.h>
@@ -16,6 +18,17 @@ int32_t getPipeIndex() {
 		return -1;
 	}
 	return index;
+}
+
+// Un pipe solo se puede abrir si es con nombre.
+FifoBuffer *openPipe(char *name) {
+	int i;
+	for (i = 0; strcmp(pipesList[i]->name, name) != 0 && i < PIPES_QTY; i++)
+		;
+	if (i == PIPES_QTY) {
+		return NULL;
+	}
+	return pipesList[i];
 }
 
 FifoBuffer *createFifo(char *name) {
@@ -43,15 +56,4 @@ FifoBuffer *createFifo(char *name) {
 	pipesList[index] = newPipe;
 
 	return newPipe;
-}
-
-// Un pipe solo se puede abrir si es con nombre.
-FifoBuffer *openPipe(char *name) {
-	int i;
-	for (i = 0; strcmp(pipesList[i]->name, name) != 0 && i < PIPES_QTY; i++)
-		;
-	if (i == PIPES_QTY) {
-		return NULL;
-	}
-	return pipesList[i];
 }

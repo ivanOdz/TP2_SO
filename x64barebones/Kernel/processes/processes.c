@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <libc.h>
 #include <memoryManager.h>
 #include <processes.h>
@@ -10,12 +12,12 @@
 
 static uint16_t nextPid = 1;
 
-PCB *initProcess() {
+PCB *initProcess(void *kernelStack) {
 	PCB *process = allocMemory(sizeof(PCB));
 	if (!process) {
 		return NULL;
 	}
-	process->stackBasePointer = getStackBase();
+	process->stackBasePointer = kernelStack;
 	if (!process->stackBasePointer) {
 		freeMemory(process);
 		return NULL;
@@ -52,8 +54,8 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	int argc = 0;
 	while (argv[argc]) {
 		process->stackPointer -= strlen(argv[argc]) + 1;
-		strcpy(process->stackPointer, argv[argc]);
-		argv[argc++] = process->stackPointer;
+		strcpy((char *) process->stackPointer, argv[argc]);
+		argv[argc++] = (char *) process->stackPointer;
 	}
 	process->stackPointer = fabricateProcessStack(process->stackPointer, argc, argv, processMain);
 	process->name = argv[0];
@@ -198,7 +200,7 @@ int8_t getFDIndex(PCB *process, int index[2]) {
 	return 0;
 }
 
-int8_t createPipe(char *name, int index[2]) {
+/*int8_t createPipe(char *name, int index[2]) {
 	PCB *process = getCurrentProcess();
 	if (getFDIndex(process, index) == -1) {
 		return -1;
@@ -217,4 +219,4 @@ int8_t createPipe(char *name, int index[2]) {
 	fifo->writeEnds++;
 
 	return 0;
-}
+}*/

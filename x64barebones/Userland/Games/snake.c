@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "snake.h"
 #include "db.h"
 #include "sc.h"
@@ -56,7 +58,7 @@ void snake(int argc, char **argv) {
 	int status = 0;
 	uint8_t players = 2;
 	if (argc >= 2) {
-		players = stringToInt(argv[1], strlen((uint8_t *) argv[1]));
+		players = stringToInt(argv[1], strlen(argv[1]));
 		if (players > 2)
 			players = 2; // De argumento
 		if (players < 1)
@@ -429,7 +431,7 @@ uint8_t check_limits(playersFlags *flags, position *nextHead1, position *nextHea
 }
 
 uint8_t get_directions() {
-	static uint8_t keyboard_buffer[256] = {0};
+	static char keyboard_buffer[256] = {0};
 	uint64_t read = SyscallRead(STD_IN, keyboard_buffer, 254);
 	uint8_t newDir1 = 0;
 	uint8_t newDir2 = 0;

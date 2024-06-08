@@ -10,19 +10,19 @@ GLOBAL SyscallPutBlock
 GLOBAL SyscallGetTicks
 GLOBAL SyscallAudio
 GLOBAL SyscallSetTimer
-GLOBAL SyscallMalloc
-GLOBAL SyscallFree
+GLOBAL malloc
+GLOBAL free
 GLOBAL SyscallMemInfo
 GLOBAL SyscallPrintMem
-GLOBAL SyscallExecv
-GLOBAL SyscallExit
+GLOBAL execv
+GLOBAL exit
 GLOBAL SyscallProcessInfo
 GLOBAL SyscallNice
 GLOBAL SyscallToggleBlockProcess
-GLOBAL SyscallWaitPID
-GLOBAL SyscallYield
-GLOBAL SyscallGetPID
-GLOBAL SyscallKill
+GLOBAL waitpid
+GLOBAL yield
+GLOBAL getPID
+GLOBAL kill
 ALIGN 16
 
 
@@ -166,7 +166,7 @@ SyscallSetTimer:
     pop rbp
     ret
 
-SyscallMalloc:
+malloc:
     push rbp
     mov rbp, rsp    
 
@@ -179,7 +179,7 @@ SyscallMalloc:
     pop rbp
     ret
 
-SyscallFree:
+free:
     push rbp
     mov rbp, rsp    
 
@@ -217,7 +217,7 @@ SyscallPrintMem:
     pop rbp
     ret
 
-SyscallExecv:
+execv:
     push rbp
     mov rbp, rsp    
 
@@ -266,7 +266,7 @@ SyscallToggleBlockProcess:
     mov rsp, rbp
     pop rbp
     ret
-SyscallExit:
+exit:
     push rbp
     mov rbp, rsp    
 
@@ -278,7 +278,7 @@ SyscallExit:
     pop rbp
     ret
 
-SyscallWaitPID:
+waitpid:
     push rbp
     mov rbp, rsp    
 
@@ -290,7 +290,7 @@ SyscallWaitPID:
     mov rsp, rbp
     pop rbp
     ret
-SyscallYield:
+yield:
     push rbp
     mov rbp, rsp    
 
@@ -300,7 +300,7 @@ SyscallYield:
     mov rsp, rbp
     pop rbp
     ret
-SyscallGetPID:
+getPID:
     push rbp
     mov rbp, rsp    
 
@@ -311,7 +311,7 @@ SyscallGetPID:
     pop rbp
     ret
 
-SyscallKill:
+kill:
     push rbp
     mov rbp, rsp    
 

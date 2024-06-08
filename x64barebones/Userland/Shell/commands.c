@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <commands.h>
 #include <libc.h>
 #include <rick.h>
@@ -8,7 +10,7 @@
 int command_help(int argc, char **argv) {
 	uint32_t lastColor = text_color_get();
 	// Print text
-	puts((uint8_t *) STR_PREAMBLE_FOR_COMANDS);
+	puts(STR_PREAMBLE_FOR_COMANDS);
 	// Print available commands in BLUE
 	text_color_set(COLORS_CIAN);
 
@@ -23,7 +25,7 @@ int command_help(int argc, char **argv) {
 }
 
 int command_setFontSize(int argc, char **argv) {
-	int8_t newSize = stringToInt(argv[1], strlen((uint8_t *) argv[1]));
+	int8_t newSize = stringToInt(argv[1], strlen(argv[1]));
 	if (newSize <= 0 || newSize > 10) {
 		fprintf(STD_ERR, "Invalid size...\n");
 		return 1;
@@ -53,6 +55,7 @@ int command_tunes(int argc, char **argv) {
 		}
 	}
 	while (1) {
+		yield();
 	}
 	return 0;
 }

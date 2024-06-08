@@ -6,8 +6,8 @@
 #define MAX_PROCESSES		 250
 
 #include <libc.h>
-#include <stdint.h>
 #include <pipesManager.h>
+#include <stdint.h>
 
 typedef enum { BLOCKED = 0,
 			   READY,
@@ -32,14 +32,14 @@ typedef struct {
 typedef struct PCB {
 	PID_t pid;
 	PID_t parentPid;
-	uint8_t *stackBasePointer; // base del stack
-	uint8_t *stackPointer;	   // puntero a la posicion actual
+	void *stackBasePointer; // base del stack
+	void *stackPointer;		// puntero a la posicion actual
 	char *name;
 	uint8_t **argv;
 	ProcessRunMode runMode;
 	int8_t returnValue;
 	uint8_t killed;
-	//uint16_t fileDescriptors[MAX_FILE_DESCRIPTORS];	// El indice del arreglo determina el fd.
+	// uint16_t fileDescriptors[MAX_FILE_DESCRIPTORS];	// El indice del arreglo determina el fd.
 	FileDescriptors fileDescriptors[MAX_FILE_DESCRIPTORS]; // El indice del arreglo determina el fd.
 	int8_t priority;
 	ProcessStatus status;
@@ -47,7 +47,7 @@ typedef struct PCB {
 	uint64_t lastTickRun;
 } PCB;
 
-PCB *initProcess();
+PCB *initProcess(void *kernelStack);
 PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
 void freeProcess(PCB *process);
 PID_t execute(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <keyboard.h>
 #include <processes.h>
 #include <stdint.h>
@@ -19,7 +21,7 @@ uint8_t isAlpha(uint8_t c) {
 	return FALSE;
 }
 
-uint64_t consume_keys(uint8_t *buf, uint64_t size) {
+uint64_t consume_keys(char *buf, uint64_t size) {
 	uint64_t i = 0;
 	while ((i < size) && (readCursor != writeCursor)) {
 		buf[i++] = buffer[readCursor++];

@@ -3,7 +3,7 @@
 #include <libc.h>
 #include <stdint.h>
 
-#define BUDDY
+#define LIST
 typedef struct MemoryManagerCDT *MemoryManagerADT;
 
 MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_t memAmount);

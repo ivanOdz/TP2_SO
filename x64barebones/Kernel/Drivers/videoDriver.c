@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "videoDriver.h"
 #include "./../Include/defs.h"
 #include "./../Include/font.h"
@@ -101,7 +103,7 @@ void *memmove(void *dest, const void *src, uint64_t n) {
 	return dest;
 }
 
-void print(uint8_t *word) {
+void print(char *word) {
 	drawWord(STD_OUT, word);
 }
 
@@ -115,7 +117,7 @@ void initializeVideoDriver() {
 
 void putPixel(uint64_t x, uint64_t y, uint32_t color) {
 	uint64_t offset = (x * ((VBE_mode_info->bpp) / 8)) + (y * VBE_mode_info->pitch);
-	putBuffer(framebuffer + offset, color);
+	putBuffer((uint8_t *) framebuffer + offset, color);
 }
 
 void putBuffer(uint8_t *buffer, uint32_t color) {
@@ -127,7 +129,7 @@ void putBuffer(uint8_t *buffer, uint32_t color) {
 	buffer[2] = (color >> 16) & 0xFF;
 }
 
-void drawchar_transparent(uint8_t c, uint64_t x, uint64_t y, uint32_t fgcolor) {
+void drawchar_transparent(char c, uint64_t x, uint64_t y, uint32_t fgcolor) {
 	uint64_t cx, cy;
 	static const uint64_t mask[8] = {128, 64, 32, 16, 8, 4, 2, 1}; // Cambiamos el orden de los bits en el array mask
 	const uint8_t *glyph = font + (uint8_t) c * 16;
@@ -169,7 +171,7 @@ void backSpace() {
 	drawchar_transparent(219, cursor_x, cursor_y, backgroundColor);
 }
 
-void printChar(uint8_t c, uint32_t fg) {
+void printChar(char c, uint32_t fg) {
 	if (c == '\t') {
 		setTab();
 	}
@@ -197,7 +199,7 @@ void printChar(uint8_t c, uint32_t fg) {
 	}
 }
 
-void drawWord(uint8_t fd, uint8_t *word) {
+void drawWord(uint8_t fd, char *word) {
 	uint64_t i = 0;
 	uint32_t foreground = (fd == STD_ERR) ? STDERR_FG : fontColor;
 
@@ -264,7 +266,7 @@ void printCursor() {
 	}
 }
 
-uint64_t syscall_puts(uint8_t fd, uint8_t *buf, uint64_t size) {
+uint64_t syscall_puts(uint8_t fd, char *buf, uint64_t size) {
 	uint32_t foreground = (fd == STD_ERR) ? STDERR_FG : fontColor;
 	uint64_t i;
 
