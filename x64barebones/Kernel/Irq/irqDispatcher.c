@@ -72,7 +72,7 @@ uint64_t syscall_clear() {
 	return 0;
 }
 
-uint64_t syscall_getRTC(time_t *buf) {
+uint64_t syscall_getRTC(time_type *buf) {
 	return (getRTC(buf));
 }
 

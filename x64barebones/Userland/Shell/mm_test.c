@@ -64,12 +64,16 @@ void mm_test(int argc, char **argv) {
 	}
 	SyscallClear();
 
-	time_t time;
+	time_type time;
 	SyscallGetRTC(&time);
 	srand(time.hora << 16 | time.min << 8 | time.seg);
 
 	uint8_t **test = (uint8_t **) malloc(maxBlocks * sizeof(uint8_t *));
 	uint64_t *testsize = (uint64_t *) malloc(maxBlocks * sizeof(uint64_t));
+	if (!test || !testsize) {
+		fprintf(STD_ERR, "Error initializing mm_test, sorry\n");
+		exit(-1);
+	}
 
 	MemoryInfo mminfoo;
 	memoryManagerStats(&mminfoo);
@@ -119,7 +123,7 @@ void mm_test(int argc, char **argv) {
 			uint8_t probe = memSlot[0];
 			for (uint64_t position = 1; position < testsize[testNum]; position++) {
 				if (memSlot[position] != probe) {
-					fprintf(STD_ERR, "\nTest %ld Error at 0x%lx (pos %lu of %lu) (read %lu, expected %lu, previous %lu)\n", testNum, memSlot + position, position, testsize[testNum], (uint64_t) memSlot[position], (uint64_t) memSlot[0], (uint64_t) memSlot[position - 1]);
+					fprintf(STD_ERR, "\nTest %d Error at 0x%lx (pos %lu of %lu) (read %lu, expected %lu, previous %lu)\n", testNum, memSlot + position, position, testsize[testNum], (uint64_t) memSlot[position], (uint64_t) memSlot[0], (uint64_t) memSlot[position - 1]);
 					printf("Testing allocated memory for overlaps and corruption (0000)");
 					break;
 				}

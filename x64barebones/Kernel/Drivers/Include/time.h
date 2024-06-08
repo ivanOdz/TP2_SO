@@ -9,7 +9,6 @@ int ticks_elapsed();
 int seconds_elapsed();
 uint64_t get_ticks();
 extern void setPIT0Freq(uint16_t delay);
-
-extern uint8_t getRTC(time_t *timestruct);
+extern uint8_t getRTC(time_type *timestruct);
 
 #endif

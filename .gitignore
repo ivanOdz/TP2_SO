@@ -16,3 +16,7 @@ x64barebones/.vscode/c_cpp_properties.json
 .vscode
 pulseaudio_win
 x64barebones/cr.sh
+
+strace_out
+PVS-Studio.log
+report.tasks

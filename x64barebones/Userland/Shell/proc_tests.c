@@ -60,7 +60,7 @@ void test_processes(int argc, char **argv) {
 	SyscallClear();
 	SyscallNice(getPID(), 9);
 
-	time_t time;
+	time_type time;
 	SyscallGetRTC(&time);
 	srand(time.hora << 16 | time.min << 8 | time.seg);
 	ProcessTestType *processes = malloc(maxProcesses * sizeof(ProcessTestType));

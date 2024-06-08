@@ -12,7 +12,7 @@ void defineDefaultFileDescriptors(PCB *process);
 
 int32_t getPipeIndex() {
 	int index;
-	for (index = 0; pipesList[index] == NULL && index < PIPES_QTY; index++)
+	for (index = 0; index < PIPES_QTY && pipesList[index] == NULL; index++)
 		;
 	if (index == PIPES_QTY) {
 		return -1;
@@ -23,7 +23,7 @@ int32_t getPipeIndex() {
 // Un pipe solo se puede abrir si es con nombre.
 FifoBuffer *openPipe(char *name) {
 	int i;
-	for (i = 0; strcmp(pipesList[i]->name, name) != 0 && i < PIPES_QTY; i++)
+	for (i = 0; i < PIPES_QTY && strcmp(pipesList[i]->name, name) != 0; i++)
 		;
 	if (i == PIPES_QTY) {
 		return NULL;
@@ -39,7 +39,7 @@ FifoBuffer *createFifo(char *name) {
 			return newPipe;
 		}
 	}
-	uint16_t index = getPipeIndex();
+	int32_t index = getPipeIndex();
 	if (index == -1) {
 		return NULL;
 	}
@@ -47,7 +47,10 @@ FifoBuffer *createFifo(char *name) {
 	if (newPipe == NULL) {
 		return NULL;
 	}
-	strcpy(newPipe->name, name); // si el nombre es la cadena vacia 0, es un pipe anonimo.
+	if (name)
+		strcpy(newPipe->name, name); // si el nombre es la cadena vacia 0, es un pipe anonimo.
+	else
+		newPipe->name[0] = 0;
 	newPipe->readCursor = newPipe->buffer;
 	newPipe->writeCursor = newPipe->buffer;
 	newPipe->readEnds = 0;

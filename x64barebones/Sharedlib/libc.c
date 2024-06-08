@@ -185,7 +185,7 @@ uint64_t argumentParse(int arg, int argc, char **argv) {
 
 void printPadded(uint8_t fd, char *buffer, uint8_t pad, uint64_t totalLen, uint8_t padRight) {
 	uint32_t bufferLen = strlen(buffer);
-	if (!totalLen)
+	if (!totalLen && bufferLen)
 		totalLen = bufferLen;
 	if (padRight) {
 		SyscallWrite(fd, buffer, (bufferLen < totalLen) ? bufferLen : totalLen);

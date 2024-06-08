@@ -16,7 +16,7 @@ void ps(int argc, char **argv) {
 }
 
 void time(int argc, char **argv) {
-	time_t time;
+	time_type time;
 	int8_t offset = 0;
 	if (argc > 1)
 		offset = stringToInt(argv[1], strlen(argv[1]));

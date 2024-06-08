@@ -97,7 +97,7 @@ void reset_positions() {
 		snake2[i].y = BLOCKS_Y - 1 - i;
 		snake2[i].dir = DIR_N;
 	}
-	time_t time;
+	time_type time;
 	SyscallGetRTC(&time);
 	srand(time.hora << 16 | time.min << 8 | time.seg);
 	apple.x = BLOCKS_X / 2 - 1;
@@ -412,7 +412,7 @@ uint8_t check_positions(playersFlags *flags, position *nextHead1, position *next
 		flags->grow1 = 1;
 	}
 	if (flags->players == 2 && nextHead2->x == apple.x && nextHead2->y == apple.y) {
-		flags->grow2 = 1 * (flags->players == 2);
+		flags->grow2 = 1;
 	}
 
 	return 0;

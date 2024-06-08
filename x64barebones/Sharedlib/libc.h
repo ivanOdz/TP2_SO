@@ -38,7 +38,7 @@ typedef struct {
 	uint8_t hora;
 	uint8_t min;
 	uint8_t seg;
-} time_t;
+} time_type;
 
 typedef struct {
 	uint16_t x, y;
@@ -84,7 +84,7 @@ extern uint64_t SyscallWrite(uint8_t fd, char *buffer, uint64_t size);
 extern uint64_t SyscallRead(uint8_t fd, char *buffer, uint64_t size);
 extern uint64_t SyscallClear();
 extern uint64_t SyscallGetRegisters();
-extern uint64_t SyscallGetRTC(time_t *buffer);
+extern uint64_t SyscallGetRTC(time_type *buffer);
 extern uint64_t SyscallGetFormat(text_format *buffer);
 extern uint64_t SyscallSetFormat(text_format *buffer);
 extern uint64_t SyscallPutBlock(draw_type *draw);
