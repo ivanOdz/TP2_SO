@@ -1,3 +1,6 @@
+#ifndef SCHEDULER_H
+#define SCHEDULER_H
+
 #include <processes.h>
 
 typedef struct ProcessListNode {
@@ -7,6 +10,7 @@ typedef struct ProcessListNode {
 } ProcessListNode;
 
 void initScheduler();
+void updateCurrentStack();
 uint8_t addProcess(PCB *pcb);
 uint8_t removeProcess(PCB *process);
 PID_t getCurrentPID();
@@ -18,3 +22,5 @@ void *forceyield();
 ProcessInfo *processInfo();
 extern uint8_t *stackSwitcharoo;
 extern uint8_t *yieldInterrupt(uint8_t *preserveStack);
+
+#endif

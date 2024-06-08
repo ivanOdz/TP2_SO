@@ -30,6 +30,10 @@ void schedyield() {
 	}
 }
 
+void updateCurrentStack() {
+	currentProcess->process->stackPointer = stackSwitcharoo;
+}
+
 void setProcessInfo(ProcessInfo *info, ProcessListNode *node) {
 	strcpy(info->name, node->process->name);
 	info->pid = node->process->pid;
