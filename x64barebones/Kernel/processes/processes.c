@@ -184,3 +184,37 @@ void blockProcess(uint16_t pid) {
 		process->blockedOn.manual = TRUE;
 	}
 }
+
+int8_t getFDIndex(PCB *process, int index[2]) {
+	int i, found = 0;
+	for (i = 0; i < MAX_FILE_DESCRIPTORS && found < 2; i++) {
+		if (process->fileDescriptors[i].isBeingUsed == 0) {
+			index[found++] = i;
+		}
+	}
+	if (i == MAX_FILE_DESCRIPTORS) {
+		return -1;
+	}
+	return 0;
+}
+
+int8_t createPipe(char *name, int index[2]) {
+	PCB *process = getCurrentProcess();
+	if (getFDIndex(process, index) == -1) {
+		return -1;
+	}
+	FifoBuffer *fifo = createFifo(name);
+	process->fileDescriptors[index[0]].pipe = fifo;
+	process->fileDescriptors[index[0]].mode = 'r';
+	process->fileDescriptors[index[0]].isBeingUsed = 1;
+
+	fifo->readEnds++;
+
+	process->fileDescriptors[index[1]].pipe = fifo;
+	process->fileDescriptors[index[1]].mode = 'w';
+	process->fileDescriptors[index[1]].isBeingUsed = 1;
+
+	fifo->writeEnds++;
+
+	return 0;
+}

@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <videoDriver.h>
 
-#define EOF			0xFF
 #define BUFFER_SIZE 0x100
 
 static uint8_t buffer[BUFFER_SIZE];
@@ -86,7 +85,7 @@ void keyboard_handler() {
 		if (c == 0x2E) // C (Kill)
 			killRunningForegroundProcess();
 		if (c == 0x20) // D (EOF)
-			buffer[writeCursor++] = 0;
+			buffer[writeCursor++] = 0xFF;
 	}
 
 	// regular characters
