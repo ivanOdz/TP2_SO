@@ -39,8 +39,8 @@ typedef struct PCB {
 	ProcessRunMode runMode;
 	int8_t returnValue;
 	uint8_t killed;
-	uint16_t fileDescriptors[MAX_FILE_DESCRIPTORS];
-	//FileDescriptors fileDescriptors[MAX_FILE_DESCRIPTORS];
+	uint16_t fileDescriptors[MAX_FILE_DESCRIPTORS];	// El indice del arreglo determina el fd.
+	//FileDescriptors fileDescriptors[MAX_FILE_DESCRIPTORS]; // El indice del arreglo determina el fd.
 	uint16_t fileDescriptorsInUse;
 	int8_t priority;
 	ProcessStatus status;
