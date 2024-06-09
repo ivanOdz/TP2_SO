@@ -15,6 +15,7 @@ uint64_t getProcessRunPriority(ProcessListNode *candidate, uint16_t distanceFrom
 uint8_t *pickNextProcess();
 uint16_t getProcessCount();
 ProcessListNode *getZombieChild(PID_t parentPID, PID_t childPID);
+
 void initScheduler(void *kernelStack) {
 	// hardwire halt process
 	currentProcess = allocMemory(sizeof(ProcessListNode));

@@ -68,13 +68,16 @@ void test_processes(int argc, char **argv) {
 		exit(1);
 	char *args[2];
 	printf("Instantiating processes (0000 of %4lu processes)", maxProcesses);
-	for (int spawned = 0; spawned < maxProcesses; spawned++) {
+	int spawned;
+	for (spawned = 0; spawned < maxProcesses; spawned++) {
 		args[0] = "Test process";
 		args[1] = NULL;
 		PID_t newProcess = execv(processTestLoop, args, BACKGROUND);
 		if (!newProcess) {
-			fprintf(STD_ERR, "\nError creating process N#%d, trying again\n", spawned-- + 1);
+			fprintf(STD_ERR, "\nError creating process N#%d\n", spawned);
 			puts("Instantiating processes (0000 of 0000 processes)");
+			processes[spawned].PID = 0;
+			processes[spawned].status = KILLED;
 		}
 		else {
 			processes[spawned].PID = newProcess;
@@ -83,24 +86,32 @@ void test_processes(int argc, char **argv) {
 		printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4lu processes)", spawned + 1, maxProcesses);
 		yield();
 	}
-	for (int i = 0; i < 100; i++) {
-		yield();
-	}
-	printf("\n\nKilling processes (0000 of %4lu processes)", maxProcesses);
-	for (int spawned = 0; spawned < maxProcesses; spawned++) {
-		PID_t newProcess = kill(processes[spawned].PID);
-		if (!newProcess) {
-			fprintf(STD_ERR, "\nError killing process N#%d, trying again\n", spawned-- + 1);
-			puts("Killing processes (0000 of 0000 processes)");
+	printf("\nInstantiated %d processes\n", spawned);
+	printf("\n\nKilling / blocking processes (0000 of %4lu processes alive)", spawned);
+	while (spawned) {
+		int index;
+		do {
+			index = randBetween(0, maxProcesses);
+		} while (!processes[index].PID);
+		if (randBetween(0, 101) >= bias) {
+			PID_t newProcess = kill(processes[spawned].PID);
+			spawned--;
+			processes[index].PID = 0;
+			processes[index].status = KILLED;
+			if (!newProcess) {
+				fprintf(STD_ERR, "\nError killing process N#%d (PID %d)\n", index, processes[index].PID);
+				puts("Killing processes (0000 of 0000 processes alive)");
+			}
+			else {
+				ReturnStatus f;
+				waitpid(newProcess, &f);
+			}
+			printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4lu processes alive)", spawned + 1, maxProcesses);
+			yield();
 		}
 		else {
-			ReturnStatus f;
-			waitpid(newProcess, &f);
-			processes[spawned].PID = newProcess;
-			processes[spawned].status = KILLED;
+			processes[index].status = (SyscallToggleBlockProcess(processes[index].PID)) ? BLOCKED : RUNNING;
 		}
-		printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4lu processes)", spawned + 1, maxProcesses);
-		yield();
 	}
 	puts("\n\n");
 	exit(0);

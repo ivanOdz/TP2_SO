@@ -102,6 +102,7 @@ PID_t execute(int (*processMain)(int argc, char **argv), char **argv, ProcessRun
 	}
 	return process->pid;
 }
+
 void exitProcess(int returnValue) {
 	PCB *process = getCurrentProcess();
 	// removeProcess(process->pid);
@@ -114,6 +115,7 @@ void exitProcess(int returnValue) {
 	}
 	schedyield();
 }
+
 PID_t waitPID(PID_t PID, ReturnStatus *wstatus) {
 	PCB *process = getCurrentProcess();
 	PCB *child = getProcess(PID);
@@ -135,6 +137,8 @@ void freeProcess(PCB *process) {
 }
 
 PID_t killProcess(PID_t PID) {
+	if (PID < 2)
+		return 0;
 	PCB *process = getProcess(PID);
 	if (!process)
 		return 0;
@@ -170,20 +174,23 @@ void setProcessState(uint16_t pid, ProcessStatus ps) {
 }
 */
 
-void blockProcess(uint16_t pid) {
+uint8_t blockProcess(uint16_t pid) {
 	PCB *process = getProcess(pid);
 	if (!process) {
-		return;
+		return FALSE;
 	}
 	if (process->status == BLOCKED) {
 		if (process->blockedOn.waitPID == NULL && process->blockedOn.fd == 0)
 			process->status = READY;
 		process->blockedOn.manual = FALSE;
+		return FALSE;
 	}
 	else if (process->status == READY) {
 		process->status = BLOCKED;
 		process->blockedOn.manual = TRUE;
+		return TRUE;
 	}
+	return FALSE;
 }
 
 int8_t getFDIndex(PCB *process, int index[2]) {

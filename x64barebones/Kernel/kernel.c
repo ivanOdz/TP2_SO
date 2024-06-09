@@ -12,6 +12,7 @@
 #include <scheduler.h>
 #include <sound.h>
 #include <stdint.h>
+#include <time.h>
 #include <videoDriver.h>
 
 extern uint8_t text;

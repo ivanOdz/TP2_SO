@@ -66,14 +66,15 @@ int command_getRegisters(int argc, char **argv) {
 }
 
 int command_kill(int argc, char **argv) {
-	if (argc != 2 || !argv[1]) {
+	if (argc < 2 || !argv[1]) {
 		fprintf(STD_ERR, "Please provide a PID to obliterate.\n");
 		return 1;
 	}
-	PID_t PID = stringToInt(argv[1], strlen(argv[1]));
-	if (PID && kill(PID)) {
-		return 0;
+	for (int i = 1; i < argc; i++) {
+		PID_t PID = stringToInt(argv[i], strlen(argv[i]));
+		if (!PID || !kill(PID)) {
+			fprintf(STD_ERR, "Couldn't kill process %s\n", argv[i]);
+		}
 	}
-	fprintf(STD_ERR, "Couldn't kill process %d\n", PID);
-	return 1;
+	return 0;
 }

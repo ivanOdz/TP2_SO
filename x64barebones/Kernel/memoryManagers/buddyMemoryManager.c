@@ -56,7 +56,12 @@ MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_
 	while (size_pow2 < memAmount && (size_pow2 * 2) <= memAmount)
 		size_pow2 *= 2;
 	memMan.totalBlocks = size_pow2 / BLOCK_SIZE;
-
+	for (int i = 0; i < LIST_MEM_SIZE; i++) {
+		list[i].addr = NULL;
+		list[i].left = NULL;
+		list[i].right = NULL;
+		list[i].blocks = 0;
+	}
 	memMan.root = NULL;
 	memMan.levels = 0;
 	memMan.minBlockMemory = MIN_MEM_SIZE;
