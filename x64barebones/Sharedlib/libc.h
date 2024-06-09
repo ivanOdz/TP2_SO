@@ -128,5 +128,6 @@ PID_t waitpid(PID_t PID, ReturnStatus *wstatus);
 void yield();
 PID_t getPID();
 PID_t kill(PID_t PID);
+void sleep(uint64_t ms);
 
 #endif

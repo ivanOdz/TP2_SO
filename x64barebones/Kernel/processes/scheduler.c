@@ -15,6 +15,7 @@ uint64_t getProcessRunPriority(ProcessListNode *candidate, uint16_t distanceFrom
 uint8_t *pickNextProcess();
 uint16_t getProcessCount();
 ProcessListNode *getZombieChild(PID_t parentPID, PID_t childPID);
+uint8_t checkUnblock(ProcessListNode *candidate);
 
 void initScheduler(void *kernelStack) {
 	// hardwire halt process
@@ -126,19 +127,37 @@ uint64_t getProcessRunPriority(ProcessListNode *candidate, uint16_t distanceFrom
 		return 1;
 	}
 	if (candidate->process->status == BLOCKED) {
-		ProcessListNode *zombieChild = getZombieChild(candidate->process->pid, candidate->process->blockedOn.waitPID->pid);
-		if (zombieChild) {
-			candidate->process->status = READY;
-			candidate->process->blockedOn.waitPID->pid = zombieChild->process->pid;
-			candidate->process->blockedOn.waitPID->aborted = zombieChild->process->killed;
-			candidate->process->blockedOn.waitPID->returnValue = zombieChild->process->returnValue;
-			freeProcess(zombieChild->process);
-		}
-		else {
+		if (!checkUnblock(candidate))
 			return 0;
+	}
+	return (uint64_t) ((1L << candidate->process->priority) * ((double) processCount / distanceFromCurrent)) + (1L << ((get_ticks() - candidate->process->lastTickRun) >> 3));
+}
+
+uint8_t checkUnblock(ProcessListNode *candidate) {
+	// if manually blocked we wont even bother
+	if (!candidate->process->blockedOn.manual) {
+		// cannot be blocked on two of these at once
+		if (candidate->process->blockedOn.timer && candidate->process->blockedOn.timer <= get_ticks()) {
+			candidate->process->status = READY;
+			candidate->process->blockedOn.timer = 0;
+			return TRUE;
+		}
+		if (candidate->process->blockedOn.waitPID) {
+			ProcessListNode *zombieChild = getZombieChild(candidate->process->pid, candidate->process->blockedOn.waitPID->pid);
+			if (zombieChild) {
+				candidate->process->status = READY;
+				candidate->process->blockedOn.waitPID->pid = zombieChild->process->pid;
+				candidate->process->blockedOn.waitPID->aborted = zombieChild->process->killed;
+				candidate->process->blockedOn.waitPID->returnValue = zombieChild->process->returnValue;
+				freeProcess(zombieChild->process);
+				return TRUE;
+			}
+			else {
+				return FALSE;
+			}
 		}
 	}
-	return (uint64_t) ((1L << candidate->process->priority) * ((double) processCount / distanceFromCurrent)) + (1L << (get_ticks() - candidate->process->lastTickRun));
+	return FALSE;
 }
 
 ProcessListNode *getZombieChild(PID_t parentPID, PID_t childPID) {

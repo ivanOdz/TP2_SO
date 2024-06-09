@@ -48,6 +48,7 @@ EXTERN syscall_waitpid
 EXTERN syscall_yield
 EXTERN syscall_getPID
 EXTERN syscall_kill
+EXTERN syscall_sleep
 EXTERN forceyield
 
 SECTION .text
@@ -313,7 +314,7 @@ haltcpu:
 	ret
 
 SECTION .text
-	syscalls dq syscall_getRTC, syscall_clear, syscall_getRegisters, syscall_read, syscall_write, syscall_getFormat, syscall_setFormat, syscall_putBlock, syscall_getTicks, syscall_playSound, syscall_setTimer, syscall_malloc, syscall_free, syscall_meminfo, syscall_printMemory, syscall_execv, syscall_processInfo, syscall_nice, syscall_block, syscall_exit, syscall_waitpid, syscall_yield, syscall_getPID, syscall_kill
+	syscalls dq syscall_getRTC, syscall_clear, syscall_getRegisters, syscall_read, syscall_write, syscall_getFormat, syscall_setFormat, syscall_putBlock, syscall_getTicks, syscall_playSound, syscall_setTimer, syscall_malloc, syscall_free, syscall_meminfo, syscall_printMemory, syscall_execv, syscall_processInfo, syscall_nice, syscall_block, syscall_exit, syscall_waitpid, syscall_yield, syscall_getPID, syscall_kill, syscall_sleep
 
 SECTION .bss
 	aux resq 1

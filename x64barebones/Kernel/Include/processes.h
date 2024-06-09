@@ -55,6 +55,7 @@ void exitProcess(int returnValue);
 PID_t killProcess(PID_t PID);
 void killRunningForegroundProcess();
 PID_t waitPID(PID_t PID, ReturnStatus *wstatus);
+void processSleep(uint64_t ms);
 void setProcessPriority(uint16_t pid, int8_t priority);
 uint8_t blockProcess(uint16_t pid);
 extern uint8_t *fabricateProcessStack(uint8_t *stackBasePointer, int argc, char **argv, int (*processMain)(int argc, char **argv));

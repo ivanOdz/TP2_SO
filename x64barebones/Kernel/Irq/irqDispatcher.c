@@ -147,13 +147,16 @@ uint64_t syscall_nice(uint16_t pid, uint8_t newPriority) {
 }
 
 uint64_t syscall_block(uint16_t pid) {
-	blockProcess(pid);
-	return 0;
+	return blockProcess(pid);
 }
 
 uint64_t syscall_yield(uint16_t pid) {
 	schedyield();
 	return 0;
+}
+
+void syscall_sleep(uint64_t ms) {
+	processSleep(ms);
 }
 
 typedef int (*EntryPoint)();

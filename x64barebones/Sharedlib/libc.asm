@@ -23,6 +23,7 @@ GLOBAL waitpid
 GLOBAL yield
 GLOBAL getPID
 GLOBAL kill
+GLOBAL sleep
 ALIGN 16
 
 
@@ -317,6 +318,18 @@ kill:
 
     mov rax, 0x17
     mov rbx, rdi    ; pid
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+sleep:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x18
+    mov rbx, rdi    ; ms
     int 80h
 
     mov rsp, rbp

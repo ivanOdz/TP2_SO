@@ -13,6 +13,7 @@
 static uint16_t nextPid = 1;
 
 PCB *initProcess(void *kernelStack) {
+	nextPid = 1;
 	PCB *process = allocMemory(sizeof(PCB));
 	if (!process) {
 		return NULL;
@@ -130,6 +131,15 @@ PID_t waitPID(PID_t PID, ReturnStatus *wstatus) {
 	return 0;
 }
 
+void processSleep(uint64_t ms) {
+	PCB *process = getCurrentProcess();
+	uint64_t wakeUpTick = get_ticks() + ((ms * HZ) / 1000);
+	process->blockedOn.timer = wakeUpTick;
+	process->status = BLOCKED;
+	process->stackPointer = forceyield();
+	return;
+}
+
 void freeProcess(PCB *process) {
 	freeMemory(process->stackBasePointer);
 	removeProcess(process);
@@ -142,6 +152,7 @@ PID_t killProcess(PID_t PID) {
 	PCB *process = getProcess(PID);
 	if (!process)
 		return 0;
+	process->blockedOn.manual = 0;
 	process->returnValue = -1;
 	process->killed = TRUE;
 	process->status = ZOMBIE;

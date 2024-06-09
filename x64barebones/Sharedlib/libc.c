@@ -2,8 +2,30 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <libc.h>
 #include <stdarg.h>
-static uint32_t rand_seed = 1;
+#include <stdint.h>
 
+#define n	  624
+#define m	  397
+#define w	  32
+#define r	  31
+#define UMASK (0xffffffffUL << r)
+#define LMASK (0xffffffffUL >> (w - r))
+#define a	  0x9908b0dfUL
+#define u	  11
+#define s	  7
+#define t	  15
+#define l	  18
+#define b	  0x9d2c5680UL
+#define c	  0xefc60000UL
+#define f	  1812433253UL
+
+typedef struct
+{
+	uint32_t state_array[n]; // the array for the state vector
+	int state_index;		 // index into state vector array
+} mt_state;
+
+static mt_state *randState;
 uint64_t pow(uint64_t base, uint64_t exp) {
 	uint64_t ans = 1;
 	while (exp--) {
@@ -177,7 +199,7 @@ uint64_t argumentParse(int arg, int argc, char **argv) {
 	}
 	else {
 		uint64_t result = stringToInt(argv[arg + 1], strlen(argv[arg + 1]));
-		if (!result)
+		if (!result && argv[arg + 1][0] != '0')
 			fprintf(STD_ERR, "Argument error, expected value for %s, got %s\n", argv[arg], argv[arg + 1]);
 		return result;
 	}
@@ -202,12 +224,12 @@ void printPadded(uint8_t fd, char *buffer, uint8_t pad, uint64_t totalLen, uint8
 	return;
 }
 
-void putchar(char c) {
-	fputchar(STD_OUT, c);
+void putchar(char ch) {
+	fputchar(STD_OUT, ch);
 }
 
-void fputchar(uint8_t fd, char c) {
-	SyscallWrite(fd, &c, 1);
+void fputchar(uint8_t fd, char ch) {
+	SyscallWrite(fd, &ch, 1);
 }
 
 void fputs(uint8_t fd, char *str) {
@@ -237,14 +259,58 @@ uint32_t text_color_get() {
 	return format.fg;
 }
 
+// MERSENNE TWISTER ALGHORITH BORROWED FROM https://en.wikipedia.org/wiki/Mersenne_Twister
 void srand(uint32_t seed) {
-	rand_seed = seed;
+	randState = malloc(sizeof(mt_state));
+	uint32_t *state_array = &(randState->state_array[0]);
+
+	state_array[0] = seed; // suggested initial seed = 19650218UL
+
+	for (int i = 1; i < n; i++) {
+		seed = f * (seed ^ (seed >> (w - 2))) + i; // Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier.
+		state_array[i] = seed;
+	}
+
+	randState->state_index = 0;
 }
 
 uint32_t rand() {
-	uint32_t new_rand = (rand_seed * 31 * 29 * 23 * 19 * 17 / 13 / 11 / 7 / 5 / 3) & 0xFFFFFFFF;
-	srand(new_rand);
-	return new_rand;
+	uint32_t *state_array = &(randState->state_array[0]);
+
+	int k = randState->state_index; // point to current state location
+
+	//  int k = k - n;                   // point to state n iterations before
+	//  if (k < 0) k += n;               // modulo n circular indexing
+	// the previous 2 lines actually do nothing
+	//  for illustrative purposes only
+
+	int j = k - (n - 1); // point to state n-1 iterations before
+	if (j < 0)
+		j += n; // modulo n circular indexing
+
+	uint32_t x = (state_array[k] & UMASK) | (state_array[j] & LMASK);
+
+	uint32_t xA = x >> 1;
+	if (x & 0x00000001UL)
+		xA ^= a;
+
+	j = k - (n - m); // point to state n-m iterations before
+	if (j < 0)
+		j += n; // modulo n circular indexing
+
+	x = state_array[j] ^ xA; // compute next value in the state
+	state_array[k++] = x;	 // update new state value
+
+	if (k >= n)
+		k = 0;					// modulo n circular indexing
+	randState->state_index = k; // 0 <= state_index <= n-1   always
+
+	uint32_t y = x ^ (x >> u); // tempering
+	y = y ^ ((y << s) & b);
+	y = y ^ ((y << t) & c);
+	uint32_t z = y ^ (y >> l);
+
+	return z;
 }
 
 uint32_t randBetween(uint32_t start, uint32_t end) {

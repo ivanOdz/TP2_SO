@@ -3,7 +3,7 @@
 #include <libc.h>
 #include <stdint.h>
 #define MAX_BLOCKS_DEFAULT	   4000
-#define MAX_BLOCK_SIZE_DEFAULT 30000000
+#define MAX_BLOCK_SIZE_DEFAULT 300000
 #define MIN_BLOCK_SIZE_DEFAULT 10
 #define BURN_IN_DEFAULT		   3
 #define NULL_MALLOC_RETRY	   100
@@ -61,6 +61,10 @@ void mm_test(int argc, char **argv) {
 			printf(HELP_STRING, MAX_BLOCK_SIZE_DEFAULT, MIN_BLOCK_SIZE_DEFAULT, BURN_IN_DEFAULT, MAX_BLOCKS_DEFAULT);
 			exit(1);
 		}
+	}
+	if (minBlockSize >= maxBlockSize) {
+		fprintf(STD_ERR, "Minimum size must be strictly smaller than maximum size\n");
+		exit(-1);
 	}
 	SyscallClear();
 
@@ -123,7 +127,7 @@ void mm_test(int argc, char **argv) {
 			uint8_t probe = memSlot[0];
 			for (uint64_t position = 1; position < testsize[testNum]; position++) {
 				if (memSlot[position] != probe) {
-					fprintf(STD_ERR, "\nTest %d Error at 0x%lx (pos %lu of %lu) (read %lu, expected %lu, previous %lu)\n", testNum, memSlot + position, position, testsize[testNum], (uint64_t) memSlot[position], (uint64_t) memSlot[0], (uint64_t) memSlot[position - 1]);
+					fprintf(STD_ERR, "%cTest %d Error at 0x%lx (pos %lu of %lu) (read %lu, expected %lu, previous %lu)\n", 0xD, testNum, memSlot + position, position, testsize[testNum], (uint64_t) memSlot[position], (uint64_t) memSlot[0], (uint64_t) memSlot[position - 1]);
 					printf("Testing allocated memory for overlaps and corruption (0000)");
 					break;
 				}
