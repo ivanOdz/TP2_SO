@@ -124,45 +124,42 @@ uint8_t game_loop(uint8_t players) {
 	printf("%c                                    ", 0xD);
 	printScore(flags);
 	while (1) {
-		if (mNextFrame < SyscallGetTicks()) {
-			mNextFrame = SyscallGetTicks() + TICKS_PER_FRAME;
+		get_directions();
+		uint8_t lost = check_positions(&flags, &nextHead1, &nextHead2);
+		move_heads(&flags, &nextHead1, &nextHead2);
+		uint16_t tempScore1 = (snakePos1.tail > snakePos1.head) ? MAX_SNAKE_SIZE - snakePos1.tail + snakePos1.head - START_LEN : snakePos1.head - snakePos1.tail - START_LEN;
+		uint16_t tempScore2 = (snakePos2.tail > snakePos2.head) ? MAX_SNAKE_SIZE - snakePos2.tail + snakePos2.head - START_LEN : snakePos2.head - snakePos2.tail - START_LEN;
 
-			get_directions();
-			uint8_t lost = check_positions(&flags, &nextHead1, &nextHead2);
-			move_heads(&flags, &nextHead1, &nextHead2);
-			uint16_t tempScore1 = (snakePos1.tail > snakePos1.head) ? MAX_SNAKE_SIZE - snakePos1.tail + snakePos1.head - START_LEN : snakePos1.head - snakePos1.tail - START_LEN;
-			uint16_t tempScore2 = (snakePos2.tail > snakePos2.head) ? MAX_SNAKE_SIZE - snakePos2.tail + snakePos2.head - START_LEN : snakePos2.head - snakePos2.tail - START_LEN;
-
-			if (tempScore1 != snakePos1.score) {
-				snakePos1.score = tempScore1;
-				snakePos2.score = tempScore2;
-				printScore(flags);
-			}
-
-			if (lost) {
-				SyscallAudio(0, Dogbass, Dogbasslength); // stop musica
-				putchar(0xD);							 // carriage return
-				if (flags.lose1 && flags.lose2) {
-					winner = 0;
-				}
-				else if (flags.lose1 && flags.players == 2) {
-					winner = 2;
-				}
-				else if (flags.lose2) {
-					winner = 1;
-				}
-				if (winner && flags.players == 2)
-					printf("Player %1d won!    Scores: %5d vs. %5d", winner, snakePos1.score, snakePos2.score);
-				else if (!winner && flags.players == 1)
-					printf("Game Over!       Score: %5d          ", snakePos1.score);
-				else
-					printf("It's a draw!                             ");
-				mNextFrame = SyscallGetTicks() + TICKS_PER_FRAME * 50;
-				while (SyscallGetTicks() < mNextFrame)
-					;
-				break;
-			}
+		if (tempScore1 != snakePos1.score) {
+			snakePos1.score = tempScore1;
+			snakePos2.score = tempScore2;
+			printScore(flags);
 		}
+
+		if (lost) {
+			SyscallAudio(0, Dogbass, Dogbasslength); // stop musica
+			putchar(0xD);							 // carriage return
+			if (flags.lose1 && flags.lose2) {
+				winner = 0;
+			}
+			else if (flags.lose1 && flags.players == 2) {
+				winner = 2;
+			}
+			else if (flags.lose2) {
+				winner = 1;
+			}
+			if (winner && flags.players == 2)
+				printf("Player %1d won!    Scores: %5d vs. %5d", winner, snakePos1.score, snakePos2.score);
+			else if (!winner && flags.players == 1)
+				printf("Game Over!       Score: %5d          ", snakePos1.score);
+			else
+				printf("It's a draw!                             ");
+			mNextFrame = SyscallGetTicks() + TICKS_PER_FRAME * 50;
+			while (SyscallGetTicks() < mNextFrame)
+				;
+			break;
+		}
+		sleep(66);
 	}
 
 	return winner;

@@ -15,11 +15,11 @@ Arguments:\n\n\
 -help\t\t\tdisplays this help message\n\n\
 -maxprocesses x  sets how many processes this test should create. Bear in mind that, while the kernel can spawn unlimited\n\
 \t\t\t\t processes, it will become quite slow (range 1 - 500) (ex. -maxprocesses 200) (default %d)\n\n\
--bias x\t\t  sets the randomness bias from 0-99, where 0 means always kill and 99 means kill once every 100 times. This\n\
+-bias x\t\t  sets the randomness bias from 1-99, where 1 means always kill and 99 means kill once every 100 times. This\n\
 \t\t\t\t is useful to stress-test the blocking operations (ex. -bias 50 meaning half the time) (default %d)\n\n\
 -sleep x\t\t sets the sleep interval in ms between block / kill attempts, mostly for output readability, otherwise it may\n\
 \t\t\t\t go by too fast to read. Can be set to 0 to disable sleep altogether (ex. -sleep 500) (default %d)\n\n\
-- burnin x\t\tsets how many times this test should loop(ex.- burnin 3)(default % d)\n\n\
+-burnin x\t\tsets how many times this test should loop (ex.- burnin 3)(default %d)\n\n\
 Usage example:\n\t\ttest_processes - maxprocesses 100 - bias 20 - burnin 1\n\n "
 
 typedef struct ProcessTestType {
@@ -43,18 +43,24 @@ void test_processes(int argc, char **argv) {
 		}
 		else if (strcmp(argv[arg], "-maxprocesses") == 0) {
 			maxProcesses = argumentParse(arg++, argc, argv);
-			if (!maxProcesses || maxProcesses > 500)
+			if (!maxProcesses || maxProcesses > 999) {
+				fprintf(STD_ERR, "INVALID -maxprocesses paramenter. Expected 1-999, got %s", argv[arg]);
 				exit(1);
+			}
 		}
 		else if (strcmp(argv[arg], "-bias") == 0) {
 			bias = argumentParse(arg++, argc, argv);
-			if (!bias || bias > 99)
-				exit(1);
+			if (!bias || bias > 99) {
+				fprintf(STD_ERR, "INVALID -bias paramenter. Expected 1-99, got %s", argv[arg]);
+				exit(2);
+			}
 		}
 		else if (strcmp(argv[arg], "-burnin") == 0) {
 			burnin = argumentParse(arg++, argc, argv);
-			if (!burnin)
-				exit(1);
+			if (!burnin) {
+				fprintf(STD_ERR, "INVALID -burnin paramenter. Expected 1+, got %s", argv[arg]);
+				exit(3);
+			}
 		}
 		else if (strcmp(argv[arg], "-sleep") == 0) {
 			sleepAmount = argumentParse(arg++, argc, argv);
@@ -62,7 +68,7 @@ void test_processes(int argc, char **argv) {
 		else {
 			fprintf(STD_ERR, "Invalid argument provided (got %s)\n", argv[arg]);
 			printf(HELP_STRING_PROC, MAX_PROCESSES_DEFAULT, BIAS_DEFAULT, SLEEP_DEFAULT, BURN_IN_DEFAULT);
-			exit(1);
+			exit(4);
 		}
 	}
 	SyscallClear();
@@ -73,7 +79,7 @@ void test_processes(int argc, char **argv) {
 	srand(time.hora << 16 | time.min << 8 | time.seg);
 	ProcessTestType *processes = malloc(maxProcesses * sizeof(ProcessTestType));
 	if (!processes)
-		exit(1);
+		exit(5);
 	char *args[2];
 	while (burnin--) {
 		printf("\nNew iteration (%lu left)\n", burnin);
@@ -95,7 +101,8 @@ void test_processes(int argc, char **argv) {
 				processes[spawned].status = RUNNING;
 			}
 			printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4lu processes)", spawned + 1, maxProcesses);
-			yield();
+			if (sleepAmount)
+				sleep(sleepAmount);
 		}
 		printf("\nInstantiated %d processes\n", spawned);
 		printf("\nKilling / blocking processes (0000 processes alive, 0000 processes blocked)");

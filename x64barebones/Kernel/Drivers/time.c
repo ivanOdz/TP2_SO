@@ -10,7 +10,7 @@ static uint64_t ticks = 0;
 
 void timer_handler() {
 	ticks++;
-	if ((ticks % (HZ / 24) == 0)) {
+	if ((ticks % (HZ / 40) == 0)) {
 		soundNext();
 	}
 

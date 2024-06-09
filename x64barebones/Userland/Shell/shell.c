@@ -17,7 +17,7 @@ typedef struct commandBuffer {
 void emptyCommandBuffer(commandBuffer *buffer);
 void deleteChars(commandBuffer *command);
 int64_t runCommand(char *strBuffer);
-void printEdit(commandBuffer *command, uint8_t onDelete);
+void printEdit(commandBuffer *command);
 void shell(int argc, char **argv) {
 	commandBuffer *command = malloc(sizeof(commandBuffer));
 	if (!command) {
@@ -48,7 +48,7 @@ void shell(int argc, char **argv) {
 						}
 						else {
 							deleteChars(command);
-							command->position = command->editCursor;
+							command->editCursor = command->position;
 							command->buffer[command->position] = 0;
 							printf("%s\n", command->buffer);
 						}
@@ -74,11 +74,12 @@ void shell(int argc, char **argv) {
 					}
 					else {
 						if (command->editCursor) {
+							deleteChars(command);
 							--command->position;
 							for (int i = --command->editCursor; i < command->position; i++) {
 								command->buffer[i] = command->buffer[i + 1];
 							}
-							printEdit(command, TRUE);
+							printEdit(command);
 						}
 					}
 					break;
@@ -92,8 +93,11 @@ void shell(int argc, char **argv) {
 							deleteChars(command);
 							emptyCommandBuffer(command);
 							command->position = strcpy(command->buffer, avCommands[listItem].name);
+							command->buffer[command->position++] = ' ';
 							command->editCursor = command->position;
 							puts(command->buffer);
+							shell_fmt.enableCursorBlink = TRUE;
+							SyscallSetFormat(&shell_fmt);
 						}
 					}
 					break;
@@ -101,16 +105,15 @@ void shell(int argc, char **argv) {
 					if (historyIndex < HISTORY_SIZE && history[historyIndex]) {
 						deleteChars(command);
 						command->position = strcpy(command->buffer, history[historyIndex++]->buffer);
-						puts(command->buffer);
-						command->buffer[command->position++] = ' ';
 						command->editCursor = command->position;
-						putchar(' ');
+						puts(command->buffer);
 					}
 					break;
 				case 0x1F: // down arrow
 					if (historyIndex) {
 						deleteChars(command);
-						command->position = strcpy(command->buffer, history[historyIndex-- - 1]->buffer);
+						command->position = strcpy(command->buffer, history[--historyIndex]->buffer);
+						command->editCursor = command->position;
 						puts(command->buffer);
 					}
 					else {
@@ -119,50 +122,54 @@ void shell(int argc, char **argv) {
 					}
 					break;
 				case 0x11: // left arrow
+					deleteChars(command);
 					if (shell_fmt.enableCursorBlink) {
 						shell_fmt.enableCursorBlink = 0;
 						SyscallSetFormat(&shell_fmt);
 					}
 					if (command->editCursor)
 						command->editCursor--;
-					printEdit(command, FALSE);
+					printEdit(command);
 					break;
 				case 0x10: // right arrow
+					deleteChars(command);
 					if (command->editCursor < command->position)
 						command->editCursor++;
 					if (command->editCursor == command->position) {
 						shell_fmt.enableCursorBlink = 1;
 						SyscallSetFormat(&shell_fmt);
 					}
-					printEdit(command, FALSE);
+					printEdit(command);
 					break;
 				default:
-					if (command->editCursor == command->position) {
-						if (command->position < BUFFER_SIZE - 2) {
+					if (command->position < BUFFER_SIZE - 2) {
+						if (command->editCursor == command->position) {
 							command->buffer[command->position++] = incoming;
 							command->editCursor = command->position;
 							putchar(incoming);
 						}
 						else {
-							fprintf(STD_ERR, "\nCommand is too long\n>> ");
-							emptyCommandBuffer(command);
+							deleteChars(command);
+							++command->position;
+							for (int i = command->position; i > command->editCursor; i--) {
+								command->buffer[i] = command->buffer[i - 1];
+							}
+							command->buffer[command->editCursor++] = incoming;
+							printEdit(command);
 						}
 					}
 					else {
-						command->buffer[command->editCursor++] = incoming;
-						printEdit(command, FALSE);
+						fprintf(STD_ERR, "\nCommand is too long\n>> ");
+						emptyCommandBuffer(command);
 					}
 			}
+			yield();
 		}
-		yield();
 	}
 	exit(0);
 }
 
-void printEdit(commandBuffer *command, uint8_t onDelete) {
-	deleteChars(command);
-	if (onDelete)
-		putchar('\b');
+void printEdit(commandBuffer *command) {
 	if (command->editCursor)
 		SyscallWrite(STD_OUT, command->buffer, command->editCursor);
 	if (command->editCursor == command->position) {
@@ -206,24 +213,19 @@ int64_t runCommand(char *run) {
 
 	// trim whitespace & get command
 	int position = 0;
-	while (strBuffer[position] == ' ') {
-		position++;
-	}
-	argv[0] = strBuffer + position;
 	while (position < BUFFER_SIZE && strBuffer[position] == ' ') {
 		position++;
 	}
-
+	argv[0] = strBuffer + position;
 	// Get arguments
 	for (argc = 1; position < BUFFER_SIZE && strBuffer[position] != 0; position++) {
 		if (strBuffer[position] == ' ') {
-			strBuffer[position] = 0;
-			position++;
-			argv[argc] = strBuffer + position;
-			argc++;
+			strBuffer[position++] = 0;
 			while (position < BUFFER_SIZE && strBuffer[position] == ' ') {
 				position++;
 			}
+			if (position < BUFFER_SIZE && strBuffer[position] != 0)
+				argv[argc++] = strBuffer + position;
 		}
 	}
 	argv[argc] = NULL;
