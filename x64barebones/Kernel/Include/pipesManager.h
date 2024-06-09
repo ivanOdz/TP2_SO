@@ -11,13 +11,10 @@
 // El proceso que tenga solamente para leer de un pipe, le voy a dar el readCursor
 // El proceso que tenga solamente para escribir un pipe, le voy a dar el writeCursor
 
-typedef enum { READ = 0,
-			   WRITE
-} WaitingFor;
+
 
 typedef struct BlockedProcessesNode{
 	PID_t blockedPid;
-	WaitingFor event;
 	struct BlockedProcessesNode * next;
 } BlockedProcessesNode;
 
@@ -28,7 +25,8 @@ typedef struct {
 	char *writeCursor;
 	uint16_t readEnds;
 	uint16_t writeEnds;
-	BlockedProcessesNode * blockedProcesses;
+	BlockedProcessesNode * blockedProcessesOnRead;
+	BlockedProcessesNode * blockedProcessesOnWrite;
 } FifoBuffer;
 
 #endif

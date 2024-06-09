@@ -5,6 +5,8 @@
 #include <processes.h>
 #include <stdint.h>
 #include <videoDriver.h>
+#include <scheduler.h>
+#include <memoryManager.h>
 
 static uint8_t flags = 0; // bit 0 shift left, bit 1 shift right, bit 2 caps lock, bit 3 left ctrl, bit 4 right ctrl
 static FifoBuffer fifo = {0};
@@ -41,12 +43,30 @@ uint64_t consume_keys2(char *dest, FifoBuffer *src, uint64_t size) {
 	uint64_t i = 0;
 	while (i < size && src->readCursor != EOF) {	// ESTO ESTA MAL, PERO HAY QUE PREGUNTAR SI ES QUE NO HAY MAS NADA PARA LEER POR EOF
 		if (src->readCursor == src->writeCursor) {
-			// CHANGE STATE A BLOCKED ON READ DE ESTE FD
+			// CHANGE STATE A BLOCKED
+			PCB * process = getCurrentProcess();
+			process->status = BLOCKED;
 			// AÑADIR EL PROCESO BLOCKEADO AL PIPE CON ALLOC MEMORY
+			BlockedProcessesNode * blockProcess = allocMemory(sizeof(BlockedProcessesNode));
+			if(blockProcess == NULL) {
+				return 0;
+			}
+			BlockedProcessesNode * current = src->blockedProcessesOnRead;
+			if(current == NULL) {
+				current = blockProcess;
+			}
+			while(current->next != NULL){
+				current = current->next;
+			}
+			current->next = blockProcess;
+
 			// YIELD
+			schedyield();
+
 			// CUANDO SE DESBLOQUEE ESTE PROCESO, VA A SEGUIR DESDE ACA ADENTRO LEYENDO.
 			// LIBERO EL PROCESO QUE ESTABA BLOQUEADO EN LA LISTA DEL PIPE
-		}
+			freeMemory(blockProcess);
+			}
 		dest[i++] = *(src->readCursor++);
 		if (src->readCursor >= src->buffer + PIPES_BUFFER_SIZE) { // BUFFER CIRCULAR
 			src->readCursor = src->buffer;
