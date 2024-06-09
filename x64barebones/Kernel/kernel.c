@@ -53,6 +53,7 @@ int main() {
 	_cli();
 	load_idt();
 	initializeVideoDriver();
+	initializeKeyboardDriver();
 	createMemoryManager(heapStartAddress, 0x10000000);
 	char *argv[2] = {"Shell", NULL};
 	initScheduler(getStackBase());

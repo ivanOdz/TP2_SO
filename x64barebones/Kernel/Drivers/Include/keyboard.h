@@ -3,9 +3,10 @@
 
 #include <stdint.h>
 
+void initializeKeyboardDriver();
 void keyboard_handler();
 uint64_t consume_keys(char *buf, uint64_t size);
-extern void main();
+extern int main();
 
 #define STD_IN 0
 

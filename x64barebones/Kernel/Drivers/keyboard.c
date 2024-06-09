@@ -1,16 +1,21 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <keyboard.h>
+#include <pipesManager.h>
 #include <processes.h>
 #include <stdint.h>
 #include <videoDriver.h>
 
-#define BUFFER_SIZE 0x100
-
-static uint8_t buffer[BUFFER_SIZE];
-static uint8_t readCursor = 0;
-static uint8_t writeCursor = 0;
 static uint8_t flags = 0; // bit 0 shift left, bit 1 shift right, bit 2 caps lock, bit 3 left ctrl, bit 4 right ctrl
+static FifoBuffer fifo = {0};
+
+void initializeKeyboardDriver() {
+	strcpy(fifo.name, "stdin");
+	fifo.readCursor = fifo.buffer;
+	fifo.writeCursor = fifo.buffer;
+	fifo.readEnds = 1;
+	fifo.writeEnds = 1;
+}
 
 uint8_t isAlpha(uint8_t c) {
 	if (c >= 0x41 && c <= 0x5A)
@@ -23,9 +28,11 @@ uint8_t isAlpha(uint8_t c) {
 
 uint64_t consume_keys(char *buf, uint64_t size) {
 	uint64_t i = 0;
-	while ((i < size) && (readCursor != writeCursor)) {
-		buf[i++] = buffer[readCursor++];
-		readCursor &= 0xFF;
+	while ((i < size) && (fifo.readCursor != fifo.writeCursor)) {
+		buf[i++] = *(fifo.readCursor++);
+		if (fifo.readCursor >= fifo.buffer + PIPES_BUFFER_SIZE) {
+			fifo.readCursor = fifo.buffer;
+		}
 	}
 	return i;
 }
@@ -37,16 +44,16 @@ void keyboard_handler() {
 		c = getKey(); // the following keycode contains the actual key pressed
 		switch (c) {
 			case 0x48:						  // up
-				buffer[writeCursor++] = 0x1E; // code for up arrow in font
+				*(fifo.writeCursor++) = 0x1E; // code for up arrow in font
 				break;
 			case 0x50:						  // down
-				buffer[writeCursor++] = 0x1F; // code for down arrow in font
+				*(fifo.writeCursor++) = 0x1F; // code for down arrow in font
 				break;
 			case 0x4B:						  // left
-				buffer[writeCursor++] = 0x11; // code for left arrow in font
+				*(fifo.writeCursor++) = 0x11; // code for left arrow in font
 				break;
 			case 0x4D:						  // right
-				buffer[writeCursor++] = 0x10; // code for right arrow in font
+				*(fifo.writeCursor++) = 0x10; // code for right arrow in font
 				break;
 			case 0x1D: // right ctrl pressed
 				flags |= 0x10;
@@ -55,7 +62,9 @@ void keyboard_handler() {
 				flags &= 0xFF - 0x10;
 				break;
 		}
-		writeCursor &= 0xFF;
+		if (fifo.writeCursor >= fifo.buffer + PIPES_BUFFER_SIZE) {
+			fifo.writeCursor = fifo.buffer;
+		}
 		return;
 	}
 	switch (c) {
@@ -91,7 +100,7 @@ void keyboard_handler() {
 			return;
 		}
 		if (c == 0x20) // D (EOF)
-			buffer[writeCursor++] = EOF;
+			*(fifo.writeCursor++) = EOF;
 		if (c == 0x13) { // R (Panic! at the Kernel)
 			setFontSize(4);
 			drawWord(STD_ERR, "\ePanic! at the Kernel");
@@ -109,19 +118,21 @@ void keyboard_handler() {
 		if (ascii != 0) {
 			if (flags & SHIFT) {
 				if (isAlpha(ascii) && ((flags & CAPS) > 0)) { // also caps lock and is letter -> lower case
-					buffer[writeCursor++] = toAscii[c];
+					*(fifo.writeCursor++) = toAscii[c];
 				}
 				else { // no caps lock / caps lock but not letter -> regular shift
-					buffer[writeCursor++] = mods[c];
+					*(fifo.writeCursor++) = mods[c];
 				}
 			}
 			else if (isAlpha(ascii) && ((flags & 0x04) > 0)) { // no shift but caps lock and is letter -> upper case
-				buffer[writeCursor++] = mods[c];
+				*(fifo.writeCursor++) = mods[c];
 			}
 			else { // w/o modifier
-				buffer[writeCursor++] = toAscii[c];
+				*(fifo.writeCursor++) = toAscii[c];
 			}
 		}
-		writeCursor &= 0xFF;
+		if (fifo.writeCursor >= fifo.buffer + PIPES_BUFFER_SIZE) {
+			fifo.writeCursor = fifo.buffer;
+		}
 	}
 }
