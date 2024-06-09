@@ -37,6 +37,22 @@ uint64_t consume_keys(char *buf, uint64_t size) {
 	return i;
 }
 
+uint64_t consume_keys2(char *dest, FifoBuffer *src, uint64_t size) {
+	uint64_t i = 0;
+	while (i < size && src->readCursor != EOF) {	// ESTO ESTA MAL, PERO HAY QUE PREGUNTAR SI ES QUE NO HAY MAS NADA PARA LEER POR EOF
+		if (src->readCursor == src->writeCursor) {
+			// CHANGE STATE A BLOCKED ON READ DE ESTE FD
+			// YIELD
+			// CUANDO SE DESBLOQUEE ESTE PROCESO, VA A SEGUIR DESDE ACA ADENTRO LEYENDO.
+		}
+		dest[i++] = *(src->readCursor++);
+		if (src->readCursor >= src->buffer + PIPES_BUFFER_SIZE) { // BUFFER CIRCULAR
+			src->readCursor = src->buffer;
+		}
+	}
+	return i;
+}
+
 void keyboard_handler() {
 	uint8_t c = getKey();
 

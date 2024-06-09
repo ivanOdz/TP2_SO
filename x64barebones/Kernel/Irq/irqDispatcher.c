@@ -58,6 +58,23 @@ uint64_t syscall_write(uint8_t fd, char *buf, uint64_t size) {
 	}
 }
 
+uint64_t syscall_write2(uint8_t fd, char *buf, uint64_t size) {
+	//Tengo que obtener el proceso actual, entrar al fd que me pasan, 
+	//y escribir en el buffer, si es que tengo lugar, lo que me estan pasando.
+	PCB * process = getCurrentProcess();
+	if(process->fileDescriptors[fd].isBeingUsed == 0) {
+		return 0;
+	}
+	// Me fijo si tengo lugar en el buffer
+	// Si no tengo lugar para escribir, bloqueo, sino hago puts
+	//if(no tengo lugar en el buffer){
+		// Cambio el estado del proceso a blocked
+		// Hago yield	
+	//}
+	return syscall_puts(fd, buf, size); 
+
+}
+
 uint64_t syscall_read(uint8_t fd, char *buf, uint64_t size) {
 	switch (fd) {
 		case STD_IN:
@@ -66,6 +83,16 @@ uint64_t syscall_read(uint8_t fd, char *buf, uint64_t size) {
 			return 0;
 	}
 }
+
+uint64_t syscall_read2(uint8_t fd, char *buf, uint64_t size) {
+	PCB * process = getCurrentProcess();
+	if(process->fileDescriptors[fd].isBeingUsed == 0) {
+		return 0;
+	}
+	return consume_keys2(buf, process->fileDescriptors[fd].pipe , size);
+}
+
+
 
 uint64_t syscall_clear() {
 	clear();
