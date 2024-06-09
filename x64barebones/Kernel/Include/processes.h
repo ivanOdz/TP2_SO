@@ -17,7 +17,7 @@ typedef enum { BLOCKED = 0,
 
 typedef struct BlockedOn {
 	ReturnStatus *waitPID; // NULL means not blocked on PID, internal PID == 0 means any child, internal PID > 0 means that one
-	//int64_t fd;
+	int8_t fd;
 	int64_t timer;
 	uint8_t manual;
 	// sem_t semaphore;

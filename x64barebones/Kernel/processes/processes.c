@@ -32,7 +32,7 @@ PCB *initProcess(void *kernelStack) {
 	process->killed = FALSE;
 	process->lastTickRun = get_ticks();
 	process->blockedOn.waitPID = NULL;
-	// process->blockedOn.fd = 0;
+	process->blockedOn.fd = FALSE;
 	process->blockedOn.timer = 0;
 	process->blockedOn.manual = FALSE;
 	// process->fileDescriptorsInUse = 0;

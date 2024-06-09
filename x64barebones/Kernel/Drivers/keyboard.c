@@ -1,12 +1,12 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <keyboard.h>
+#include <memoryManager.h>
 #include <pipesManager.h>
 #include <processes.h>
+#include <scheduler.h>
 #include <stdint.h>
 #include <videoDriver.h>
-#include <scheduler.h>
-#include <memoryManager.h>
 
 static uint8_t flags = 0; // bit 0 shift left, bit 1 shift right, bit 2 caps lock, bit 3 left ctrl, bit 4 right ctrl
 static FifoBuffer fifo = {0};
@@ -15,8 +15,8 @@ void initializeKeyboardDriver() {
 	strcpy(fifo.name, "stdin");
 	fifo.readCursor = fifo.buffer;
 	fifo.writeCursor = fifo.buffer;
-	fifo.readEnds = 1;
-	fifo.writeEnds = 1;
+	fifo.readEnds = 0;
+	fifo.writeEnds = 0;
 }
 
 uint8_t isAlpha(uint8_t c) {
@@ -39,34 +39,48 @@ uint64_t consume_keys(char *buf, uint64_t size) {
 	return i;
 }
 
-uint64_t consume_keys2(char *dest, FifoBuffer *src, uint64_t size) {
+/*
+typedef struct BlockedProcessesNode{
+	PID_t blockedPid;
+	struct BlockedProcessesNode * next;
+} BlockedProcessesNode;*/
+
+int64_t consume_keys2(char *dest, FifoBuffer *src, uint64_t size) {
 	uint64_t i = 0;
-	while (i < size && src->readCursor != EOF) {	// ESTO ESTA MAL, PERO HAY QUE PREGUNTAR SI ES QUE NO HAY MAS NADA PARA LEER POR EOF
+	while (i < size && *(src->readCursor) != EOF) {
+		if (((src->writeCursor - src->buffer + 1) % PIPES_BUFFER_SIZE) == (src->readCursor - src->buffer)) {
+			BlockedProcessesNode *aux;
+			PCB *process;
+			while (src->blockedProcessesOnWrite) {
+				aux = src->blockedProcessesOnWrite->next;
+				if ((process = getProcess(src->blockedProcessesOnWrite->blockedPid))) {
+					process->blockedOn.fd = FALSE;
+				}
+				freeMemory(src->blockedProcessesOnWrite);
+				src->blockedProcessesOnWrite = aux;
+			}
+		}
 		if (src->readCursor == src->writeCursor) {
 			// CHANGE STATE A BLOCKED
-			PCB * process = getCurrentProcess();
-			process->status = BLOCKED;
+			PCB *process = getCurrentProcess();
+			process->blockedOn.fd = TRUE;
 			// AÑADIR EL PROCESO BLOCKEADO AL PIPE CON ALLOC MEMORY
-			BlockedProcessesNode * blockProcess = allocMemory(sizeof(BlockedProcessesNode));
-			if(blockProcess == NULL) {
-				return 0;
+			BlockedProcessesNode *blockProcess = allocMemory(sizeof(BlockedProcessesNode));
+			if (blockProcess == NULL) {
+				return -1;
 			}
-			BlockedProcessesNode * current = src->blockedProcessesOnRead;
-			if(current == NULL) {
+			BlockedProcessesNode *current = src->blockedProcessesOnRead;
+			if (current == NULL) {
 				current = blockProcess;
 			}
-			while(current->next != NULL){
+			while (current->next != NULL) {
 				current = current->next;
 			}
 			current->next = blockProcess;
 
 			// YIELD
-			schedyield();
-
-			// CUANDO SE DESBLOQUEE ESTE PROCESO, VA A SEGUIR DESDE ACA ADENTRO LEYENDO.
-			// LIBERO EL PROCESO QUE ESTABA BLOQUEADO EN LA LISTA DEL PIPE
-			freeMemory(blockProcess);
-			}
+			process->stackPointer = forceyield();
+		}
 		dest[i++] = *(src->readCursor++);
 		if (src->readCursor >= src->buffer + PIPES_BUFFER_SIZE) { // BUFFER CIRCULAR
 			src->readCursor = src->buffer;

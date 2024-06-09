@@ -83,10 +83,10 @@ uint64_t syscall_read(uint8_t fd, char *buf, uint64_t size) {
 	}
 }
 
-uint64_t syscall_read2(uint8_t fd, char *buf, uint64_t size) {
+int64_t syscall_read2(uint8_t fd, char *buf, uint64_t size) {
 	PCB *process = getCurrentProcess();
 	if (process->fileDescriptors[fd].isBeingUsed == 0) {
-		return 0;
+		return -1;
 	}
 	return consume_keys2(buf, process->fileDescriptors[fd].pipe, size);
 }
