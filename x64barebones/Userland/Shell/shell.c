@@ -11,13 +11,13 @@
 typedef struct commandBuffer {
 	char buffer[BUFFER_SIZE];
 	uint8_t position;
+	uint8_t editCursor;
 } commandBuffer;
 
 void emptyCommandBuffer(commandBuffer *buffer);
 void deleteChars(commandBuffer *command);
 int64_t runCommand(char *strBuffer);
-commandBuffer *initBuffers();
-
+void printEdit(commandBuffer *command, uint8_t onDelete);
 void shell(int argc, char **argv) {
 	commandBuffer *command = malloc(sizeof(commandBuffer));
 	if (!command) {
@@ -42,8 +42,16 @@ void shell(int argc, char **argv) {
 						emptyCommandBuffer(command);
 					}
 					else {
-						putchar('\n');
-						command->buffer[command->position] = 0;
+						if (command->editCursor == command->position) {
+							putchar('\n');
+							command->buffer[command->position] = 0;
+						}
+						else {
+							deleteChars(command);
+							command->position = command->editCursor;
+							command->buffer[command->position] = 0;
+							printf("%s\n", command->buffer);
+						}
 						runCommand(command->buffer);
 						if (history[HISTORY_SIZE - 1])
 							free(history[HISTORY_SIZE - 1]);
@@ -57,13 +65,25 @@ void shell(int argc, char **argv) {
 					}
 					break;
 				case '\b':
-					if (command->position) {
-						command->buffer[--(command->position)] = 0;
-						putchar('\b');
+					if (command->position == command->editCursor) {
+						if (command->position) {
+							command->buffer[--command->position] = 0;
+							command->editCursor--;
+							putchar('\b');
+						}
+					}
+					else {
+						if (command->editCursor) {
+							--command->position;
+							for (int i = --command->editCursor; i < command->position; i++) {
+								command->buffer[i] = command->buffer[i + 1];
+							}
+							printEdit(command, TRUE);
+						}
 					}
 					break;
 				case '\e':
-					runCommand("Clear");
+					runCommand("clear");
 					emptyCommandBuffer(command);
 					break;
 				case '\t':
@@ -71,17 +91,20 @@ void shell(int argc, char **argv) {
 						if (strincludes(avCommands[listItem].name, command->buffer)) {
 							deleteChars(command);
 							emptyCommandBuffer(command);
-							strcpy(command->buffer, avCommands[listItem].name);
-							command->position = strlen(command->buffer);
+							command->position = strcpy(command->buffer, avCommands[listItem].name);
+							command->editCursor = command->position;
 							puts(command->buffer);
 						}
 					}
 					break;
 				case 0x1E: // up arrow
-					if (historyIndex + 1 < HISTORY_SIZE && history[historyIndex + 1]) {
+					if (historyIndex < HISTORY_SIZE && history[historyIndex]) {
 						deleteChars(command);
-						command->position = strcpy(command->buffer, history[++historyIndex - 1]->buffer);
+						command->position = strcpy(command->buffer, history[historyIndex++]->buffer);
 						puts(command->buffer);
+						command->buffer[command->position++] = ' ';
+						command->editCursor = command->position;
+						putchar(' ');
 					}
 					break;
 				case 0x1F: // down arrow
@@ -95,14 +118,39 @@ void shell(int argc, char **argv) {
 						emptyCommandBuffer(command);
 					}
 					break;
+				case 0x11: // left arrow
+					if (shell_fmt.enableCursorBlink) {
+						shell_fmt.enableCursorBlink = 0;
+						SyscallSetFormat(&shell_fmt);
+					}
+					if (command->editCursor)
+						command->editCursor--;
+					printEdit(command, FALSE);
+					break;
+				case 0x10: // right arrow
+					if (command->editCursor < command->position)
+						command->editCursor++;
+					if (command->editCursor == command->position) {
+						shell_fmt.enableCursorBlink = 1;
+						SyscallSetFormat(&shell_fmt);
+					}
+					printEdit(command, FALSE);
+					break;
 				default:
-					if (command->position < BUFFER_SIZE - 2) {
-						command->buffer[command->position++] = incoming;
-						putchar(incoming);
+					if (command->editCursor == command->position) {
+						if (command->position < BUFFER_SIZE - 2) {
+							command->buffer[command->position++] = incoming;
+							command->editCursor = command->position;
+							putchar(incoming);
+						}
+						else {
+							fprintf(STD_ERR, "\nCommand is too long\n>> ");
+							emptyCommandBuffer(command);
+						}
 					}
 					else {
-						fprintf(STD_ERR, "\nCommand is too long\n>> ");
-						emptyCommandBuffer(command);
+						command->buffer[command->editCursor++] = incoming;
+						printEdit(command, FALSE);
 					}
 			}
 		}
@@ -111,11 +159,37 @@ void shell(int argc, char **argv) {
 	exit(0);
 }
 
+void printEdit(commandBuffer *command, uint8_t onDelete) {
+	deleteChars(command);
+	if (onDelete)
+		putchar('\b');
+	if (command->editCursor)
+		SyscallWrite(STD_OUT, command->buffer, command->editCursor);
+	if (command->editCursor == command->position) {
+		shell_fmt.enableCursorBlink = 1;
+		SyscallSetFormat(&shell_fmt);
+		return;
+	}
+	uint32_t colorSwap = shell_fmt.bg;
+	shell_fmt.bg = shell_fmt.fg;
+	shell_fmt.fg = colorSwap;
+	SyscallSetFormat(&shell_fmt);
+	SyscallWrite(STD_OUT, command->buffer + command->editCursor, 1);
+	colorSwap = shell_fmt.bg;
+	shell_fmt.bg = shell_fmt.fg;
+	shell_fmt.fg = colorSwap;
+	SyscallSetFormat(&shell_fmt);
+	int remainingChars = command->position - (command->editCursor + 1);
+	if (remainingChars)
+		SyscallWrite(STD_OUT, command->buffer + command->editCursor + 1, remainingChars);
+}
+
 void emptyCommandBuffer(commandBuffer *command) {
 	for (int i = 0; i < BUFFER_SIZE; i++) {
 		command->buffer[i] = '\0';
 	}
 	command->position = 0;
+	command->editCursor = 0;
 }
 void deleteChars(commandBuffer *command) {
 	if (command->position)
@@ -136,17 +210,20 @@ int64_t runCommand(char *run) {
 		position++;
 	}
 	argv[0] = strBuffer + position;
+	while (position < BUFFER_SIZE && strBuffer[position] == ' ') {
+		position++;
+	}
 
 	// Get arguments
 	for (argc = 1; position < BUFFER_SIZE && strBuffer[position] != 0; position++) {
 		if (strBuffer[position] == ' ') {
 			strBuffer[position] = 0;
 			position++;
+			argv[argc] = strBuffer + position;
+			argc++;
 			while (position < BUFFER_SIZE && strBuffer[position] == ' ') {
 				position++;
 			}
-			argv[argc] = strBuffer + position;
-			argc++;
 		}
 	}
 	argv[argc] = NULL;

@@ -151,7 +151,7 @@ void *findMemory(uint64_t blocks, BlockNode *node, uint8_t virginNode) {
 		return NULL;
 	}
 	/// yo soy candidato ideal
-	uint8_t minimal = node->blocks >= blocks && (node->blocks >> 1) < blocks;
+	uint8_t minimal = (node->blocks >> 1) < blocks;
 	if (minimal && virginNode) {
 		return node->addr;
 	}
@@ -244,7 +244,7 @@ uint8_t binarySearch(void *addr, BlockNode *node, uint8_t *found) {
 		if (binarySearch(addr, node->right, found)) {
 			node->right = NULL;
 			// found & deleted. should I delete myself as well?
-			if (node->left == NULL && node->right == NULL) {
+			if (node->left == NULL) {
 				deleteNode(node);
 				return 1;
 			}
@@ -258,7 +258,7 @@ uint8_t binarySearch(void *addr, BlockNode *node, uint8_t *found) {
 		if (binarySearch(addr, node->left, found)) {
 			node->left = NULL;
 			// found & deleted. should I delete myself as well?
-			if (node->left == NULL && node->right == NULL) {
+			if (node->right == NULL) {
 				deleteNode(node);
 				return 1;
 			}
@@ -338,41 +338,6 @@ void *getMemoryRecursive(MemoryInfo *meminfo, BlockNode *node, void *lastUsedAdd
 	if (node->right)
 		lastUsedAddress = getMemoryRecursive(meminfo, node->right, lastUsedAddress);
 	return lastUsedAddress;
-}
-
-void printPad(void *nodeAddr, void *memAddr, uint64_t blocks, BlockNode *left, BlockNode *right, int tree, int nodenum) {
-	while (tree > 0) {
-		if (tree == 1) {
-			printf("|__");
-		}
-		else if (tree & 1) {
-			printf("|  ");
-		}
-		else {
-			printf("   ");
-		}
-		tree = tree >> 1;
-	}
-	printf("(%d) %x (%x %x %x %x)\n", nodenum, nodeAddr, memAddr, blocks * BLOCK_SIZE, left, right);
-}
-
-void printGraphRec(BlockNode *Node, int depth, int tree, int nodenum) {
-	printPad(Node, Node->addr, Node->blocks, Node->left, Node->right, tree, nodenum);
-	int newTree = tree + (1 << (depth));
-	if (Node->right == NULL && depth >= 1) {
-		newTree = newTree - (1 << (depth - 1));
-	}
-	if (Node->left)
-		printGraphRec(Node->left, depth + 1, newTree, 1);
-	if (Node->right)
-		printGraphRec(Node->right, depth + 1, newTree, 2);
-}
-
-void printMem() {
-	if (memMan.root)
-		printGraphRec(memMan.root, 0, 0, 0);
-	else
-		printf("No memory allocated\n");
 }
 
 #endif

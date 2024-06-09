@@ -61,3 +61,57 @@ void block(int argc, char **argv) {
 	SyscallToggleBlockProcess(pid);
 	exit(0);
 }
+
+void mem(int argc, char **argv) {
+	MemoryInfo mminfoo;
+	memoryManagerStats(&mminfoo);
+	printf("Total Memory: 0x%8lx\tFree Memory: 0x%8lx\tOcupied Memory: 0x%8lx\nFragmented Memory: 0x%8lx\tMax Frag Block Size:%8lx\tMin Frag Block Size:%8lx\tAssigned Nodes:%4lu\nStart address: 0x%8lx\tEnd address: 0x%8lx\tMM Type: %c\n", mminfoo.totalMemory, mminfoo.freeMemory, mminfoo.occupiedMemory, mminfoo.fragmentedMemory, mminfoo.maxFragmentedSize, mminfoo.minFragmentedSize, mminfoo.assignedNodes, mminfoo.startAddress, mminfoo.endAddress, mminfoo.mmType);
+	exit(0);
+}
+
+void greeting(int argc, char **argv) {
+	int sleepTime = 1000;
+	if (argc > 1) {
+		sleepTime = stringToInt(argv[1], strlen(argv[1])) * 1000;
+		if (!sleepTime) {
+			fprintf(STD_ERR, "Please provide a valid sleep time or use the default\n");
+			exit(-1);
+		}
+	}
+	PID_t myPID = getPID();
+	while (TRUE) {
+		printf("\nHello! I'm %u\0", myPID);
+		sleep(sleepTime);
+	}
+	exit(0);
+}
+
+void cat(int argc, char **argv) {
+	char c;
+	while ((c = getchar()) != EOF) {
+		if (c)
+			putchar(c);
+	}
+	exit(0);
+}
+
+void filter(int argc, char **argv) {
+	char c;
+	while ((c = getchar()) != EOF) {
+		if (c)
+			if (c != 'a' && c != 'A' && c != 'e' && c != 'E' && c != 'i' && c != 'I' &&
+				c != 'o' && c != 'O' && c != 'u' && c != 'U')
+				putchar(c);
+	}
+	exit(0);
+}
+
+void wc(int argc, char **argv) {
+	char c;
+	int lines = 0;
+	while ((c = getchar()) != EOF) {
+		if (c == '\n')
+			lines++;
+	}
+	exit(lines);
+}

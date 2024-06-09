@@ -240,6 +240,12 @@ void puts(char *str) {
 	fputs(STD_OUT, str);
 }
 
+char getchar() {
+	char ch = 0;
+	SyscallRead(STD_IN, &ch, 1);
+	return ch;
+}
+
 void text_color_set(uint32_t color) {
 	text_format format;
 
@@ -262,6 +268,8 @@ uint32_t text_color_get() {
 // MERSENNE TWISTER ALGHORITH BORROWED FROM https://en.wikipedia.org/wiki/Mersenne_Twister
 void srand(uint32_t seed) {
 	randState = malloc(sizeof(mt_state));
+	if (!randState)
+		return;
 	uint32_t *state_array = &(randState->state_array[0]);
 
 	state_array[0] = seed; // suggested initial seed = 19650218UL
@@ -275,6 +283,8 @@ void srand(uint32_t seed) {
 }
 
 uint32_t rand() {
+	if (!randState)
+		return 0;
 	uint32_t *state_array = &(randState->state_array[0]);
 
 	int k = randState->state_index; // point to current state location

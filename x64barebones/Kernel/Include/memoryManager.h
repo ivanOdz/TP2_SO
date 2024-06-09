@@ -10,6 +10,5 @@ MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_
 void *allocMemory(const uint64_t size);
 void getMemoryInfo(MemoryInfo *mminfo);
 uint8_t freeMemory(void *ptrAllocatedMemory);
-void printMem();
 
 #endif

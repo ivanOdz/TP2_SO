@@ -7,6 +7,7 @@
 #define NULL  0
 #define TRUE  1
 #define FALSE 0
+#define EOF	  (char) -1
 
 #define STD_IN	0
 #define STD_OUT 1
@@ -110,6 +111,7 @@ void puts(char *str);
 void putchar(char c);
 void fputchar(uint8_t fd, char c);
 void fputs(uint8_t fd, char *str);
+char getchar();
 void printf(char *fmt, ...);
 void fprintf(uint8_t fd, char *fmt, ...);
 void fprintf_args(uint8_t fd, char *fmt, va_list args);

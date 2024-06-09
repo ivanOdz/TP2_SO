@@ -91,7 +91,7 @@ void keyboard_handler() {
 			return;
 		}
 		if (c == 0x20) // D (EOF)
-			buffer[writeCursor++] = 0xFF;
+			buffer[writeCursor++] = EOF;
 		if (c == 0x13) { // R (Panic! at the Kernel)
 			setFontSize(4);
 			drawWord(STD_ERR, "\ePanic! at the Kernel");

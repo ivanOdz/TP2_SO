@@ -5,6 +5,7 @@
 
 void keyboard_handler();
 uint64_t consume_keys(char *buf, uint64_t size);
+extern void main();
 
 #define STD_IN 0
 

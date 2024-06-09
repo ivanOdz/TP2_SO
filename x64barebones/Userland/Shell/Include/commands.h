@@ -52,5 +52,10 @@ static const availableCommand avCommands[] = {
 	{"ps", FALSE, (int (*)(int, char **)) ps},
 	{"nice", FALSE, (int (*)(int, char **)) nice},
 	{"kill", TRUE, command_kill},
-	{"block", FALSE, (int (*)(int, char **)) block}};
+	{"block", FALSE, (int (*)(int, char **)) block},
+	{"mem", FALSE, (int (*)(int, char **)) mem},
+	{"loop", FALSE, (int (*)(int, char **)) greeting},
+	{"cat", FALSE, (int (*)(int, char **)) cat},
+	{"filter", FALSE, (int (*)(int, char **)) filter},
+	{"wc", FALSE, (int (*)(int, char **)) wc}};
 #endif
