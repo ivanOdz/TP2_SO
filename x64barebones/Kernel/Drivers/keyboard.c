@@ -42,8 +42,10 @@ uint64_t consume_keys2(char *dest, FifoBuffer *src, uint64_t size) {
 	while (i < size && src->readCursor != EOF) {	// ESTO ESTA MAL, PERO HAY QUE PREGUNTAR SI ES QUE NO HAY MAS NADA PARA LEER POR EOF
 		if (src->readCursor == src->writeCursor) {
 			// CHANGE STATE A BLOCKED ON READ DE ESTE FD
+			// AÑADIR EL PROCESO BLOCKEADO AL PIPE CON ALLOC MEMORY
 			// YIELD
 			// CUANDO SE DESBLOQUEE ESTE PROCESO, VA A SEGUIR DESDE ACA ADENTRO LEYENDO.
+			// LIBERO EL PROCESO QUE ESTABA BLOQUEADO EN LA LISTA DEL PIPE
 		}
 		dest[i++] = *(src->readCursor++);
 		if (src->readCursor >= src->buffer + PIPES_BUFFER_SIZE) { // BUFFER CIRCULAR
