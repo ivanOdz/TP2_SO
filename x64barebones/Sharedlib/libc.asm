@@ -355,6 +355,8 @@ SyscallFdInfo:
     mov rbp, rsp    
 
     mov rax, 0x1A
+    mov rbx, rdi    
+
     int 80h
 
     mov rsp, rbp
