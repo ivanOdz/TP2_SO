@@ -77,7 +77,7 @@ typedef struct ProcessInfo {
 
 } ProcessInfo;
 
-typedef struct FdInfo{
+typedef struct FdInfo {
 	char processName[255];
 	PID_t pid;
 	uint16_t fd;
@@ -92,9 +92,13 @@ typedef struct ReturnStatus {
 	PID_t pid;
 } ReturnStatus;
 
+typedef enum { READ = 0,
+			   WRITE = 1
+} FifoMode;
+
 extern uint64_t SyscallWrite(uint8_t fd, char *buffer, uint64_t size);
 extern uint64_t SyscallRead(uint8_t fd, char *buffer, uint64_t size);
-extern uint64_t SyscallClear();
+extern void SyscallClear();
 extern uint64_t SyscallGetRegisters();
 extern uint64_t SyscallGetRTC(time_type *buffer);
 extern uint64_t SyscallGetFormat(text_format *buffer);
@@ -104,12 +108,14 @@ extern uint64_t SyscallGetTicks();
 extern uint64_t SyscallAudio(uint8_t isLoop, const uint8_t *buffer, uint64_t size);
 extern uint64_t SyscallSetTimer(uint16_t delay);
 extern uint64_t SyscallMemInfo(MemoryInfo *meminfo);
-extern uint64_t SyscallPrintMem();
 extern ProcessInfo *SyscallProcessInfo();
 extern uint64_t SyscallNice(uint16_t pid, uint8_t newPriority);
 extern uint64_t SyscallToggleBlockProcess(uint16_t pid);
+extern int pipe(int fds[2]);
 extern FdInfo *SyscallFdInfo();
-
+extern int64_t open(char *name, FifoMode mode);
+extern int64_t close(uint64_t fd);
+extern int64_t dupFD(uint64_t fd);
 
 int64_t strcpy(char *dest, const char *src);
 int64_t strcmp(const char *str1, const char *str2);
@@ -145,6 +151,5 @@ void yield();
 PID_t getPID();
 PID_t kill(PID_t PID);
 void sleep(uint64_t ms);
-
 
 #endif

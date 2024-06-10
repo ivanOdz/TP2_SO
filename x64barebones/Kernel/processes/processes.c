@@ -36,6 +36,9 @@ PCB *initProcess(void *kernelStack) {
 	process->blockedOn.timer = 0;
 	process->blockedOn.manual = FALSE;
 	process->priority = 1;
+	for (int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
+		process->fileDescriptors[i].pipe = NULL;
+	}
 	return process;
 }
 
@@ -78,11 +81,11 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	process->blockedOn.fd = 0;
 	process->blockedOn.timer = 0;
 	process->blockedOn.manual = FALSE;
-	process->fileDescriptors[0].pipe = createFifo(KEYBOARD_NAME);
+	process->fileDescriptors[0].pipe = openFifo(KEYBOARD_NAME, READ);
 	process->fileDescriptors[0].mode = READ;
-	process->fileDescriptors[1].pipe = createFifo(CONSOLE_NAME);
+	process->fileDescriptors[1].pipe = openFifo(CONSOLE_NAME, WRITE);
 	process->fileDescriptors[1].mode = WRITE;
-	process->fileDescriptors[2].pipe = createFifo(ERROR_NAME);
+	process->fileDescriptors[2].pipe = openFifo(ERROR_NAME, WRITE);
 	process->fileDescriptors[2].mode = WRITE;
 
 	return process;
@@ -208,7 +211,7 @@ bool getFDEmptyIndexes(PCB *process, int pipefd[2]) {
 	return TRUE;
 }
 
-int8_t createPipe(char *name, int pipefd[2]) {
+int64_t createPipe(char *name, int pipefd[2]) {
 	PCB *process = getCurrentProcess();
 	if (!getFDEmptyIndexes(process, pipefd)) {
 		return -1;
@@ -218,14 +221,66 @@ int8_t createPipe(char *name, int pipefd[2]) {
 		return -1;
 	}
 	process->fileDescriptors[pipefd[0]].pipe = fifo;
-	process->fileDescriptors[pipefd[0]].mode = 'r';
+	process->fileDescriptors[pipefd[0]].mode = READ;
 
 	fifo->readEnds++;
 
 	process->fileDescriptors[pipefd[1]].pipe = fifo;
-	process->fileDescriptors[pipefd[1]].mode = 'w';
+	process->fileDescriptors[pipefd[1]].mode = WRITE;
 
 	fifo->writeEnds++;
 
 	return 0;
+}
+
+int64_t openFD(char *name, FifoMode mode) {
+	PCB *process = getCurrentProcess();
+	if (!process)
+		return -1;
+	FifoBuffer *fifo = openFifo(name, mode);
+	if (!fifo)
+		return -1;
+	int index = 0;
+	while (!process->fileDescriptors[index++].pipe)
+		;
+	if (index >= MAX_FILE_DESCRIPTORS) {
+		closeFifo(fifo, mode);
+		return -1;
+	}
+	process->fileDescriptors[index].pipe = fifo;
+	process->fileDescriptors[index].mode = mode;
+	return index;
+}
+
+int64_t closeFD(int fd) {
+	PCB *process = getCurrentProcess();
+	if (!process)
+		return -1;
+	if (fd >= MAX_FILE_DESCRIPTORS || !process->fileDescriptors[fd].pipe)
+		return -1;
+	closeFifo(process->fileDescriptors[fd].pipe, process->fileDescriptors[fd].mode);
+	process->fileDescriptors[fd].pipe = NULL;
+	return 0;
+}
+
+int64_t duplicateFD(int fd) {
+	PCB *process = getCurrentProcess();
+	if (!process)
+		return -1;
+	if (fd >= MAX_FILE_DESCRIPTORS || !process->fileDescriptors[fd].pipe)
+		return -1;
+	int index = 0;
+	while (!process->fileDescriptors[index++].pipe)
+		;
+	if (index >= MAX_FILE_DESCRIPTORS)
+		return -1;
+	process->fileDescriptors[index].pipe = process->fileDescriptors[fd].pipe;
+	process->fileDescriptors[index].mode = process->fileDescriptors[fd].mode;
+	if (process->fileDescriptors[index].mode == READ) {
+		process->fileDescriptors[index].pipe->readEnds++;
+	}
+	else {
+		process->fileDescriptors[index].pipe->writeEnds++;
+	}
+	return index;
 }

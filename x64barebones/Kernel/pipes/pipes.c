@@ -117,24 +117,29 @@ int64_t getPipeIndex() {
 }
 
 // Un pipe solo se puede abrir si es con nombre.
-FifoBuffer *openPipe(char *name) {
+FifoBuffer *openFifo(char *name, FifoMode mode) {
 	int i;
 	for (i = 0; i < PIPES_QTY; i++) {
-		if (pipesList[i] && pipesList[i]->name && strcmp(pipesList[i]->name, name) == 0)
-			break;
+		if (pipesList[i] && pipesList[i]->name && strcmp(pipesList[i]->name, name) == 0) {
+			if (mode == READ) {
+				pipesList[i]->readEnds++;
+			}
+			else {
+				pipesList[i]->writeEnds++;
+			}
+			return pipesList[i];
+		}
 	}
-	if (i == PIPES_QTY) {
-		return NULL;
-	}
-	return pipesList[i];
+	return NULL;
 }
 
 FifoBuffer *createFifo(char *name) {
 	FifoBuffer *newPipe;
 	if (name) {
-		newPipe = openPipe(name);
+		newPipe = openFifo(name, READ);
 		if (newPipe) {
-			return newPipe;
+			closeFifo(newPipe, READ);
+			return NULL;
 		}
 	}
 	int32_t index = getPipeIndex();
@@ -151,7 +156,7 @@ FifoBuffer *createFifo(char *name) {
 		strcpy(newPipe->name, name); // si el nombre es la cadena vacia 0, es un pipe anonimo.
 	}
 	else {
-		newPipe->name = "pipe";
+		newPipe->name = "";
 	}
 	newPipe->readCursor = newPipe->buffer;
 	newPipe->writeCursor = newPipe->buffer;
@@ -165,9 +170,18 @@ FifoBuffer *createFifo(char *name) {
 	return newPipe;
 }
 
-FdInfo * fdInfo(){
+void closeFifo(FifoBuffer *fifo, FifoMode mode) {
+	if (mode == READ) {
+		fifo->readEnds--;
+	}
+	else {
+		fifo->writeEnds--;
+	}
+}
+
+FdInfo *fdInfo() {
 	FdInfo *currentProcessInfo = allocMemory(sizeof(FdInfo));
-	//setfDInfo(currentProcessInfo, currentProcess);
+	// setfDInfo(currentProcessInfo, currentProcess);
 
 	return NULL;
 }

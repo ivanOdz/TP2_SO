@@ -26,6 +26,9 @@ GLOBAL kill
 GLOBAL sleep
 GLOBAL pipe
 GLOBAL SyscallFdInfo
+GLOBAL open
+GLOBAL close
+GLOBAL dupFD
 ALIGN 16
 
 
@@ -355,6 +358,43 @@ SyscallFdInfo:
     mov rbp, rsp    
 
     mov rax, 0x1A
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+open:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x1B
+    mov rbx, rdi    ; name
+    mov rcx, rsi    ; mode
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+close:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x1C
+    mov rbx, rdi    ; fd
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+dupFD:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x1B
+    mov rbx, rdi    ; fd
     int 80h
 
     mov rsp, rbp

@@ -23,7 +23,7 @@ typedef struct BlockedOn {
 	// sem_t semaphore;
 } BlockedOn;
 
-typedef struct {
+typedef struct FileDescriptors {
 	FifoBuffer *pipe;
 	FifoMode mode;
 } FileDescriptors;
@@ -59,6 +59,9 @@ void setProcessPriority(uint16_t pid, int8_t priority);
 uint8_t blockProcess(uint16_t pid);
 extern uint8_t *fabricateProcessStack(uint8_t *stackBasePointer, int argc, char **argv, int (*processMain)(int argc, char **argv));
 bool getFDEmptyIndexes(PCB *process, int index[2]);
-int8_t createPipe(char *name, int index[2]);
+int64_t createPipe(char *name, int index[2]);
+int64_t openFD(char *name, FifoMode mode);
+int64_t closeFD(int fd);
+int64_t duplicateFD(int fd);
 
 #endif

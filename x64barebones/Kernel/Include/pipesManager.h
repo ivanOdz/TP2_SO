@@ -20,10 +20,6 @@ typedef struct BlockedProcessesNode {
 	struct BlockedProcessesNode *next;
 } BlockedProcessesNode;
 
-typedef enum { READ = 0,
-			   WRITE = 1
-} FifoMode;
-
 typedef struct {
 	char *name;
 	char buffer[PIPES_BUFFER_SIZE];
@@ -36,6 +32,8 @@ typedef struct {
 } FifoBuffer;
 
 FifoBuffer *createFifo(char *name);
+FifoBuffer *openFifo(char *name, FifoMode mode);
+void closeFifo(FifoBuffer *fifo, FifoMode mode);
 bool wouldBlock(FifoBuffer *fifo, FifoMode blockMode);
 void unblockFifo(FifoBuffer *fifo, FifoMode mode);
 void blockFifo(FifoBuffer *fifo, FifoMode mode);
@@ -44,6 +42,6 @@ int64_t readFifo(FifoBuffer *fifo, char *dest, uint64_t size, bool blocking);
 bool putFifo(FifoBuffer *fifo, char c, bool blocking);
 char getFifo(FifoBuffer *fifo, bool blocking);
 void printFileDescriptors(PID_t pid);
-FdInfo * fdInfo();
+FdInfo *fdInfo();
 
 #endif

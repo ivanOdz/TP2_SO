@@ -172,9 +172,20 @@ int64_t syscall_pipe(char *name, int pipefd[2]) {
 	return createPipe(name, pipefd);
 }
 
-FdInfo * syscall_fdinfo(){
-	return fdInfo();	
+FdInfo *syscall_fdinfo() {
+	return fdInfo();
 }
 
+int64_t syscall_open(char *name, FifoMode mode) {
+	return openFD(name, mode);
+}
+
+int64_t syscall_close(uint64_t fd) {
+	return closeFD(fd);
+}
+
+int64_t syscall_dup(uint64_t fd) {
+	return duplicateFD(fd);
+}
 
 typedef int (*EntryPoint)();
