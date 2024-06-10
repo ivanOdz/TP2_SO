@@ -396,7 +396,7 @@ dupFD:
     push rbp
     mov rbp, rsp    
 
-    mov rax, 0x1B
+    mov rax, 0x1D
     mov rbx, rdi    ; fd
     int 80h
 

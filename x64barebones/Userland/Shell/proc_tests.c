@@ -98,7 +98,7 @@ void test_processes(int argc, char **argv) {
 			exit(4);
 		}
 	}
-	SyscallClear();
+	putchar('\e');
 	SyscallNice(getPID(), 9);
 	printf("Max processes: %lu\tbias: %lu\tsleep: %lums\tburn-in: %lu\n", maxProcesses, bias, sleepAmount, burnin);
 	time_type time;
@@ -243,7 +243,7 @@ void test_priority(int argc, char **argv) {
 			exit(4);
 		}
 	}
-	SyscallClear();
+	putchar('\e');
 	SyscallNice(getPID(), 9);
 	printf("Processes: %lu\tbusytime: %lu\tmin priority: %lu\tmax priority: %lu\tburn-in: %lu\n", maxProcesses, busytime, minPriority, maxPriority, burnin);
 	ProcessPriorityType *processes = malloc(maxProcesses * sizeof(ProcessPriorityType));

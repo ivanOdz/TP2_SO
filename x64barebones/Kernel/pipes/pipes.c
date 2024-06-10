@@ -13,7 +13,7 @@ int64_t readFifo(FifoBuffer *fifo, char *dest, uint64_t size, bool blocking) {
 	if (blocking)
 		blockFifo(fifo, READ);
 	uint64_t i = 0;
-	while (i < size && *(fifo->readCursor) != EOF && !wouldBlock(fifo, READ)) {
+	while (i < size && !wouldBlock(fifo, READ)) {
 		dest[i++] = *(fifo->readCursor++);
 		if (fifo->readCursor >= fifo->buffer + PIPES_BUFFER_SIZE) { // BUFFER CIRCULAR
 			fifo->readCursor = fifo->buffer;
@@ -88,8 +88,7 @@ void blockFifo(FifoBuffer *fifo, FifoMode blockMode) {
 }
 
 void unblockFifo(FifoBuffer *fifo, FifoMode blockMode) {
-	if ((blockMode == WRITE && ((fifo->writeCursor - fifo->buffer + 1) % PIPES_BUFFER_SIZE) != (fifo->readCursor - fifo->buffer)) ||
-		(blockMode == READ && (fifo->writeCursor != fifo->readCursor))) {
+	if (!wouldBlock(fifo, blockMode)) {
 		BlockedProcessesNode *blocked = (blockMode == READ) ? fifo->blockedProcessesOnRead : fifo->blockedProcessesOnWrite;
 		BlockedProcessesNode *aux;
 		PCB *process;
@@ -179,6 +178,9 @@ void closeFifo(FifoBuffer *fifo, FifoMode mode) {
 	}
 	else {
 		fifo->writeEnds--;
+	}
+	if (!fifo->writeEnds) {
+		putFifo(fifo, EOF, FALSE);
 	}
 }
 

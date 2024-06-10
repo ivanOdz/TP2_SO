@@ -211,7 +211,7 @@ bool getFDEmptyIndexes(PCB *process, int pipefd[2]) {
 	return TRUE;
 }
 
-int64_t createPipe(char *name, int *pipefd) {
+int64_t createPipe(char *name, int pipefd[2]) {
 	PCB *process = getCurrentProcess();
 	if (!getFDEmptyIndexes(process, pipefd)) {
 		return -1;
@@ -222,12 +222,10 @@ int64_t createPipe(char *name, int *pipefd) {
 	}
 	process->fileDescriptors[pipefd[0]].pipe = fifo;
 	process->fileDescriptors[pipefd[0]].mode = READ;
-
 	fifo->readEnds++;
 
 	process->fileDescriptors[pipefd[1]].pipe = fifo;
 	process->fileDescriptors[pipefd[1]].mode = WRITE;
-
 	fifo->writeEnds++;
 
 	return 0;
@@ -267,18 +265,18 @@ int64_t duplicateFD(int fd) {
 		return -1;
 	if (fd >= MAX_FILE_DESCRIPTORS || !process->fileDescriptors[fd].pipe)
 		return -1;
-	int index = 0;
-	while (!process->fileDescriptors[index++].pipe)
-		;
-	if (index >= MAX_FILE_DESCRIPTORS)
-		return -1;
-	process->fileDescriptors[index].pipe = process->fileDescriptors[fd].pipe;
-	process->fileDescriptors[index].mode = process->fileDescriptors[fd].mode;
-	if (process->fileDescriptors[index].mode == READ) {
-		process->fileDescriptors[index].pipe->readEnds++;
+	for (int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
+		if (!process->fileDescriptors[i].pipe) {
+			process->fileDescriptors[i].pipe = process->fileDescriptors[fd].pipe;
+			process->fileDescriptors[i].mode = process->fileDescriptors[fd].mode;
+			if (process->fileDescriptors[i].mode == READ) {
+				process->fileDescriptors[i].pipe->readEnds++;
+			}
+			else {
+				process->fileDescriptors[i].pipe->writeEnds++;
+			}
+			return i;
+		}
 	}
-	else {
-		process->fileDescriptors[index].pipe->writeEnds++;
-	}
-	return index;
+	return -1;
 }

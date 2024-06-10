@@ -105,6 +105,7 @@ void cat(int argc, char **argv) {
 		if (c)
 			putchar(c);
 	}
+	putchar(c);
 	exit(0);
 }
 
@@ -116,6 +117,7 @@ void filter(int argc, char **argv) {
 				c != 'o' && c != 'O' && c != 'u' && c != 'U')
 				putchar(c);
 	}
+	putchar(c);
 	exit(0);
 }
 
@@ -126,5 +128,6 @@ void wc(int argc, char **argv) {
 		if (c == '\n')
 			lines++;
 	}
+	putchar(c);
 	exit(lines);
 }

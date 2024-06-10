@@ -231,6 +231,8 @@ void runCommand(char *runMe) {
 			open(KEYBOARD_NAME, READ);
 			if (pid != getPID()) {
 				if (!pid) {
+					close(pipefds[0]);
+					close(pipefds[1]);
 					puts(">> ");
 					return;
 				}
@@ -238,6 +240,8 @@ void runCommand(char *runMe) {
 			}
 			close(STD_OUT);
 			dupFD(pipefds[WRITE]);
+			close(pipefds[0]);
+			close(pipefds[1]);
 		}
 	}
 	pid = run(strBuffer);
@@ -250,10 +254,7 @@ void runCommand(char *runMe) {
 	}
 	close(STD_OUT);
 	open(CONSOLE_NAME, WRITE);
-	if (pipefds[0] || pipefds[1]) {
-		close(pipefds[0]);
-		close(pipefds[1]);
-	}
+
 	while (waits--) {
 		PID_t exited = waitpid(0, &wstatus);
 		SyscallSetFormat(&shell_fmt);

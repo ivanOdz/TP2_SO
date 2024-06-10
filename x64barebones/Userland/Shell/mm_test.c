@@ -66,7 +66,7 @@ void mm_test(int argc, char **argv) {
 		fprintf(STD_ERR, "Minimum size must be strictly smaller than maximum size\n");
 		exit(-1);
 	}
-	SyscallClear();
+	putchar('\e');
 
 	time_type time;
 	SyscallGetRTC(&time);

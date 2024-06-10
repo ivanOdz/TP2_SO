@@ -35,12 +35,12 @@ int command_setFontSize(int argc, char **argv) {
 	}
 	shell_fmt.size = newSize;
 	SyscallSetFormat(&shell_fmt);
-	SyscallClear();
+	putchar('\e');
 	return 0;
 }
 
 int command_clear(int argc, char **argv) {
-	SyscallClear();
+	putchar('\e');
 	return 0;
 }
 
@@ -48,7 +48,7 @@ int command_tunes(int argc, char **argv) {
 	draw_type ricky = {0, 0, RICKWIDTH, RICKHEIGHT, 0, 0, (uint32_t *) rick};
 	text_format fmt = {0x00000000, 0x00C0C0C0, 3, 0};
 	SyscallSetFormat(&fmt);
-	SyscallClear();
+	putchar('\e');
 	SyscallAudio(1, roll, rolllength);
 	for (int i = 0; i + RICKWIDTH < 1024; i += RICKWIDTH) {
 		for (int j = 0; j + RICKHEIGHT < 768; j += RICKHEIGHT) {
