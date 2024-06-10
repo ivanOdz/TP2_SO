@@ -274,7 +274,7 @@ void test_priority(int argc, char **argv) {
 				processes[spawned].priority = (int) (minPriority + (double) (maxPriority - minPriority + 1) * progress);
 				SyscallNice(processes[spawned].PID, processes[spawned].priority);
 			}
-			printf("\rInstantiating processes (%lu of %lu processes)", spawned + 1, maxProcesses);
+			printf("\rInstantiating processes (%d of %lu processes)", spawned + 1, maxProcesses);
 		}
 		for (int p = 0; p < maxProcesses; p++) {
 			perPriority[processes[p].priority]++;

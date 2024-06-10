@@ -18,10 +18,10 @@ void ps(int argc, char **argv) {
 void lsof(int argc, char **argv) {
 	FdInfo *info = SyscallFdInfo();
 	printf("PROCESS NAME\t\tPID   FD  MODE\tPIPE NAME\n");
-		printf("=============================================================\n");
+	printf("=============================================================\n");
 
 	while (info != NULL) {
-		printf("%-20s %5d %5d   %-10s  %-20s\n", info->processName, info->pid, info->fd, info->mode, info->pipeName);
+		printf("%-20s %5u %5u   %c  %-20s\n", info->processName, info->pid, info->fd, info->mode, info->pipeName);
 		FdInfo *temp = info;
 		info = info->nextFdInfo;
 		free(temp);
