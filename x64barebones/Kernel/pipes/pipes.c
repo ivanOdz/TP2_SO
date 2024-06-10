@@ -56,7 +56,7 @@ bool wouldBlock(FifoBuffer *fifo, FifoMode blockMode) {
 }
 
 void blockFifo(FifoBuffer *fifo, FifoMode blockMode) {
-	if (wouldBlock(fifo, blockMode)) {
+	if (wouldBlock(fifo, blockMode) && ((blockMode == READ && fifo->writeEnds) || (blockMode == WRITE))) {
 		// CHANGE STATE A BLOCKED
 		PCB *process = getCurrentProcess();
 		process->blockedOn.fd = TRUE;
@@ -178,9 +178,6 @@ void closeFifo(FifoBuffer *fifo, FifoMode mode) {
 	}
 	else {
 		fifo->writeEnds--;
-	}
-	if (!fifo->writeEnds && fifo->writeCursor != fifo->buffer) {
-		putFifo(fifo, EOF, FALSE);
 	}
 }
 
