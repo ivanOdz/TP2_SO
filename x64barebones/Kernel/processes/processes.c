@@ -211,7 +211,7 @@ bool getFDEmptyIndexes(PCB *process, int pipefd[2]) {
 	return TRUE;
 }
 
-int64_t createPipe(char *name, int pipefd[2]) {
+int64_t createPipe(char *name, int *pipefd) {
 	PCB *process = getCurrentProcess();
 	if (!getFDEmptyIndexes(process, pipefd)) {
 		return -1;

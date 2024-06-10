@@ -346,7 +346,8 @@ pipe:
     mov rbp, rsp    
 
     mov rax, 0x19
-    mov rbx, rdi    ; int pipefd[2]
+    mov rbx, rdi    ; name
+    mov rcx, rsi    ; int pipefd[2]
     int 80h
 
     mov rsp, rbp

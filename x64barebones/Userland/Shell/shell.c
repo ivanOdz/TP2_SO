@@ -16,7 +16,9 @@ typedef struct commandBuffer {
 
 void emptyCommandBuffer(commandBuffer *buffer);
 void deleteChars(commandBuffer *command);
-int64_t runCommand(char *strBuffer);
+PID_t run(char *strBuffer);
+void runCommand(char *strBuffer);
+
 void printEdit(commandBuffer *command);
 void shell(int argc, char **argv) {
 	open(KEYBOARD_NAME, READ);
@@ -208,9 +210,65 @@ void deleteChars(commandBuffer *command) {
 		}
 }
 
-int64_t runCommand(char *run) {
+void runCommand(char *runMe) {
 	char strBuffer[BUFFER_SIZE];
-	strcpy(strBuffer, run);
+	strcpy(strBuffer, runMe);
+	ReturnStatus wstatus;
+	int64_t pid;
+	int waits = 0;
+	int pipefds[2] = {0};
+	for (int i = 0; strBuffer[i] != 0; i++) {
+		if (strBuffer[i] == '|') {
+			strBuffer[i] = 0;
+			if (pipe(NULL, pipefds) != 0) {
+				fprintf(STD_ERR, "Error creating pipes for IPC\n");
+				puts(">> ");
+			}
+			close(STD_IN);
+			dupFD(pipefds[READ]);
+			pid = run(strBuffer + i + 1);
+			close(STD_IN);
+			open(KEYBOARD_NAME, READ);
+			if (pid != getPID()) {
+				if (!pid) {
+					puts(">> ");
+					return;
+				}
+				waits++;
+			}
+			close(STD_OUT);
+			dupFD(pipefds[WRITE]);
+		}
+	}
+	pid = run(strBuffer);
+	if (pid != getPID()) {
+		if (!pid) {
+			puts(">> ");
+			return;
+		}
+		waits++;
+	}
+	close(STD_OUT);
+	open(CONSOLE_NAME, WRITE);
+	if (pipefds[0] || pipefds[1]) {
+		close(pipefds[0]);
+		close(pipefds[1]);
+	}
+	while (waits--) {
+		PID_t exited = waitpid(0, &wstatus);
+		SyscallSetFormat(&shell_fmt);
+		if (wstatus.aborted)
+			fprintf(STD_ERR, "%u was killed\n", exited);
+		if (wstatus.returnValue)
+			printf("Process %u exited with code %d\n", exited, wstatus.returnValue);
+	}
+	puts(">> ");
+	return;
+}
+
+PID_t run(char *command) {
+	char strBuffer[BUFFER_SIZE];
+	strcpy(strBuffer, command);
 	int argc;
 	char *argv[BUFFER_SIZE];
 
@@ -232,47 +290,30 @@ int64_t runCommand(char *run) {
 		}
 	}
 	argv[argc] = NULL;
-
 	for (uint64_t cont = 0; cont < AVAILABLE_COMMANDS; cont++) {
 		// Search for command and execute
 		if (strcmp(argv[0], (avCommands[cont]).name) == 0) {
 			if (avCommands[cont].function != NULL) {
-				int retValue;
 				if (avCommands[cont].builtin) {
-					retValue = avCommands[cont].function(argc, (char **) argv);
+					avCommands[cont].function(argc, (char **) argv);
+					return getPID();
 				}
 				else {
 					PID_t childPID = execv((void (*)(int, char **)) avCommands[cont].function, argv, FOREGROUND);
-					ReturnStatus wstatus;
-					if (childPID) {
-						PID_t exited = waitpid(childPID, &wstatus);
-						SyscallSetFormat(&shell_fmt);
-						printf("\nI'm back, PID %d has taken an L and returned %d\n", exited, wstatus.returnValue);
-						if (wstatus.aborted)
-							fprintf(STD_ERR, "%s was killed\n", strBuffer);
-						retValue = wstatus.returnValue;
-					}
-					else {
+					if (!childPID)
 						fprintf(STD_ERR, "Couldn't execute %s\n", strBuffer);
-						retValue = 0;
-					}
+					return childPID;
 				}
-				if (retValue)
-					printf("Command %s exited with code %d\n", avCommands[cont].name, retValue);
-				puts(">> ");
-				return 0;
 			}
 			else {
 				uint32_t lastColor = text_color_get();
 				text_color_set(COLORS_ORANGE);
-				fprintf(STD_OUT, "Cannot execute \'%s\', not implemented or invalid pointer\n", run);
+				fprintf(STD_OUT, "Cannot execute \'%s\', not implemented or invalid pointer\n", strBuffer);
 				text_color_set(lastColor);
-				puts(">> ");
-				return -1;
+				return 0;
 			}
 		}
 	}
-	fprintf(STD_ERR, "Command \'%s\' not found\n", run);
-	puts(">> ");
-	return -1;
+	fprintf(STD_ERR, "Command \'%s\' not found\n", strBuffer);
+	return 0;
 }
