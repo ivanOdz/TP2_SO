@@ -195,11 +195,11 @@ uint8_t blockProcess(uint16_t pid) {
 	return FALSE;
 }
 
-bool getFDEmptyIndexes(PCB *process, int index[2]) {
+bool getFDEmptyIndexes(PCB *process, int pipefd[2]) {
 	int i, found = 0;
 	for (i = 0; i < MAX_FILE_DESCRIPTORS && found < 2; i++) {
 		if (!process->fileDescriptors[i].pipe) {
-			index[found++] = i;
+			pipefd[found++] = i;
 		}
 	}
 	if (i == MAX_FILE_DESCRIPTORS) {
@@ -208,23 +208,24 @@ bool getFDEmptyIndexes(PCB *process, int index[2]) {
 	return TRUE;
 }
 
-/*int8_t createPipe(char *name, int index[2]) {
+int8_t createPipe(char *name, int pipefd[2]) {
 	PCB *process = getCurrentProcess();
-	if (getFDIndex(process, index) == -1) {
+	if(!getFDEmptyIndexes(process, pipefd)){
 		return -1;
 	}
 	FifoBuffer *fifo = createFifo(name);
-	process->fileDescriptors[index[0]].pipe = fifo;
-	process->fileDescriptors[index[0]].mode = 'r';
-	process->fileDescriptors[index[0]].isBeingUsed = 1;
+	if(!fifo){
+		return -1;
+	}
+	process->fileDescriptors[pipefd[0]].pipe = fifo;
+	process->fileDescriptors[pipefd[0]].mode = 'r';
 
 	fifo->readEnds++;
 
-	process->fileDescriptors[index[1]].pipe = fifo;
-	process->fileDescriptors[index[1]].mode = 'w';
-	process->fileDescriptors[index[1]].isBeingUsed = 1;
+	process->fileDescriptors[pipefd[1]].pipe = fifo;
+	process->fileDescriptors[pipefd[1]].mode = 'w';
 
 	fifo->writeEnds++;
 
 	return 0;
-}*/
+}

@@ -168,4 +168,8 @@ void syscall_sleep(uint64_t ms) {
 	processSleep(ms);
 }
 
+int64_t syscall_pipe(char *name, int pipefd[2]) {
+	return createPipe(name, pipefd);
+}
+
 typedef int (*EntryPoint)();

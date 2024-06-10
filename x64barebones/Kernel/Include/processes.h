@@ -59,5 +59,6 @@ void setProcessPriority(uint16_t pid, int8_t priority);
 uint8_t blockProcess(uint16_t pid);
 extern uint8_t *fabricateProcessStack(uint8_t *stackBasePointer, int argc, char **argv, int (*processMain)(int argc, char **argv));
 bool getFDEmptyIndexes(PCB *process, int index[2]);
+int8_t createPipe(char *name, int index[2]);
 
 #endif

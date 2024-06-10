@@ -335,6 +335,19 @@ sleep:
     mov rsp, rbp
     pop rbp
     ret
+
+pipe:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x19
+    mov rbx, rdi    ; int pipefd[2]
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
 invalidOpcode:
     ud2
     ret
