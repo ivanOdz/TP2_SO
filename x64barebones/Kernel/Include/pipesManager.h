@@ -8,10 +8,6 @@
 #define PIPES_BUFFER_SIZE (1 << 12)
 #define PIPES_NAME_SIZE	  20
 
-#define KEYBOARD_NAME "keyboardFifo"
-#define CONSOLE_NAME  "consoleFifo"
-#define ERROR_NAME	  "errorFifo"
-
 // El proceso que tenga solamente para leer de un pipe, le voy a dar el readCursor
 // El proceso que tenga solamente para escribir un pipe, le voy a dar el writeCursor
 

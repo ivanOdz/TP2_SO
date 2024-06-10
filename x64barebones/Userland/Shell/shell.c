@@ -19,6 +19,9 @@ void deleteChars(commandBuffer *command);
 int64_t runCommand(char *strBuffer);
 void printEdit(commandBuffer *command);
 void shell(int argc, char **argv) {
+	open(KEYBOARD_NAME, READ);
+	open(CONSOLE_NAME, WRITE);
+	open(ERROR_NAME, WRITE);
 	commandBuffer *command = malloc(sizeof(commandBuffer));
 	if (!command) {
 		fprintf(STD_ERR, "SHELL ERROR\n");

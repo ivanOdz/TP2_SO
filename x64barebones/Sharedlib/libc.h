@@ -13,6 +13,11 @@
 #define STD_OUT 1
 #define STD_ERR 2
 
+#define KEYBOARD_NAME "/keyboardFifo"
+#define CONSOLE_NAME  "/consoleFifo"
+#define ERROR_NAME	  "/errorFifo"
+#define DEV_NULL	  "/dev/null"
+
 #define HZ 50
 
 #define COLORS_BLUE	  0x000000FF

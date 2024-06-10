@@ -70,8 +70,9 @@ static uint8_t charSpacing = 8;
 static uint8_t fontSize = 1;
 static uint8_t cursorActive = 1;
 
-FifoBuffer *terminalFifo;
-FifoBuffer *errorFifo;
+static FifoBuffer *terminalFifo;
+static FifoBuffer *errorFifo;
+static FifoBuffer *devnull;
 
 void scrollUp() {
 	// Copia todo el framebuffer una línea hacia arriba
@@ -113,7 +114,10 @@ void print(char *word) {
 
 void initializeVideoDriver() {
 	terminalFifo = createFifo(CONSOLE_NAME);
+	terminalFifo->readEnds++;
 	errorFifo = createFifo(ERROR_NAME);
+	terminalFifo->writeEnds++;
+	devnull = createFifo(DEV_NULL);
 	cursorActive = 1;
 	framebuffer = VBE_mode_info->framebuffer;
 	cursor_x = X_OFFSET;
@@ -292,6 +296,7 @@ void updateScreen() {
 	while ((c = getFifo(terminalFifo, FALSE)) != EOF) {
 		printChar(c, fontColor);
 	}
+	devnull->readCursor = devnull->writeCursor;
 }
 
 uint64_t setFormat(const text_format *fmt) {

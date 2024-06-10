@@ -19,6 +19,8 @@ int64_t readFifo(FifoBuffer *fifo, char *dest, uint64_t size, bool blocking) {
 			fifo->readCursor = fifo->buffer;
 		}
 	}
+	if (i < size && wouldBlock(fifo, READ) && !fifo->writeEnds)
+		dest[i++] = EOF;
 	if (i)
 		unblockFifo(fifo, WRITE);
 	return i;

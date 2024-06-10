@@ -52,6 +52,8 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 		freeMemory(process);
 		return NULL;
 	}
+	PCB *parent = getCurrentProcess();
+
 	process->stackBasePointer += STACK_DEFAULT_SIZE - sizeof(uint64_t); // stack works backwards
 	process->stackPointer = process->stackBasePointer;
 	int argc = 0;
@@ -63,7 +65,7 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	process->stackPointer = fabricateProcessStack(process->stackPointer, argc, argv, processMain);
 	process->name = argv[0];
 	process->pid = nextPid++;
-	process->parentPid = getCurrentPID();
+	process->parentPid = parent->pid;
 	process->status = READY;
 	process->runMode = runMode;
 	process->priority = 5;
@@ -81,12 +83,10 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	process->blockedOn.fd = 0;
 	process->blockedOn.timer = 0;
 	process->blockedOn.manual = FALSE;
-	process->fileDescriptors[0].pipe = openFifo(KEYBOARD_NAME, READ);
-	process->fileDescriptors[0].mode = READ;
-	process->fileDescriptors[1].pipe = openFifo(CONSOLE_NAME, WRITE);
-	process->fileDescriptors[1].mode = WRITE;
-	process->fileDescriptors[2].pipe = openFifo(ERROR_NAME, WRITE);
-	process->fileDescriptors[2].mode = WRITE;
+	for (int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
+		process->fileDescriptors[i].pipe = parent->fileDescriptors[i].pipe;
+		process->fileDescriptors[i].mode = parent->fileDescriptors[i].mode;
+	}
 
 	return process;
 }
@@ -240,16 +240,14 @@ int64_t openFD(char *name, FifoMode mode) {
 	FifoBuffer *fifo = openFifo(name, mode);
 	if (!fifo)
 		return -1;
-	int index = 0;
-	while (!process->fileDescriptors[index++].pipe)
-		;
-	if (index >= MAX_FILE_DESCRIPTORS) {
-		closeFifo(fifo, mode);
-		return -1;
+	for (int index = 0; index < MAX_FILE_DESCRIPTORS; index++) {
+		if (!process->fileDescriptors[index].pipe) {
+			process->fileDescriptors[index].pipe = fifo;
+			process->fileDescriptors[index].mode = mode;
+			return index;
+		}
 	}
-	process->fileDescriptors[index].pipe = fifo;
-	process->fileDescriptors[index].mode = mode;
-	return index;
+	return -1;
 }
 
 int64_t closeFD(int fd) {

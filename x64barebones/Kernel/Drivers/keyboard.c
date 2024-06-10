@@ -8,6 +8,7 @@ static FifoBuffer *keyboardFifo;
 
 void initializeKeyboardDriver() {
 	keyboardFifo = createFifo(KEYBOARD_NAME);
+	keyboardFifo->writeEnds++;
 }
 
 uint8_t
