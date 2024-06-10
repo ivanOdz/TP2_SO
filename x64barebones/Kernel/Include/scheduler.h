@@ -20,7 +20,7 @@ uint64_t schedyield();
 PCB *getForegroundProcess();
 void *forceyield();
 ProcessInfo *processInfo();
-extern uint8_t *stackSwitcharoo;
+extern void *stackSwitcharoo;
 extern uint8_t *yieldInterrupt(uint8_t *preserveStack);
 
 #endif

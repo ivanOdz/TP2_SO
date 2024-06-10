@@ -25,8 +25,7 @@ typedef struct BlockedOn {
 
 typedef struct {
 	FifoBuffer *pipe;
-	uint8_t mode;
-	uint8_t isBeingUsed;
+	FifoMode mode;
 } FileDescriptors;
 
 typedef struct PCB {
@@ -39,7 +38,6 @@ typedef struct PCB {
 	ProcessRunMode runMode;
 	int8_t returnValue;
 	uint8_t killed;
-	// uint16_t fileDescriptors[MAX_FILE_DESCRIPTORS];	// El indice del arreglo determina el fd.
 	FileDescriptors fileDescriptors[MAX_FILE_DESCRIPTORS]; // El indice del arreglo determina el fd.
 	int8_t priority;
 	ProcessStatus status;
@@ -60,5 +58,6 @@ void processSleep(uint64_t ms);
 void setProcessPriority(uint16_t pid, int8_t priority);
 uint8_t blockProcess(uint16_t pid);
 extern uint8_t *fabricateProcessStack(uint8_t *stackBasePointer, int argc, char **argv, int (*processMain)(int argc, char **argv));
+bool getFDEmptyIndexes(PCB *process, int index[2]);
 
 #endif

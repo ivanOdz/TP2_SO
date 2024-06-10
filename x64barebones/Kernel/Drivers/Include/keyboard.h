@@ -1,17 +1,14 @@
 #ifndef _KEYBOARD_H_
 #define _KEYBOARD_H_
 
-#include <stdint.h>
+#include <memoryManager.h>
 #include <pipesManager.h>
 #include <processes.h>
-#include <memoryManager.h>
 #include <scheduler.h>
 #include <stdint.h>
 #include <videoDriver.h>
 
-static FifoBuffer keyboardFifo = {0};
-
-void setStandardFileDescriptors(PCB * process);
+void setStandardFileDescriptors(PCB *process);
 void initializeKeyboardDriver();
 void keyboard_handler();
 uint64_t consume_keys(char *buf, uint64_t size);

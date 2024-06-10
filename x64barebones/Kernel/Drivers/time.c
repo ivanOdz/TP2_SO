@@ -20,6 +20,7 @@ uint64_t timer_handler() {
 
 	if (stackSwitcharoo)
 		return schedyield();
+	return 0;
 }
 
 int ticks_elapsed() {

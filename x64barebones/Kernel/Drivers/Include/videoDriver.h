@@ -2,8 +2,8 @@
 #define _VIDEODRIVER_H_
 
 #include <libc.h>
-#include <stdint.h>
 #include <pipesManager.h>
+#include <stdint.h>
 
 int64_t syscall_puts2(char *src, uint64_t size, uint8_t fd);
 void initializeVideoDriver();
@@ -21,6 +21,8 @@ void printCursor();
 void clear();
 void initializeSnakeGame(uint16_t pixelsX, uint16_t pixelsY);
 void putBlock(draw_type *draw);
+
+void updateScreen();
 
 uint64_t syscall_puts(uint8_t fd, char *buf, uint64_t size);
 uint64_t setFormat(const text_format *fmt);

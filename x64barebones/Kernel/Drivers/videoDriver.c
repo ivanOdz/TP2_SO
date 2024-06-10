@@ -1,10 +1,10 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include <videoDriver.h>
 #include <defs.h>
 #include <font.h>
 #include <lib.h>
 #include <pipesManager.h>
+#include <videoDriver.h>
 
 struct vbe_mode_info_structure {
 	uint16_t attributes;  // deprecated, only bit 7 should be of interest to you, and it indicates the mode supports a linear frame buffer.
@@ -70,9 +70,8 @@ static uint8_t charSpacing = 8;
 static uint8_t fontSize = 1;
 static uint8_t cursorActive = 1;
 
-FifoBuffer terminalFifo = {0}; 
-FifoBuffer errorFifo = {0}; 
-
+FifoBuffer *terminalFifo;
+FifoBuffer *errorFifo;
 
 void scrollUp() {
 	// Copia todo el framebuffer una línea hacia arriba
@@ -113,12 +112,13 @@ void print(char *word) {
 }
 
 void initializeVideoDriver() {
+	terminalFifo = createFifo(CONSOLE_NAME);
+	errorFifo = createFifo(ERROR_NAME);
 	cursorActive = 1;
 	framebuffer = VBE_mode_info->framebuffer;
 	cursor_x = X_OFFSET;
 	cursor_y = Y_OFFSET;
 	setBackground(backgroundColor);
-	
 }
 
 void putPixel(uint64_t x, uint64_t y, uint32_t color) {
@@ -283,16 +283,15 @@ uint64_t syscall_puts(uint8_t fd, char *buf, uint64_t size) {
 	return i;
 }
 
-/*int64_t syscall_puts2(char *src, uint64_t size, uint8_t fd) {
-	uint32_t foreground = (fd != STD_ERR) ? fontColor : STDERR_FG;
-	uint64_t i = 0;
-
-	while(i < size){
-		printChar( *(src + i++), foreground);
+void updateScreen() {
+	char c;
+	while ((c = getFifo(errorFifo, FALSE)) != EOF) {
+		printChar(c, STDERR_FG);
 	}
-	return i;
-}*/
-
+	while ((c = getFifo(terminalFifo, FALSE)) != EOF) {
+		printChar(c, fontColor);
+	}
+}
 
 uint64_t setFormat(const text_format *fmt) {
 	backgroundColor = fmt->bg;

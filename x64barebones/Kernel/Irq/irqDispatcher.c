@@ -61,27 +61,21 @@ int64_t syscall_write(uint8_t fd, char *buf, uint64_t size) {
 	// Tengo que obtener el proceso actual, entrar al fd que me pasan,
 	// y escribir en el buffer, si es que tengo lugar, lo que me estan pasando.
 	PCB *process = getCurrentProcess();
-	// if (process->fileDescriptors[fd].isBeingUsed == 0) {
-	//	return -1;
-	// }
-	return syscall_puts(fd, buf, size);
-}
-
-/*uint64_t syscall_read(uint8_t fd, char *buf, uint64_t size) {
-	switch (fd) {
-		case STD_IN:
-			return consume_keys(buf, size);
-		default:
-			return 0;
+	if (!process->fileDescriptors[fd].pipe) {
+		return -1;
 	}
-}*/
+	uint64_t written = writeFifo(process->fileDescriptors[fd].pipe, buf, size, TRUE);
+	if (strcmp(process->fileDescriptors[fd].pipe->name, CONSOLE_NAME) == 0 || strcmp(process->fileDescriptors[fd].pipe->name, ERROR_NAME) == 0)
+		updateScreen();
+	return written;
+}
 
 int64_t syscall_read(uint8_t fd, char *buf, uint64_t size) {
 	PCB *process = getCurrentProcess();
-	if (process->fileDescriptors[fd].isBeingUsed == 0) {
+	if (!process->fileDescriptors[fd].pipe) {
 		return -1;
 	}
-	return consume_keys2(buf, process->fileDescriptors[fd].pipe, size);
+	return readFifo(process->fileDescriptors[fd].pipe, buf, size, TRUE);
 }
 
 uint64_t syscall_clear() {

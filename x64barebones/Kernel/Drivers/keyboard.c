@@ -1,32 +1,17 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
+// This is a personal academic project-> Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <keyboard.h>
 
 static uint8_t flags = 0; // bit 0 shift left, bit 1 shift right, bit 2 caps lock, bit 3 left ctrl, bit 4 right ctrl
 
+static FifoBuffer *keyboardFifo;
+
 void initializeKeyboardDriver() {
-	strcpy(keyboardFifo.name, "stdin");
-	keyboardFifo.readCursor = keyboardFifo.buffer;
-	keyboardFifo.writeCursor = keyboardFifo.buffer;
-	keyboardFifo.readEnds = 0;
-	keyboardFifo.writeEnds = 0;
+	keyboardFifo = createFifo(KEYBOARD_NAME);
 }
 
-void setStandardFileDescriptors(PCB *process) {
-	process->fileDescriptors[STD_IN].isBeingUsed = TRUE;
-	process->fileDescriptors[STD_IN].mode = 'r';
-	process->fileDescriptors[STD_IN].pipe = &keyboardFifo;
-
-	process->fileDescriptors[STD_OUT].isBeingUsed = TRUE;
-	process->fileDescriptors[STD_OUT].mode = 'w';
-	// process->fileDescriptors[STD_OUT].pipe = ;
-
-	process->fileDescriptors[STD_ERR].isBeingUsed = TRUE;
-	process->fileDescriptors[STD_ERR].mode = 'w';
-	// process->fileDescriptors[STD_ERR].pipe = ;
-}
-
-uint8_t isAlpha(uint8_t c) {
+uint8_t
+isAlpha(uint8_t c) {
 	if (c >= 0x41 && c <= 0x5A)
 		return TRUE;
 	if (c >= 0x61 && c <= 0x7A)
@@ -35,82 +20,24 @@ uint8_t isAlpha(uint8_t c) {
 	return FALSE;
 }
 
-uint64_t consume_keys(char *buf, uint64_t size) {
-	uint64_t i = 0;
-	while ((i < size) && (keyboardFifo.readCursor != keyboardFifo.writeCursor)) {
-		buf[i++] = *(keyboardFifo.readCursor++);
-		if (keyboardFifo.readCursor >= keyboardFifo.buffer + PIPES_BUFFER_SIZE) {
-			keyboardFifo.readCursor = keyboardFifo.buffer;
-		}
-	}
-	return i;
-}
-
-int64_t consume_keys2(char *dest, FifoBuffer *src, uint64_t size) {
-	uint64_t i = 0;
-	while (i < size && *(src->readCursor) != EOF) {
-		if (((src->writeCursor - src->buffer + 1) % PIPES_BUFFER_SIZE) == (src->readCursor - src->buffer)) {
-			BlockedProcessesNode *aux;
-			PCB *process;
-			while (src->blockedProcessesOnWrite) {
-				aux = src->blockedProcessesOnWrite->next;
-				if ((process = getProcess(src->blockedProcessesOnWrite->blockedPid))) {
-					process->blockedOn.fd = FALSE;
-				}
-				freeMemory(src->blockedProcessesOnWrite);
-				src->blockedProcessesOnWrite = aux;
-			}
-		}
-		if (src->readCursor == src->writeCursor) {
-			// CHANGE STATE A BLOCKED
-			PCB *process = getCurrentProcess();
-			process->blockedOn.fd = TRUE;
-			process->status = BLOCKED;
-			// AÑADIR EL PROCESO BLOCKEADO AL PIPE CON ALLOC MEMORY
-			BlockedProcessesNode *blockProcess = allocMemory(sizeof(BlockedProcessesNode));
-			if (blockProcess == NULL) {
-				return -1;
-			}
-			blockProcess->blockedPid = getCurrentPID();
-			blockProcess->next = NULL;
-			BlockedProcessesNode *current = src->blockedProcessesOnRead;
-			if (current == NULL) {
-				src->blockedProcessesOnRead = blockProcess;
-			}
-			else {
-				while (current->next != NULL) {
-					current = current->next;
-				}
-				current->next = blockProcess;
-			}
-			// YIELD
-			process->stackPointer = forceyield();
-		}
-		dest[i++] = *(src->readCursor++);
-		if (src->readCursor >= src->buffer + PIPES_BUFFER_SIZE) { // BUFFER CIRCULAR
-			src->readCursor = src->buffer;
-		}
-	}
-	return i;
-}
-
 void keyboard_handler() {
 	uint8_t c = getKey();
-
+	if (!keyboardFifo)
+		return;
 	if (c == 0xE0) {  // 0xE0 is modifier for multimedia keys & numpad
 		c = getKey(); // the following keycode contains the actual key pressed
 		switch (c) {
-			case 0x48:								  // up
-				*(keyboardFifo.writeCursor++) = 0x1E; // code for up arrow in font
+			case 0x48:								// up
+				putFifo(keyboardFifo, 0x1E, FALSE); // code for up arrow in font
 				break;
-			case 0x50:								  // down
-				*(keyboardFifo.writeCursor++) = 0x1F; // code for down arrow in font
+			case 0x50:								// down
+				putFifo(keyboardFifo, 0x1F, FALSE); // code for down arrow in font
 				break;
-			case 0x4B:								  // left
-				*(keyboardFifo.writeCursor++) = 0x11; // code for left arrow in font
+			case 0x4B:								// left
+				putFifo(keyboardFifo, 0x11, FALSE); // code for left arrow in font
 				break;
-			case 0x4D:								  // right
-				*(keyboardFifo.writeCursor++) = 0x10; // code for right arrow in font
+			case 0x4D:								// right
+				putFifo(keyboardFifo, 0x10, FALSE); // code for right arrow in font
 				break;
 			case 0x1D: // right ctrl pressed
 				flags |= 0x10;
@@ -119,11 +46,6 @@ void keyboard_handler() {
 				flags &= 0xFF - 0x10;
 				break;
 		}
-		if (keyboardFifo.writeCursor >= keyboardFifo.buffer + PIPES_BUFFER_SIZE) {
-			keyboardFifo.writeCursor = keyboardFifo.buffer;
-		}
-		freeListPipes(&keyboardFifo);
-
 		return;
 	}
 	switch (c) {
@@ -159,8 +81,7 @@ void keyboard_handler() {
 			return;
 		}
 		if (c == 0x20) { // D (EOF)
-			*(keyboardFifo.writeCursor++) = EOF;
-			freeListPipes(&keyboardFifo);
+			putFifo(keyboardFifo, EOF, FALSE);
 			return;
 		}
 
@@ -181,22 +102,18 @@ void keyboard_handler() {
 		if (ascii != 0) {
 			if (flags & SHIFT) {
 				if (isAlpha(ascii) && ((flags & CAPS) > 0)) { // also caps lock and is letter -> lower case
-					*(keyboardFifo.writeCursor++) = toAscii[c];
+					putFifo(keyboardFifo, toAscii[c], FALSE);
 				}
 				else { // no caps lock / caps lock but not letter -> regular shift
-					*(keyboardFifo.writeCursor++) = mods[c];
+					putFifo(keyboardFifo, mods[c], FALSE);
 				}
 			}
 			else if (isAlpha(ascii) && ((flags & 0x04) > 0)) { // no shift but caps lock and is letter -> upper case
-				*(keyboardFifo.writeCursor++) = mods[c];
+				putFifo(keyboardFifo, mods[c], FALSE);
 			}
 			else { // w/o modifier
-				*(keyboardFifo.writeCursor++) = toAscii[c];
+				putFifo(keyboardFifo, toAscii[c], FALSE);
 			}
 		}
-		if (keyboardFifo.writeCursor >= keyboardFifo.buffer + PIPES_BUFFER_SIZE) {
-			keyboardFifo.writeCursor = keyboardFifo.buffer;
-		}
 	}
-	freeListPipes(&keyboardFifo);
 }

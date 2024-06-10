@@ -35,7 +35,6 @@ PCB *initProcess(void *kernelStack) {
 	process->blockedOn.fd = FALSE;
 	process->blockedOn.timer = 0;
 	process->blockedOn.manual = FALSE;
-	// process->fileDescriptorsInUse = 0;
 	process->priority = 1;
 	return process;
 }
@@ -79,15 +78,12 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	process->blockedOn.fd = 0;
 	process->blockedOn.timer = 0;
 	process->blockedOn.manual = FALSE;
-
-	/*for (int i = 0; i < DEFAULT_QTY_FDS; i++) {
-		//process->fileDescriptors[i] = i;
-	}
-	process->fileDescriptorsInUse = DEFAULT_QTY_FDS;
-
-	*/
-
-	// defineDefaultFileDescriptors(process);
+	process->fileDescriptors[0].pipe = createFifo(KEYBOARD_NAME);
+	process->fileDescriptors[0].mode = READ;
+	process->fileDescriptors[1].pipe = createFifo(CONSOLE_NAME);
+	process->fileDescriptors[1].mode = WRITE;
+	process->fileDescriptors[2].pipe = createFifo(ERROR_NAME);
+	process->fileDescriptors[2].mode = WRITE;
 
 	return process;
 }
@@ -180,11 +176,6 @@ void setProcessPriority(uint16_t pid, int8_t priority) {
 	process->priority = priority;
 }
 
-/*
-void setProcessState(uint16_t pid, ProcessStatus ps) {
-}
-*/
-
 uint8_t blockProcess(uint16_t pid) {
 	PCB *process = getProcess(pid);
 	if (!process) {
@@ -204,17 +195,17 @@ uint8_t blockProcess(uint16_t pid) {
 	return FALSE;
 }
 
-int8_t getFDIndex(PCB *process, int index[2]) {
+bool getFDEmptyIndexes(PCB *process, int index[2]) {
 	int i, found = 0;
 	for (i = 0; i < MAX_FILE_DESCRIPTORS && found < 2; i++) {
-		if (process->fileDescriptors[i].isBeingUsed == 0) {
+		if (!process->fileDescriptors[i].pipe) {
 			index[found++] = i;
 		}
 	}
 	if (i == MAX_FILE_DESCRIPTORS) {
-		return -1;
+		return FALSE;
 	}
-	return 0;
+	return TRUE;
 }
 
 /*int8_t createPipe(char *name, int index[2]) {
