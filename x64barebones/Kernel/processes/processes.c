@@ -76,7 +76,7 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	process->killed = FALSE;
 	process->lastTickRun = get_ticks();
 	process->blockedOn.waitPID = NULL;
-	// process->blockedOn.fd = 0;
+	process->blockedOn.fd = 0;
 	process->blockedOn.timer = 0;
 	process->blockedOn.manual = FALSE;
 
@@ -191,7 +191,7 @@ uint8_t blockProcess(uint16_t pid) {
 		return FALSE;
 	}
 	if (process->status == BLOCKED) {
-		if (process->blockedOn.waitPID == NULL /*&& process->blockedOn.fd == 0*/)
+		if (process->blockedOn.waitPID == NULL && process->blockedOn.fd == 0)
 			process->status = READY;
 		process->blockedOn.manual = FALSE;
 		return FALSE;

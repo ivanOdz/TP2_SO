@@ -3,7 +3,9 @@
 
 #include <libc.h>
 #include <stdint.h>
+#include <pipesManager.h>
 
+int64_t syscall_puts2(char *src, uint64_t size, uint8_t fd);
 void initializeVideoDriver();
 void putPixel(uint64_t x, uint64_t y, uint32_t color);
 void setBackground();

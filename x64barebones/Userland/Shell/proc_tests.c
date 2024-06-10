@@ -89,6 +89,9 @@ void test_processes(int argc, char **argv) {
 			args[0] = "Test process";
 			args[1] = NULL;
 			PID_t newProcess = execv(processTestLoop, args, BACKGROUND);
+			if(newProcess > 30000){
+				printf("QUE PASO?\n");
+			}
 			if (!newProcess) {
 				fprintf(STD_ERR, "%cERROR CREATING PROCESS N#%d, WILL RETRY          \n", 0xD, spawned);
 				puts("Instantiating processes (0000 of 0000 processes)");

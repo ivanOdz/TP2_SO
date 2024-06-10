@@ -2,10 +2,20 @@
 #define _KEYBOARD_H_
 
 #include <stdint.h>
+#include <pipesManager.h>
+#include <processes.h>
+#include <memoryManager.h>
+#include <scheduler.h>
+#include <stdint.h>
+#include <videoDriver.h>
 
+static FifoBuffer keyboardFifo = {0};
+
+void setStandardFileDescriptors(PCB * process);
 void initializeKeyboardDriver();
 void keyboard_handler();
 uint64_t consume_keys(char *buf, uint64_t size);
+int64_t consume_keys2(char *dest, FifoBuffer *src, uint64_t size);
 extern int main();
 
 #define STD_IN 0

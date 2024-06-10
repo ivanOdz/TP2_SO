@@ -57,7 +57,12 @@ int main() {
 	createMemoryManager(heapStartAddress, 0x10000000);
 	char *argv[2] = {"Shell", NULL};
 	initScheduler(getStackBase());
-	execute((EntryPoint) shellModuleAddress, argv, FOREGROUND);
+	
+	PID_t shPid = execute((EntryPoint) shellModuleAddress, argv, FOREGROUND);
+	PCB * shell = getProcess(shPid);
+	setStandardFileDescriptors(shell);
+
+
 	setPIT0Freq(1193182 / HZ);
 	_sti();
 

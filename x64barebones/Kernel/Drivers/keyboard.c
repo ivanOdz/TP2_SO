@@ -1,22 +1,29 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <keyboard.h>
-#include <memoryManager.h>
-#include <pipesManager.h>
-#include <processes.h>
-#include <scheduler.h>
-#include <stdint.h>
-#include <videoDriver.h>
 
 static uint8_t flags = 0; // bit 0 shift left, bit 1 shift right, bit 2 caps lock, bit 3 left ctrl, bit 4 right ctrl
-static FifoBuffer fifo = {0};
 
 void initializeKeyboardDriver() {
-	strcpy(fifo.name, "stdin");
-	fifo.readCursor = fifo.buffer;
-	fifo.writeCursor = fifo.buffer;
-	fifo.readEnds = 0;
-	fifo.writeEnds = 0;
+	strcpy(keyboardFifo.name, "stdin");
+	keyboardFifo.readCursor = keyboardFifo.buffer;
+	keyboardFifo.writeCursor = keyboardFifo.buffer;
+	keyboardFifo.readEnds = 0;
+	keyboardFifo.writeEnds = 0;
+}
+
+void setStandardFileDescriptors(PCB *process) {
+	process->fileDescriptors[STD_IN].isBeingUsed = TRUE;
+	process->fileDescriptors[STD_IN].mode = 'r';
+	process->fileDescriptors[STD_IN].pipe = &keyboardFifo;
+
+	process->fileDescriptors[STD_OUT].isBeingUsed = TRUE;
+	process->fileDescriptors[STD_OUT].mode = 'w';
+	// process->fileDescriptors[STD_OUT].pipe = ;
+
+	process->fileDescriptors[STD_ERR].isBeingUsed = TRUE;
+	process->fileDescriptors[STD_ERR].mode = 'w';
+	// process->fileDescriptors[STD_ERR].pipe = ;
 }
 
 uint8_t isAlpha(uint8_t c) {
@@ -30,20 +37,14 @@ uint8_t isAlpha(uint8_t c) {
 
 uint64_t consume_keys(char *buf, uint64_t size) {
 	uint64_t i = 0;
-	while ((i < size) && (fifo.readCursor != fifo.writeCursor)) {
-		buf[i++] = *(fifo.readCursor++);
-		if (fifo.readCursor >= fifo.buffer + PIPES_BUFFER_SIZE) {
-			fifo.readCursor = fifo.buffer;
+	while ((i < size) && (keyboardFifo.readCursor != keyboardFifo.writeCursor)) {
+		buf[i++] = *(keyboardFifo.readCursor++);
+		if (keyboardFifo.readCursor >= keyboardFifo.buffer + PIPES_BUFFER_SIZE) {
+			keyboardFifo.readCursor = keyboardFifo.buffer;
 		}
 	}
 	return i;
 }
-
-/*
-typedef struct BlockedProcessesNode{
-	PID_t blockedPid;
-	struct BlockedProcessesNode * next;
-} BlockedProcessesNode;*/
 
 int64_t consume_keys2(char *dest, FifoBuffer *src, uint64_t size) {
 	uint64_t i = 0;
@@ -64,20 +65,24 @@ int64_t consume_keys2(char *dest, FifoBuffer *src, uint64_t size) {
 			// CHANGE STATE A BLOCKED
 			PCB *process = getCurrentProcess();
 			process->blockedOn.fd = TRUE;
+			process->status = BLOCKED;
 			// AÑADIR EL PROCESO BLOCKEADO AL PIPE CON ALLOC MEMORY
 			BlockedProcessesNode *blockProcess = allocMemory(sizeof(BlockedProcessesNode));
 			if (blockProcess == NULL) {
 				return -1;
 			}
+			blockProcess->blockedPid = getCurrentPID();
+			blockProcess->next = NULL;
 			BlockedProcessesNode *current = src->blockedProcessesOnRead;
 			if (current == NULL) {
-				current = blockProcess;
+				src->blockedProcessesOnRead = blockProcess;
 			}
-			while (current->next != NULL) {
-				current = current->next;
+			else {
+				while (current->next != NULL) {
+					current = current->next;
+				}
+				current->next = blockProcess;
 			}
-			current->next = blockProcess;
-
 			// YIELD
 			process->stackPointer = forceyield();
 		}
@@ -95,17 +100,17 @@ void keyboard_handler() {
 	if (c == 0xE0) {  // 0xE0 is modifier for multimedia keys & numpad
 		c = getKey(); // the following keycode contains the actual key pressed
 		switch (c) {
-			case 0x48:						  // up
-				*(fifo.writeCursor++) = 0x1E; // code for up arrow in font
+			case 0x48:								  // up
+				*(keyboardFifo.writeCursor++) = 0x1E; // code for up arrow in font
 				break;
-			case 0x50:						  // down
-				*(fifo.writeCursor++) = 0x1F; // code for down arrow in font
+			case 0x50:								  // down
+				*(keyboardFifo.writeCursor++) = 0x1F; // code for down arrow in font
 				break;
-			case 0x4B:						  // left
-				*(fifo.writeCursor++) = 0x11; // code for left arrow in font
+			case 0x4B:								  // left
+				*(keyboardFifo.writeCursor++) = 0x11; // code for left arrow in font
 				break;
-			case 0x4D:						  // right
-				*(fifo.writeCursor++) = 0x10; // code for right arrow in font
+			case 0x4D:								  // right
+				*(keyboardFifo.writeCursor++) = 0x10; // code for right arrow in font
 				break;
 			case 0x1D: // right ctrl pressed
 				flags |= 0x10;
@@ -114,9 +119,11 @@ void keyboard_handler() {
 				flags &= 0xFF - 0x10;
 				break;
 		}
-		if (fifo.writeCursor >= fifo.buffer + PIPES_BUFFER_SIZE) {
-			fifo.writeCursor = fifo.buffer;
+		if (keyboardFifo.writeCursor >= keyboardFifo.buffer + PIPES_BUFFER_SIZE) {
+			keyboardFifo.writeCursor = keyboardFifo.buffer;
 		}
+		freeListPipes(&keyboardFifo);
+
 		return;
 	}
 	switch (c) {
@@ -151,8 +158,12 @@ void keyboard_handler() {
 			killRunningForegroundProcess();
 			return;
 		}
-		if (c == 0x20) // D (EOF)
-			*(fifo.writeCursor++) = EOF;
+		if (c == 0x20) { // D (EOF)
+			*(keyboardFifo.writeCursor++) = EOF;
+			freeListPipes(&keyboardFifo);
+			return;
+		}
+
 		if (c == 0x13) { // R (Panic! at the Kernel)
 			setFontSize(4);
 			drawWord(STD_ERR, "\ePanic! at the Kernel");
@@ -170,21 +181,22 @@ void keyboard_handler() {
 		if (ascii != 0) {
 			if (flags & SHIFT) {
 				if (isAlpha(ascii) && ((flags & CAPS) > 0)) { // also caps lock and is letter -> lower case
-					*(fifo.writeCursor++) = toAscii[c];
+					*(keyboardFifo.writeCursor++) = toAscii[c];
 				}
 				else { // no caps lock / caps lock but not letter -> regular shift
-					*(fifo.writeCursor++) = mods[c];
+					*(keyboardFifo.writeCursor++) = mods[c];
 				}
 			}
 			else if (isAlpha(ascii) && ((flags & 0x04) > 0)) { // no shift but caps lock and is letter -> upper case
-				*(fifo.writeCursor++) = mods[c];
+				*(keyboardFifo.writeCursor++) = mods[c];
 			}
 			else { // w/o modifier
-				*(fifo.writeCursor++) = toAscii[c];
+				*(keyboardFifo.writeCursor++) = toAscii[c];
 			}
 		}
-		if (fifo.writeCursor >= fifo.buffer + PIPES_BUFFER_SIZE) {
-			fifo.writeCursor = fifo.buffer;
+		if (keyboardFifo.writeCursor >= keyboardFifo.buffer + PIPES_BUFFER_SIZE) {
+			keyboardFifo.writeCursor = keyboardFifo.buffer;
 		}
 	}
+	freeListPipes(&keyboardFifo);
 }

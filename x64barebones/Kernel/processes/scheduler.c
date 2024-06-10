@@ -142,7 +142,7 @@ uint8_t checkUnblock(ProcessListNode *candidate) {
 			candidate->process->blockedOn.timer = 0;
 			return TRUE;
 		}
-		if (candidate->process->blockedOn.waitPID) {
+		else if (candidate->process->blockedOn.waitPID) {
 			ProcessListNode *zombieChild = getZombieChild(candidate->process->pid, candidate->process->blockedOn.waitPID->pid);
 			if (zombieChild) {
 				candidate->process->status = READY;
@@ -155,6 +155,10 @@ uint8_t checkUnblock(ProcessListNode *candidate) {
 			else {
 				return FALSE;
 			}
+		}
+		else if(candidate->process->blockedOn.fd == 0){
+			candidate->process->status = READY;
+			return TRUE;
 		}
 	}
 	return FALSE;

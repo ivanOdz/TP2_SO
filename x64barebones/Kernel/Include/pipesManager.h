@@ -29,4 +29,6 @@ typedef struct {
 	BlockedProcessesNode * blockedProcessesOnWrite;
 } FifoBuffer;
 
+void freeListPipes(FifoBuffer *fifo);
+
 #endif

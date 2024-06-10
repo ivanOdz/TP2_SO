@@ -88,7 +88,6 @@ SECTION .text
 %endmacro
 
 %macro irqHandlerMaster 1
-	cli
 	pushState
 	push rax
 	mov rax, [rsp + 8]		;r15
@@ -147,7 +146,6 @@ SECTION .text
 	pop rax
 	mov rsp, [stackSwitcharoo]
 	popState
-	sti
 %endmacro
 
 %macro exceptionHandler 1

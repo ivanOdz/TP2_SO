@@ -6,9 +6,27 @@
 #include <scheduler.h>
 #include <stdint.h>
 
+
 FifoBuffer *pipesList[PIPES_QTY] = {0};
 
 void defineDefaultFileDescriptors(PCB *process);
+
+void freeListPipes(FifoBuffer *fifo) {
+	if (fifo->readCursor != fifo->writeCursor) {
+		// Desbloquea los procesos bloqueados en read
+		BlockedProcessesNode *aux = fifo->blockedProcessesOnRead;
+		PCB *processUnblocked;
+		while (fifo->blockedProcessesOnRead) {
+			processUnblocked = getProcess(fifo->blockedProcessesOnRead->blockedPid);
+			processUnblocked->blockedOn.fd = FALSE;
+			// processUnblocked->status = READY;
+
+			aux = fifo->blockedProcessesOnRead->next;
+			freeMemory(fifo->blockedProcessesOnRead);
+			fifo->blockedProcessesOnRead = aux;
+		}
+	}
+}
 
 int32_t getPipeIndex() {
 	int index;
