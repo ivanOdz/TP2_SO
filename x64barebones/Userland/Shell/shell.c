@@ -16,7 +16,7 @@ typedef struct commandBuffer {
 
 void emptyCommandBuffer(commandBuffer *buffer);
 void deleteChars(commandBuffer *command);
-PID_t run(char *strBuffer);
+PID_t run(char *strBuffer, bool isBackground);
 void runCommand(char *strBuffer);
 
 void printEdit(commandBuffer *command);
@@ -216,7 +216,14 @@ void runCommand(char *runMe) {
 	ReturnStatus wstatus;
 	int64_t pid;
 	int waits = 0;
+	int background = 0;
 	int pipefds[2] = {0};
+	for (int i = 0; strBuffer[i] != 0; i++) {
+		if (strBuffer[i] == '&' && strBuffer[i + 1] == 0) {
+			background++;
+			strBuffer[i] = 0;
+		}
+	}
 	for (int i = 0; strBuffer[i] != 0; i++) {
 		if (strBuffer[i] == '|') {
 			strBuffer[i] = 0;
@@ -226,7 +233,7 @@ void runCommand(char *runMe) {
 			}
 			close(STD_IN);
 			dupFD(pipefds[READ]);
-			pid = run(strBuffer + i + 1);
+			pid = run(strBuffer + i + 1, background);
 			close(STD_IN);
 			open(KEYBOARD_NAME, READ);
 			if (pid != getPID()) {
@@ -242,13 +249,25 @@ void runCommand(char *runMe) {
 			dupFD(pipefds[WRITE]);
 		}
 	}
-	pid = run(strBuffer);
+	if (background) {
+		close(STD_IN);
+		open(DEV_NULL, READ);
+	}
+	pid = run(strBuffer, background);
 	if (pid != getPID()) {
 		if (!pid) {
+			if (background) {
+				close(STD_IN);
+				open(KEYBOARD_NAME, READ);
+			}
 			puts(">> ");
 			return;
 		}
 		waits++;
+	}
+	if (background) {
+		close(STD_IN);
+		open(KEYBOARD_NAME, READ);
 	}
 	close(STD_OUT);
 	open(CONSOLE_NAME, WRITE);
@@ -257,7 +276,7 @@ void runCommand(char *runMe) {
 		close(pipefds[WRITE]);
 	}
 
-	while (waits--) {
+	while (!background && waits--) {
 		PID_t exited = waitpid(0, &wstatus);
 		SyscallSetFormat(&shell_fmt);
 		if (wstatus.aborted)
@@ -269,7 +288,7 @@ void runCommand(char *runMe) {
 	return;
 }
 
-PID_t run(char *command) {
+PID_t run(char *command, bool isBackground) {
 	char strBuffer[BUFFER_SIZE];
 	strcpy(strBuffer, command);
 	int argc;
@@ -302,7 +321,7 @@ PID_t run(char *command) {
 					return getPID();
 				}
 				else {
-					PID_t childPID = execv((void (*)(int, char **)) avCommands[cont].function, argv, FOREGROUND);
+					PID_t childPID = execv((void (*)(int, char **)) avCommands[cont].function, argv, isBackground);
 					if (!childPID)
 						fprintf(STD_ERR, "Couldn't execute %s\n", strBuffer);
 					return childPID;

@@ -113,6 +113,9 @@ void exitProcess(int returnValue) {
 		if (parent->runMode == RELEGATED)
 			parent->runMode = FOREGROUND;
 	}
+	if (process->runMode = BACKGROUND) {
+		freeProcess(process);
+	}
 	schedyield();
 }
 
