@@ -10,9 +10,7 @@ static uint64_t ticks = 0;
 
 uint64_t timer_handler() {
 	ticks++;
-	if ((ticks % (HZ / 40) == 0)) {
-		soundNext();
-	}
+	soundNext();
 
 	if ((ticks % (HZ / 2)) == 0) {
 		printCursor();

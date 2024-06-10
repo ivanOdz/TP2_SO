@@ -110,7 +110,7 @@ void test_processes(int argc, char **argv) {
 	char *args[2];
 	while (burnin--) {
 		printf("\nNew iteration (%lu left)\n", burnin);
-		printf("Instantiating processes (0000 of %4lu processes)", processes);
+		printf("Instantiating processes (0000 of %4lu processes)", maxProcesses);
 		int spawned;
 		for (spawned = 0; spawned < maxProcesses; spawned++) {
 			args[0] = "Test process";
@@ -253,13 +253,13 @@ void test_priority(int argc, char **argv) {
 	if (!processes)
 		exit(5);
 	char *args[3];
+	char arg2buf[20];
 	int perPriority[10];
 	int times[10];
 	while (burnin--) {
 		printf("\nNew iteration (%lu left)\n", burnin);
 		printf("Instantiating processes (0000 of %4lu processes)", maxProcesses);
 		int spawned;
-		char arg2buf[20];
 		for (spawned = 0; spawned < maxProcesses; spawned++) {
 			args[0] = "Test process";
 			uintToBase(busytime * BUSY_OFFSET, arg2buf, 10);
