@@ -5,6 +5,7 @@
 #include <processes.h>
 #include <scheduler.h>
 #include <stdint.h>
+#include <videoDriver.h>
 
 static FifoBuffer *pipesList[PIPES_QTY] = {0};
 
@@ -179,23 +180,30 @@ void closeFifo(FifoBuffer *fifo, FifoMode mode) {
 	}
 }
 
-FdInfo *fdInfo() {
-	FdInfo *currentProcessInfo = allocMemory(sizeof(FdInfo));
-	// setfDInfo(currentProcessInfo, currentProcess);
-
-	return NULL;
+void setFdInfo(PCB *process, FdInfo *node, uint16_t fd) {
+	node->pid = process->pid;
+	node->processName = process->name;
+	node->fd = fd;
+	node->mode = process->fileDescriptors[fd].mode;
+	node->pipeName = process->fileDescriptors[fd].pipe->name;
+	node->nextFdInfo = NULL;
 }
 
-/*ProcessInfo *processInfo() {
-	ProcessInfo *currentProcessInfo = allocMemory(sizeof(ProcessInfo));
-	setProcessInfo(currentProcessInfo, currentProcess);
-	ProcessInfo *newProcessInfo = currentProcessInfo;
-	for (ProcessListNode *otherProcess = currentProcess->next; otherProcess != currentProcess; otherProcess = otherProcess->next) {
-		newProcessInfo->nextProcessInfo = allocMemory(sizeof(ProcessInfo));
-		if (newProcessInfo->nextProcessInfo) {
-			newProcessInfo = newProcessInfo->nextProcessInfo;
-			setProcessInfo(newProcessInfo, otherProcess);
+FdInfo *fdInfo(uint16_t pid) {
+	PCB *process = getProcess(pid);
+	if (process->fileDescriptors[0].pipe == NULL) {
+		return NULL;
+	}
+	FdInfo *first = allocMemory(sizeof(FdInfo));
+	setFdInfo(process, first, 0);
+	FdInfo *newFdInfo = first;
+	for (int i = 1; process->fileDescriptors[i].pipe; i++) {
+		newFdInfo->nextFdInfo = allocMemory(sizeof(FdInfo));
+
+		if (newFdInfo->nextFdInfo) {
+			newFdInfo = newFdInfo->nextFdInfo;
+			setFdInfo(process, newFdInfo, i);
 		}
 	}
-	return currentProcessInfo;
-}*/
+	return first;
+}

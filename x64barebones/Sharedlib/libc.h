@@ -78,11 +78,11 @@ typedef struct ProcessInfo {
 } ProcessInfo;
 
 typedef struct FdInfo {
-	char processName[255];
+	char *processName;
 	PID_t pid;
 	uint16_t fd;
 	uint8_t mode;
-	char pipeName[255];
+	char *pipeName;
 	struct FdInfo *nextFdInfo;
 } FdInfo;
 
@@ -112,7 +112,7 @@ extern ProcessInfo *SyscallProcessInfo();
 extern uint64_t SyscallNice(uint16_t pid, uint8_t newPriority);
 extern uint64_t SyscallToggleBlockProcess(uint16_t pid);
 extern int pipe(int fds[2]);
-extern FdInfo *SyscallFdInfo();
+extern FdInfo *SyscallFdInfo(uint16_t pid);
 extern int64_t open(char *name, FifoMode mode);
 extern int64_t close(uint64_t fd);
 extern int64_t dupFD(uint64_t fd);
