@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <time.h>
 
+static ProcessListNode *currentProcess;
+
 static uint8_t enableScheduler = FALSE;
 uint8_t checkRemoveNode(ProcessListNode *node, PCB *pcb);
 uint64_t getProcessRunPriority(ProcessListNode *candidate, uint16_t distanceFromCurrent, uint16_t processCount);
