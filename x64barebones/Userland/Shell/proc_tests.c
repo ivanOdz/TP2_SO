@@ -6,8 +6,8 @@
 #define PROCESSES_DEFAULT	 50
 #define BIAS_DEFAULT		 50
 #define BURN_IN_DEFAULT		 3
-#define SLEEP_DEFAULT		 50
-#define BUSY_DEFAULT		 5000
+#define SLEEP_DEFAULT		 200
+#define BUSY_DEFAULT		 1000
 #define BUSY_OFFSET			 100000
 #define MAX_PRIORITY_DEFAULT 9
 #define MIN_PRIORITY_DEFAULT 1
@@ -53,7 +53,6 @@ typedef struct ProcessTestType {
 typedef struct ProcessPriorityType {
 	PID_t PID;
 	uint8_t priority;
-	uint64_t startTicks;
 } ProcessPriorityType;
 
 void processTestLoop(int argc, char **argv);
@@ -275,8 +274,8 @@ void test_priority(int argc, char **argv) {
 			}
 			else {
 				processes[spawned].PID = newProcess;
-				processes[spawned].startTicks = SyscallGetTicks();
-				processes[spawned].priority = (int) (minPriority + (double) (maxPriority - minPriority) * ((double) spawned / maxProcesses));
+				double progress = ((double) spawned / maxProcesses);
+				processes[spawned].priority = (int) (minPriority + (double) (maxPriority - minPriority) * progress);
 				SyscallNice(processes[spawned].PID, processes[spawned].priority);
 			}
 			printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4lu processes)", spawned + 1, maxProcesses);
@@ -288,33 +287,32 @@ void test_priority(int argc, char **argv) {
 		for (int i = 1; i <= 9; i++) {
 			printf("%d: %d\t", i, perPriority[i]);
 		}
-		printf("\nWaiting on processes (0000 processes alive)");
-		int blocked = 0;
+		printf("\nWaiting on processes (%4d processes alive)", spawned);
 		while (spawned) {
 			ReturnStatus r;
 			PID_t back = waitpid(0, &r);
 			spawned--;
 			for (int i = 0; i < maxProcesses; i++) {
 				if (processes[i].PID == back)
-					times[processes[i].priority] += SyscallGetTicks() - processes[i].startTicks;
+					times[processes[i].priority] += r.returnValue;
 			}
-			printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d processes alive)", spawned, blocked);
+			printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d processes alive)", spawned);
 		}
 		puts("\n\n");
 	}
 	for (int i = 1; i <= 9; i++) {
 		if (perPriority[i])
-			printf("Priority %d: %d ticks\t", i, times[i] / perPriority[i]);
+			printf("Priority %d: %d ticks\n", i, times[i] / perPriority[i]);
 	}
 	puts("\n");
 	exit(0);
 }
 
 void processPriorityLoop(int argc, char **argv) {
+	uint64_t startTicks = SyscallGetTicks();
 	long loopme = stringToInt(argv[1], strlen(argv[1]));
 	for (long i = 0; i < loopme; i++) {
-		for (long j = loopme; j; j--) {
-		}
 	}
-	exit(0);
+	uint64_t ticksRunning = SyscallGetTicks() - startTicks;
+	exit(ticksRunning);
 }

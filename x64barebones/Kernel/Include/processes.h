@@ -36,7 +36,7 @@ typedef struct PCB {
 	char *name;
 	uint8_t **argv;
 	ProcessRunMode runMode;
-	int8_t returnValue;
+	int64_t returnValue;
 	uint8_t killed;
 	FileDescriptors fileDescriptors[MAX_FILE_DESCRIPTORS]; // El indice del arreglo determina el fd.
 	int8_t priority;

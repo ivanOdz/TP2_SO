@@ -116,7 +116,7 @@ void exitProcess(int returnValue) {
 PID_t waitPID(PID_t PID, ReturnStatus *wstatus) {
 	PCB *process = getCurrentProcess();
 	PCB *child = getProcess(PID);
-	if (PID && child && child->parentPid == process->pid) {
+	if ((PID && child && child->parentPid == process->pid) || !PID) {
 		process->blockedOn.waitPID = wstatus;
 		process->blockedOn.waitPID->pid = PID;
 		process->status = BLOCKED;
@@ -210,11 +210,11 @@ bool getFDEmptyIndexes(PCB *process, int pipefd[2]) {
 
 int8_t createPipe(char *name, int pipefd[2]) {
 	PCB *process = getCurrentProcess();
-	if(!getFDEmptyIndexes(process, pipefd)){
+	if (!getFDEmptyIndexes(process, pipefd)) {
 		return -1;
 	}
 	FifoBuffer *fifo = createFifo(name);
-	if(!fifo){
+	if (!fifo) {
 		return -1;
 	}
 	process->fileDescriptors[pipefd[0]].pipe = fifo;
