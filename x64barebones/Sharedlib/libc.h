@@ -145,6 +145,6 @@ void yield();
 PID_t getPID();
 PID_t kill(PID_t PID);
 void sleep(uint64_t ms);
-
+int64_t pipe(char *name, int pipefd[2]);
 
 #endif
