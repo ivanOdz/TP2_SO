@@ -172,8 +172,8 @@ int64_t syscall_pipe(char *name, int pipefd[2]) {
 	return createPipe(name, pipefd);
 }
 
-FdInfo *syscall_fdinfo() {
-	return fdInfo();
+FdInfo *syscall_fdinfo(PID_t pid) {
+	return fdInfo(pid);
 }
 
 int64_t syscall_open(char *name, FifoMode mode) {
