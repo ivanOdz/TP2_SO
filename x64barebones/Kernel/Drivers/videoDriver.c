@@ -229,8 +229,8 @@ void nextLine() {
 // Manejar el carácter de tabulación (\t)
 // Asumiendo que un tabulador es equivalente a 4 espacios
 void setTab() {
-	drawchar_transparent(219, cursor_x, cursor_y, backgroundColor);
-	cursor_x += 4 * charSpacing; // Aumentar la posición x en 40 píxeles (4 veces el ancho de un carácter)
+	for (int i = 0; i < 4; i++)
+		printChar(' ', fontColor);
 }
 
 void clear() {

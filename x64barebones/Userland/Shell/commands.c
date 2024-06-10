@@ -15,7 +15,10 @@ int command_help(int argc, char **argv) {
 	text_color_set(COLORS_CIAN);
 
 	for (uint64_t cont = 0; cont < AVAILABLE_COMMANDS; cont++) {
-		printf("%s\t", avCommands[cont].name);
+		printf("%-14s\0", avCommands[cont].name);
+		if ((cont + 1) % 8 == 0) {
+			putchar('\n');
+		}
 	}
 	text_color_set(lastColor);
 
