@@ -151,7 +151,7 @@ FifoBuffer *createFifo(char *name) {
 		strcpy(newPipe->name, name); // si el nombre es la cadena vacia 0, es un pipe anonimo.
 	}
 	else {
-		newPipe->name = "\0";
+		newPipe->name = "pipe";
 	}
 	newPipe->readCursor = newPipe->buffer;
 	newPipe->writeCursor = newPipe->buffer;
@@ -164,3 +164,24 @@ FifoBuffer *createFifo(char *name) {
 
 	return newPipe;
 }
+
+FdInfo * fdInfo(){
+	FdInfo *currentProcessInfo = allocMemory(sizeof(FdInfo));
+	//setfDInfo(currentProcessInfo, currentProcess);
+
+	return NULL;
+}
+
+/*ProcessInfo *processInfo() {
+	ProcessInfo *currentProcessInfo = allocMemory(sizeof(ProcessInfo));
+	setProcessInfo(currentProcessInfo, currentProcess);
+	ProcessInfo *newProcessInfo = currentProcessInfo;
+	for (ProcessListNode *otherProcess = currentProcess->next; otherProcess != currentProcess; otherProcess = otherProcess->next) {
+		newProcessInfo->nextProcessInfo = allocMemory(sizeof(ProcessInfo));
+		if (newProcessInfo->nextProcessInfo) {
+			newProcessInfo = newProcessInfo->nextProcessInfo;
+			setProcessInfo(newProcessInfo, otherProcess);
+		}
+	}
+	return currentProcessInfo;
+}*/

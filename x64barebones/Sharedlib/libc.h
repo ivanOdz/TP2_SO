@@ -77,6 +77,15 @@ typedef struct ProcessInfo {
 
 } ProcessInfo;
 
+typedef struct FdInfo{
+	char processName[255];
+	PID_t pid;
+	uint16_t fd;
+	uint8_t mode;
+	char pipeName[255];
+	struct FdInfo *nextFdInfo;
+} FdInfo;
+
 typedef struct ReturnStatus {
 	int returnValue;
 	uint8_t aborted;
@@ -99,6 +108,8 @@ extern uint64_t SyscallPrintMem();
 extern ProcessInfo *SyscallProcessInfo();
 extern uint64_t SyscallNice(uint16_t pid, uint8_t newPriority);
 extern uint64_t SyscallToggleBlockProcess(uint16_t pid);
+extern FdInfo *SyscallFdInfo();
+
 
 int64_t strcpy(char *dest, const char *src);
 int64_t strcmp(const char *str1, const char *str2);
@@ -134,5 +145,6 @@ void yield();
 PID_t getPID();
 PID_t kill(PID_t PID);
 void sleep(uint64_t ms);
+
 
 #endif

@@ -172,4 +172,9 @@ int64_t syscall_pipe(char *name, int pipefd[2]) {
 	return createPipe(name, pipefd);
 }
 
+FdInfo * syscall_fdinfo(){
+	return fdInfo();	
+}
+
+
 typedef int (*EntryPoint)();

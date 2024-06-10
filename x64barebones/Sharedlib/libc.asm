@@ -24,6 +24,8 @@ GLOBAL yield
 GLOBAL getPID
 GLOBAL kill
 GLOBAL sleep
+GLOBAL pipe
+GLOBAL SyscallFdInfo
 ALIGN 16
 
 
@@ -342,6 +344,17 @@ pipe:
 
     mov rax, 0x19
     mov rbx, rdi    ; int pipefd[2]
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+SyscallFdInfo:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x1A
     int 80h
 
     mov rsp, rbp

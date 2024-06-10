@@ -9,6 +9,8 @@ typedef struct ProcessListNode {
 	struct ProcessListNode *last;
 } ProcessListNode;
 
+static ProcessListNode *currentProcess;
+
 void initScheduler(void *kernelStack);
 void updateCurrentStack();
 uint8_t addProcess(PCB *pcb);

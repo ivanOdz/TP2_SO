@@ -43,5 +43,7 @@ int64_t writeFifo(FifoBuffer *fifo, char *src, uint64_t size, bool blocking);
 int64_t readFifo(FifoBuffer *fifo, char *dest, uint64_t size, bool blocking);
 bool putFifo(FifoBuffer *fifo, char c, bool blocking);
 char getFifo(FifoBuffer *fifo, bool blocking);
+void printFileDescriptors(PID_t pid);
+FdInfo * fdInfo();
 
 #endif

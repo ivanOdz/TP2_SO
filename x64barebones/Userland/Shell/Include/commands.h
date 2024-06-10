@@ -54,6 +54,7 @@ static const availableCommand avCommands[] = {
 	{"ex", FALSE, (int (*)(int, char **)) testExceptions},
 	{"mem", FALSE, (int (*)(int, char **)) mem},
 	{"ps", FALSE, (int (*)(int, char **)) ps},
+	{"lsof", FALSE, (int (*)(int, char **)) lsof},
 	{"loop", FALSE, (int (*)(int, char **)) greeting},
 	{"kill", TRUE, command_kill},
 	{"nice", FALSE, (int (*)(int, char **)) nice},
