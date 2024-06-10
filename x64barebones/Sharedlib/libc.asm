@@ -29,6 +29,13 @@ GLOBAL SyscallFdInfo
 GLOBAL open
 GLOBAL close
 GLOBAL dupFD
+GLOBAL semCreate
+GLOBAL semOpen
+GLOBAL semWait
+GLOBAL semPost
+GLOBAL semBinaryPost
+GLOBAL semBinaryWait
+
 ALIGN 16
 
 
@@ -407,3 +414,16 @@ dupFD:
 invalidOpcode:
     ud2
     ret
+
+semCreate:
+ret
+semOpen:
+ret
+semWait:
+ret
+semPost:
+ret
+semBinaryPost:
+ret
+semBinaryWait:
+ret

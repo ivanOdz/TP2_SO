@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <videoDriver.h>
+#include <semaphores.h>
 
 #define MAX_INTS	 256
 #define MAX_SYSCALLS 338
@@ -186,6 +187,34 @@ int64_t syscall_close(uint64_t fd) {
 
 int64_t syscall_dup(uint64_t fd) {
 	return duplicateFD(fd);
+}
+
+int64_t syscall_semaphore_create(uint32_t initialValue) {
+	return (int64_t)semaphoreCreate(initialValue);
+}
+
+int64_t syscall_semaphore_open(uint16_t id) {
+	return (int64_t)semaphoreOpen(id);
+}
+
+int64_t syscall_semaphore_close(uint16_t id) {
+	return (int64_t)semaphoreClose(id);
+}
+
+void syscall_semaphore_binary_post(uint16_t id) {
+	return semaphoreBinaryPost(id);
+}
+
+void syscall_semaphore_binary_wait(uint16_t id) {
+	semaphoreBinaryWait(id);
+}
+
+void syscall_semaphore_post(uint16_t id) {
+	semaphorePost(id);
+}
+
+void syscall_semaphore_wait(uint16_t id) {
+	semaphoreWait(id);
 }
 
 typedef int (*EntryPoint)();

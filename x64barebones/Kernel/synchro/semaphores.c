@@ -2,11 +2,13 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <semaphores.h>
 
+static semaphore *mySemaphores[SEMAPHORES_MAX];
+
 static semaphore *semaphoreGetById(uint16_t id) {
 	semaphore *sem = NULL;
 
 	if (id) {
-		sem = semaphores[id];
+		sem = mySemaphores[id];
 	}
 	if (sem->blockedProcessesAccess == NULL) {
 		sem = NULL;
@@ -17,7 +19,7 @@ static semaphore *semaphoreGetById(uint16_t id) {
 
 static uint16_t semaphoreFindFirstFree() {
 	for (uint16_t cont = 1; cont < SEMAPHORES_MAX; cont++) {
-		if (semaphores[cont] == NULL) {
+		if (mySemaphores[cont] == NULL) {
 			return cont;
 		}
 	}
@@ -35,15 +37,15 @@ static void semaphoreClearBlockProcesses(sem_blk_prc *blkPrc) {
 
 static void semaphoresInitialize() { // [!] semaphores[0] puede servir para tener mutex sobre la misma estructura. Puede servir si se quiere hacer de tamaño dinámico
 
-	semaphore *candidate = allocMemory(sizeof(semaphores[0]));
+	semaphore *candidate = allocMemory(sizeof(mySemaphores[0]));
 	candidate->access = 0;
 	candidate->counter = 0;
 	candidate->blockedProcessesCounter = NULL;
-	candidate->blockedProcessesAccess = allocMemory(sizeof(semaphores[0]->blockedProcessesAccess));
+	candidate->blockedProcessesAccess = allocMemory(sizeof(mySemaphores[0]->blockedProcessesAccess));
 
 	semaphoreClearBlockProcesses(candidate->blockedProcessesAccess);
 
-	if (atomicCompareExchange(semaphores[0], NULL, candidate) != candidate) {
+	if (atomicCompareExchange(mySemaphores[0], NULL, candidate) != candidate) {
 		freeMemory(candidate);
 	}
 }
@@ -105,11 +107,11 @@ void semaphoreBinaryWait(uint16_t id) {
 }
 
 uint16_t semaphoreCreate(uint32_t initialValue) {
-	if (semaphores[0] == NULL) {
+	if (mySemaphores[0] == NULL) {
 		semaphoresInitialize();
 	}
 
-	semaphore *newSem = allocMemory(sizeof(semaphores[0]));
+	semaphore *newSem = allocMemory(sizeof(mySemaphores[0]));
 	newSem->access = 0;
 	newSem->counter = initialValue;
 	newSem->blockedProcessesAccess = allocMemory(sizeof(newSem->blockedProcessesAccess));
@@ -122,13 +124,14 @@ uint16_t semaphoreCreate(uint32_t initialValue) {
 
 	do {
 		newSemId = semaphoreFindFirstFree();
-	} while (newSemId && (atomicCompareExchange(semaphores[newSemId], NULL, newSem) != newSem));
+	} while (newSemId && (atomicCompareExchange(mySemaphores[newSemId], NULL, newSem) != newSem));
 
 	if (newSemId) {
 		semaphoreBinaryPost(newSemId);
 	}
 	else {
 		freeMemory(newSem);
+        newSemId = 0;
 	}
 
 	return newSemId;
@@ -143,7 +146,7 @@ uint16_t semaphoreClose(uint16_t id) {
 
 	if (sem != NULL) { // [?] Liberar si es que quedan procesos en los arreglos?
 		semaphoreBinaryWait(id);
-		semaphores[id] = NULL;
+		mySemaphores[id] = NULL;
 		freeMemory(sem->blockedProcessesAccess->pids);
 		freeMemory(sem->blockedProcessesCounter->pids);
 		freeMemory(sem);
