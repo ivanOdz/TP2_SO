@@ -191,7 +191,8 @@ void printChar(char c, uint32_t fg) {
 	else if (c == '\e') {
 		clear();
 	}
-	else if (c == 0xD) {
+	else if (c == '\r') {
+		drawchar_transparent(219, cursor_x, cursor_y, backgroundColor);
 		cursor_x = X_OFFSET;
 	}
 	else {

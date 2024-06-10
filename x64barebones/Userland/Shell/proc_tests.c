@@ -3,7 +3,7 @@
 #include <libc.h>
 #include <stdint.h>
 
-#define PROCESSES_DEFAULT	 50
+#define PROCESSES_DEFAULT	 100
 #define BIAS_DEFAULT		 50
 #define BURN_IN_DEFAULT		 3
 #define SLEEP_DEFAULT		 200
@@ -110,7 +110,7 @@ void test_processes(int argc, char **argv) {
 	char *args[2];
 	while (burnin--) {
 		printf("\nNew iteration (%lu left)\n", burnin);
-		printf("Instantiating processes (0000 of %4lu processes)", maxProcesses);
+		printf("Instantiating processes (0 of %lu processes)", maxProcesses);
 		int spawned;
 		for (spawned = 0; spawned < maxProcesses; spawned++) {
 			args[0] = "Test process";
@@ -118,7 +118,6 @@ void test_processes(int argc, char **argv) {
 			PID_t newProcess = execv(processTestLoop, args, BACKGROUND);
 			if (!newProcess) {
 				fprintf(STD_ERR, "%cERROR CREATING PROCESS N#%d, WILL RETRY          \n", 0xD, spawned);
-				puts("Instantiating processes (0000 of 0000 processes)");
 				processes[spawned].PID = 0;
 				processes[spawned].status = KILLED;
 				spawned--;
@@ -127,12 +126,12 @@ void test_processes(int argc, char **argv) {
 				processes[spawned].PID = newProcess;
 				processes[spawned].status = RUNNING;
 			}
-			printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4lu processes)", spawned + 1, maxProcesses);
+			printf("\rInstantiating processes (%d of %lu processes)", spawned + 1, maxProcesses);
 			if (sleepAmount)
 				sleep(sleepAmount);
 		}
 		printf("\nInstantiated %d processes\n", spawned);
-		printf("\nKilling / blocking processes (0000 processes alive, 0000 processes blocked)");
+		printf("\nKilling / blocking processes (0 processes alive, 0 processes blocked)");
 		int blocked = 0;
 		while (spawned) {
 			int index;
@@ -144,7 +143,6 @@ void test_processes(int argc, char **argv) {
 
 				if (!newProcess) {
 					fprintf(STD_ERR, "%cERROR KILLING PROCESS %d    \n", 0xD, processes[index].PID);
-					puts("Killing / blocking processes (0000 processes alive, 0000 processes blocked)");
 				}
 				else {
 					if (processes[index].status == BLOCKED)
@@ -164,7 +162,6 @@ void test_processes(int argc, char **argv) {
 					}
 					else {
 						fprintf(STD_ERR, "%cERROR BLOCKING PROCESS %u\n", 0xD, processes[index].PID);
-						puts("Killing / blocking processes (0000 processes alive, 0000 processes blocked)");
 					}
 				}
 				else {
@@ -174,11 +171,10 @@ void test_processes(int argc, char **argv) {
 					}
 					else {
 						fprintf(STD_ERR, "%cERROR UNBLOCKING PROCESS %u\n", 0xD, processes[index].PID);
-						puts("Killing / blocking processes (0000 processes alive, 0000 processes blocked)");
 					}
 				}
 			}
-			printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d processes alive, %4d processes blocked)", spawned, blocked);
+			printf("\rKilling / blocking processes (%d processes alive, %d processes blocked)    ", spawned, blocked);
 			if (sleepAmount)
 				sleep(sleepAmount);
 		}
@@ -209,35 +205,35 @@ void test_priority(int argc, char **argv) {
 		else if (strcmp(argv[arg], "-processes") == 0) {
 			maxProcesses = argumentParse(arg++, argc, argv);
 			if (!maxProcesses || maxProcesses > 999) {
-				fprintf(STD_ERR, "INVALID -processes paramenter. Expected 1-999, got %s", argv[arg]);
+				fprintf(STD_ERR, "INVALID -processes paramenter. Expected 1-999, got %s\0", argv[arg]);
 				exit(1);
 			}
 		}
 		else if (strcmp(argv[arg], "-busytime") == 0) {
 			busytime = argumentParse(arg++, argc, argv);
-			if (busytime > 99) {
-				fprintf(STD_ERR, "INVALID -busytime paramenter. Expected 1-10000, got %s", argv[arg]);
+			if (busytime > 10000) {
+				fprintf(STD_ERR, "INVALID -busytime paramenter. Expected 1-10000, got %s\0", argv[arg]);
 				exit(2);
 			}
 		}
 		else if (strcmp(argv[arg], "-burnin") == 0) {
 			burnin = argumentParse(arg++, argc, argv);
 			if (!burnin) {
-				fprintf(STD_ERR, "INVALID -burnin paramenter. Expected 1+, got %s", argv[arg]);
+				fprintf(STD_ERR, "INVALID -burnin paramenter. Expected 1+, got %s\0", argv[arg]);
 				exit(3);
 			}
 		}
 		else if (strcmp(argv[arg], "-minpriority") == 0) {
 			minPriority = argumentParse(arg++, argc, argv);
 			if (!minPriority) {
-				fprintf(STD_ERR, "INVALID -minpriority paramenter. Expected 1-9, got %s", argv[arg]);
+				fprintf(STD_ERR, "INVALID -minpriority paramenter. Expected 1-9, got %s\0", argv[arg]);
 				exit(3);
 			}
 		}
 		else if (strcmp(argv[arg], "-maxpriority") == 0) {
 			maxPriority = argumentParse(arg++, argc, argv);
 			if (!maxPriority) {
-				fprintf(STD_ERR, "INVALID -maxpriority paramenter. Expected 1-9, got %s", argv[arg]);
+				fprintf(STD_ERR, "INVALID -maxpriority paramenter. Expected 1-9, got %s\0", argv[arg]);
 				exit(3);
 			}
 		}
@@ -248,17 +244,18 @@ void test_priority(int argc, char **argv) {
 		}
 	}
 	SyscallClear();
+	SyscallNice(getPID(), 9);
 	printf("Processes: %lu\tbusytime: %lu\tmin priority: %lu\tmax priority: %lu\tburn-in: %lu\n", maxProcesses, busytime, minPriority, maxPriority, burnin);
 	ProcessPriorityType *processes = malloc(maxProcesses * sizeof(ProcessPriorityType));
 	if (!processes)
 		exit(5);
 	char *args[3];
 	char arg2buf[20];
-	int perPriority[10];
-	int times[10];
+	int perPriority[10] = {0};
+	int times[10] = {0};
 	while (burnin--) {
 		printf("\nNew iteration (%lu left)\n", burnin);
-		printf("Instantiating processes (0000 of %4lu processes)", maxProcesses);
+		printf("Instantiating processes (0 of %lu processes)", maxProcesses);
 		int spawned;
 		for (spawned = 0; spawned < maxProcesses; spawned++) {
 			args[0] = "Test process";
@@ -268,26 +265,25 @@ void test_priority(int argc, char **argv) {
 			PID_t newProcess = execv(processPriorityLoop, args, BACKGROUND);
 			if (!newProcess) {
 				fprintf(STD_ERR, "%cERROR CREATING PROCESS N#%d, WILL RETRY          \n", 0xD, spawned);
-				puts("Instantiating processes (0000 of 0000 processes)");
 				processes[spawned].PID = 0;
 				spawned--;
 			}
 			else {
 				processes[spawned].PID = newProcess;
 				double progress = ((double) spawned / maxProcesses);
-				processes[spawned].priority = (int) (minPriority + (double) (maxPriority - minPriority) * progress);
+				processes[spawned].priority = (int) (minPriority + (double) (maxPriority - minPriority + 1) * progress);
 				SyscallNice(processes[spawned].PID, processes[spawned].priority);
 			}
-			printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4lu processes)", spawned + 1, maxProcesses);
+			printf("\rInstantiating processes (%lu of %lu processes)", spawned + 1, maxProcesses);
 		}
-		printf("\nInstantiated %d processes\n", spawned);
 		for (int p = 0; p < maxProcesses; p++) {
 			perPriority[processes[p].priority]++;
 		}
+		printf("\nInstantiated %d processes\nTotal processes created per priority:\n", spawned);
 		for (int i = 1; i <= 9; i++) {
 			printf("%d: %d\t", i, perPriority[i]);
 		}
-		printf("\nWaiting on processes (%4d processes alive)", spawned);
+		printf("\nWaiting on processes (%d processes alive)", spawned);
 		while (spawned) {
 			ReturnStatus r;
 			PID_t back = waitpid(0, &r);
@@ -296,7 +292,7 @@ void test_priority(int argc, char **argv) {
 				if (processes[i].PID == back)
 					times[processes[i].priority] += r.returnValue;
 			}
-			printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d processes alive)", spawned);
+			printf("\rWaiting on processes (%d processes alive)", spawned);
 		}
 		puts("\n\n");
 	}

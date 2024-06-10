@@ -95,7 +95,7 @@ void mm_test(int argc, char **argv) {
 			test[i] = NULL;
 			testsize[i] = 0;
 		}
-		printf("Allocating memory slots and writing probe data (0000 of %4lu blocks) (000MiB of %3luMiB)", maxBlocks, maxMemSize);
+		printf("Allocating memory slots and writing probe data (0 of %lu blocks) (0MiB of %luMiB)", maxBlocks, maxMemSize);
 		int assigned = 0;
 		uint64_t assignedBytes = 0;
 		uint8_t tries = 0;
@@ -115,24 +115,23 @@ void mm_test(int argc, char **argv) {
 				}
 				assigned++;
 			}
-			printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%4d of %4lu blocks) (%3luMiB of %3luMiB)", assigned, maxBlocks, assignedBytes >> 20, maxMemSize);
+			printf("\rAllocating memory slots and writing probe data (%d of %lu blocks) (%luMiB of %luMiB)", assigned, maxBlocks, assignedBytes >> 20, maxMemSize);
 		} while (assigned < maxBlocks && assignedBytes <= maxMemSize << 20 && tries < NULL_MALLOC_RETRY);
 
 		printf("\nAssigned %d slots out of %lu\n", assigned, maxBlocks);
 		memoryManagerStats(&mminfoo);
 		printf("Free Memory: 0x%lx\tOcupied Memory: 0x%lx\tFragmented Memory: 0x%lx\tMax Frag Block Size:%lx\nMin Frag Block Size:%lx\tAssigned Nodes:%lu\n", mminfoo.freeMemory, mminfoo.occupiedMemory, mminfoo.fragmentedMemory, mminfoo.maxFragmentedSize, mminfoo.minFragmentedSize, mminfoo.assignedNodes);
-		printf("Testing allocated memory for overlaps and corruption (0000)");
+		printf("Testing allocated memory for overlaps and corruption (0)");
 		for (int testNum = 0; testNum < assigned; testNum++) {
 			uint8_t *memSlot = test[testNum];
 			uint8_t probe = memSlot[0];
 			for (uint64_t position = 1; position < testsize[testNum]; position++) {
 				if (memSlot[position] != probe) {
 					fprintf(STD_ERR, "%cTest %d Error at 0x%lx (pos %lu of %lu) (read %lu, expected %lu, previous %lu)\n", 0xD, testNum, memSlot + position, position, testsize[testNum], (uint64_t) memSlot[position], (uint64_t) memSlot[0], (uint64_t) memSlot[position - 1]);
-					printf("Testing allocated memory for overlaps and corruption (0000)");
 					break;
 				}
 			}
-			printf("\b\b\b\b\b%4d)", testNum + 1);
+			printf("\rTesting allocated memory for overlaps and corruption (%d)", testNum + 1);
 		}
 		// SyscallPrintMem();
 		printf("\nFreeing allocated memory...\n");

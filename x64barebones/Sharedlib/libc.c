@@ -168,7 +168,7 @@ void fprintf_args(uint8_t fd, char *fmt, va_list args) {
 				case 'd':
 				case 'i':
 					uintToBase(va_arg(args, uint64_t), buffer, 10);
-					printPadded(fd, buffer, '0', padding, padRight);
+					printPadded(fd, buffer, ' ', padding, padRight);
 					break;
 				case 'c':
 				case '%':

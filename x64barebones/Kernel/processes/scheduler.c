@@ -14,7 +14,7 @@ uint64_t getProcessRunPriority(ProcessListNode *candidate, uint16_t distanceFrom
 uint8_t *pickNextProcess();
 uint16_t getProcessCount();
 ProcessListNode *getZombieChild(PID_t parentPID, PID_t childPID);
-uint8_t checkUnblock(ProcessListNode *candidate);
+bool checkUnblock(ProcessListNode *candidate);
 
 void initScheduler(void *kernelStack) {
 	// hardwire halt process
@@ -133,10 +133,10 @@ uint64_t getProcessRunPriority(ProcessListNode *candidate, uint16_t distanceFrom
 		if (!checkUnblock(candidate))
 			return 0;
 	}
-	return (uint64_t) ((1L << candidate->process->priority) * ((double) processCount / distanceFromCurrent)) + (1L << ((get_ticks() - candidate->process->lastTickRun) >> 3));
+	return (uint64_t) ((4L << candidate->process->priority) * ((double) processCount / distanceFromCurrent)) + (1L << ((get_ticks() - candidate->process->lastTickRun) / (processCount << 1)));
 }
 
-uint8_t checkUnblock(ProcessListNode *candidate) {
+bool checkUnblock(ProcessListNode *candidate) {
 	// if manually blocked we wont even bother
 	if (!candidate->process->blockedOn.manual) {
 		// cannot be blocked on two of these at once
@@ -152,6 +152,7 @@ uint8_t checkUnblock(ProcessListNode *candidate) {
 				candidate->process->blockedOn.waitPID->pid = zombieChild->process->pid;
 				candidate->process->blockedOn.waitPID->aborted = zombieChild->process->killed;
 				candidate->process->blockedOn.waitPID->returnValue = zombieChild->process->returnValue;
+				candidate->process->blockedOn.waitPID = NULL;
 				freeProcess(zombieChild->process);
 				return TRUE;
 			}
@@ -168,12 +169,12 @@ uint8_t checkUnblock(ProcessListNode *candidate) {
 }
 
 ProcessListNode *getZombieChild(PID_t parentPID, PID_t childPID) {
-	if (currentProcess->process->status == ZOMBIE)
-		return currentProcess;
-	for (ProcessListNode *child = currentProcess->next; child != currentProcess; child = child->next) {
+	ProcessListNode *child = currentProcess;
+	do {
 		if (child->process->status == ZOMBIE && child->process->parentPid == parentPID && (childPID == 0 || child->process->pid == childPID))
 			return child;
-	}
+		child = child->next;
+	} while (child != currentProcess);
 	return NULL;
 }
 
