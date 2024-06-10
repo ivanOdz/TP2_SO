@@ -142,10 +142,15 @@ bool checkUnblock(ProcessListNode *candidate) {
 	// if manually blocked we wont even bother
 	if (!candidate->process->blockedOn.manual) {
 		// cannot be blocked on two of these at once
-		if (candidate->process->blockedOn.timer && candidate->process->blockedOn.timer <= get_ticks()) {
-			candidate->process->status = READY;
-			candidate->process->blockedOn.timer = 0;
-			return TRUE;
+		if (candidate->process->blockedOn.timer) {
+			if (candidate->process->blockedOn.timer <= get_ticks()) {
+				candidate->process->status = READY;
+				candidate->process->blockedOn.timer = 0;
+				return TRUE;
+			}
+			else {
+				return FALSE;
+			}
 		}
 		else if (candidate->process->blockedOn.waitPID) {
 			ProcessListNode *zombieChild = getZombieChild(candidate->process->pid, candidate->process->blockedOn.waitPID->pid);
