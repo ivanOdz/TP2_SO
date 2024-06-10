@@ -8,7 +8,7 @@
 
 static uint64_t ticks = 0;
 
-void timer_handler() {
+uint64_t timer_handler() {
 	ticks++;
 	if ((ticks % (HZ / 40) == 0)) {
 		soundNext();
@@ -19,7 +19,7 @@ void timer_handler() {
 	}
 
 	if (stackSwitcharoo)
-		schedyield();
+		return schedyield();
 }
 
 int ticks_elapsed() {

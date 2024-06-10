@@ -50,8 +50,8 @@ void test_processes(int argc, char **argv) {
 		}
 		else if (strcmp(argv[arg], "-bias") == 0) {
 			bias = argumentParse(arg++, argc, argv);
-			if (!bias || bias > 99) {
-				fprintf(STD_ERR, "INVALID -bias paramenter. Expected 1-99, got %s", argv[arg]);
+			if (bias > 99) {
+				fprintf(STD_ERR, "INVALID -bias paramenter. Expected 0-99, got %s", argv[arg]);
 				exit(2);
 			}
 		}
@@ -89,9 +89,6 @@ void test_processes(int argc, char **argv) {
 			args[0] = "Test process";
 			args[1] = NULL;
 			PID_t newProcess = execv(processTestLoop, args, BACKGROUND);
-			if(newProcess > 30000){
-				printf("QUE PASO?\n");
-			}
 			if (!newProcess) {
 				fprintf(STD_ERR, "%cERROR CREATING PROCESS N#%d, WILL RETRY          \n", 0xD, spawned);
 				puts("Instantiating processes (0000 of 0000 processes)");

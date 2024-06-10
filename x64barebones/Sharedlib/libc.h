@@ -23,6 +23,8 @@
 #define COLORS_ORANGE 0x00EF3F00
 #define COLORS_CIAN	  0x0000E0FF
 
+typedef char bool;
+
 typedef enum { FOREGROUND = 0,
 			   BACKGROUND,
 			   RELEGATED } ProcessRunMode;

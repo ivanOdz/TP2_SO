@@ -141,7 +141,7 @@ void processSleep(uint64_t ms) {
 }
 
 void freeProcess(PCB *process) {
-	freeMemory(process->stackBasePointer);
+	freeMemory(process->stackBasePointer - STACK_DEFAULT_SIZE + sizeof(uint64_t));
 	removeProcess(process);
 	freeMemory(process);
 }

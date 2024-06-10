@@ -16,7 +16,7 @@ uint8_t removeProcess(PCB *process);
 PID_t getCurrentPID();
 PCB *getCurrentProcess();
 PCB *getProcess(PID_t pid);
-void schedyield();
+uint64_t schedyield();
 PCB *getForegroundProcess();
 void *forceyield();
 ProcessInfo *processInfo();

@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <libc.h>
 
-void timer_handler();
+uint64_t timer_handler();
 int ticks_elapsed();
 int seconds_elapsed();
 uint64_t get_ticks();

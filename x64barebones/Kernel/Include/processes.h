@@ -45,6 +45,7 @@ typedef struct PCB {
 	ProcessStatus status;
 	BlockedOn blockedOn;
 	uint64_t lastTickRun;
+	uint64_t raxPreserve;
 } PCB;
 
 PCB *initProcess(void *kernelStack);

@@ -35,8 +35,7 @@ uint64_t nullHandler() {
 }
 
 uint64_t int_00() {
-	timer_handler();
-	return 0;
+	return timer_handler();
 }
 
 uint64_t int_01() {
@@ -62,9 +61,9 @@ int64_t syscall_write(uint8_t fd, char *buf, uint64_t size) {
 	// Tengo que obtener el proceso actual, entrar al fd que me pasan,
 	// y escribir en el buffer, si es que tengo lugar, lo que me estan pasando.
 	PCB *process = getCurrentProcess();
-	//if (process->fileDescriptors[fd].isBeingUsed == 0) {
+	// if (process->fileDescriptors[fd].isBeingUsed == 0) {
 	//	return -1;
-	//}
+	// }
 	return syscall_puts(fd, buf, size);
 }
 
@@ -101,9 +100,8 @@ uint64_t syscall_setFormat(text_format *buf) {
 	return setFormat(buf);
 }
 
-uint64_t syscall_putBlock(draw_type *draw) {
+void syscall_putBlock(draw_type *draw) {
 	putBlock(draw);
-	return 0;
 }
 
 uint64_t syscall_getTicks() {
@@ -168,8 +166,8 @@ uint64_t syscall_block(uint16_t pid) {
 	return blockProcess(pid);
 }
 
-void syscall_yield(uint16_t pid) {
-	schedyield();
+uint64_t syscall_yield(uint16_t pid) {
+	return schedyield();
 }
 
 void syscall_sleep(uint64_t ms) {

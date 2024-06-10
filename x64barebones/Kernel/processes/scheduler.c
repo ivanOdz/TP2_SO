@@ -26,12 +26,16 @@ void initScheduler(void *kernelStack) {
 	enableScheduler = TRUE;
 }
 
-void schedyield() {
+uint64_t schedyield() {
 	if (enableScheduler && currentProcess && currentProcess->process) {
+		uint64_t *myRax = (stackSwitcharoo + 14 * sizeof(int64_t));
+		currentProcess->process->raxPreserve = *myRax;
 		currentProcess->process->stackPointer = stackSwitcharoo;
 		currentProcess->process->lastTickRun = get_ticks();
 		stackSwitcharoo = pickNextProcess();
+		return currentProcess->process->raxPreserve;
 	}
+	return 0;
 }
 
 void updateCurrentStack() {
@@ -156,7 +160,7 @@ uint8_t checkUnblock(ProcessListNode *candidate) {
 				return FALSE;
 			}
 		}
-		else if(candidate->process->blockedOn.fd == 0){
+		else if (candidate->process->blockedOn.fd == FALSE) {
 			candidate->process->status = READY;
 			return TRUE;
 		}
