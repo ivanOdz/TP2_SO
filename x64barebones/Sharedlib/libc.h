@@ -105,6 +105,7 @@ int64_t strcmp(const char *str1, const char *str2);
 int64_t strincludes(const char *contains, const char *contained);
 uint64_t strlen(const char *str);
 int64_t stringToInt(char *str, uint32_t strlen);
+uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
 uint32_t rand();
 void srand(uint32_t seed);
 uint32_t randBetween(uint32_t start, uint32_t end);

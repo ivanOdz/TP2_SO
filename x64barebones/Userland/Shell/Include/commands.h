@@ -49,6 +49,7 @@ static const availableCommand avCommands[] = {
 	{"tunes", TRUE, command_tunes},
 	{"mm_test", FALSE, (int (*)(int, char **)) mm_test},
 	{"test_processes", FALSE, (int (*)(int, char **)) test_processes},
+	{"test_priority", FALSE, (int (*)(int, char **)) test_priority},
 	{"ps", FALSE, (int (*)(int, char **)) ps},
 	{"nice", FALSE, (int (*)(int, char **)) nice},
 	{"kill", TRUE, command_kill},

@@ -7,7 +7,6 @@
 #include <libc.h>
 #include <memoryManager.h>
 #include <moduleLoader.h>
-#include <naiveConsole.h>
 #include <processes.h>
 #include <scheduler.h>
 #include <sound.h>

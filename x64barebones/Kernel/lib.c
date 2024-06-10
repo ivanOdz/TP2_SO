@@ -2,7 +2,6 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <defs.h>
 #include <lib.h>
-#include <naiveConsole.h>
 #include <stdint.h>
 #include <videoDriver.h>
 
