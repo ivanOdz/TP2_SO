@@ -179,7 +179,7 @@ void closeFifo(FifoBuffer *fifo, FifoMode mode) {
 	else {
 		fifo->writeEnds--;
 	}
-	if (!fifo->writeEnds) {
+	if (!fifo->writeEnds && fifo->writeCursor != fifo->buffer) {
 		putFifo(fifo, EOF, FALSE);
 	}
 }

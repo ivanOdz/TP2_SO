@@ -240,8 +240,6 @@ void runCommand(char *runMe) {
 			}
 			close(STD_OUT);
 			dupFD(pipefds[WRITE]);
-			close(pipefds[0]);
-			close(pipefds[1]);
 		}
 	}
 	pid = run(strBuffer);
@@ -254,6 +252,10 @@ void runCommand(char *runMe) {
 	}
 	close(STD_OUT);
 	open(CONSOLE_NAME, WRITE);
+	if (pipefds[READ] || pipefds[WRITE]) {
+		close(pipefds[READ]);
+		close(pipefds[WRITE]);
+	}
 
 	while (waits--) {
 		PID_t exited = waitpid(0, &wstatus);
