@@ -177,7 +177,7 @@ void setFdInfo(PCB * process, FdInfo * node, uint16_t fd){
 
 FdInfo *fdInfo(uint16_t pid) {
 	PCB *process = getProcess(pid);
-	if (process->fileDescriptors[0].pipe == NULL) {
+	if (process == NULL || process->fileDescriptors[0].pipe == NULL) {
 		return NULL;
 	}
 	FdInfo *first = allocMemory(sizeof(FdInfo));
