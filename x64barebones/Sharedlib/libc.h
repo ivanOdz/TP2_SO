@@ -111,7 +111,7 @@ extern uint64_t SyscallMemInfo(MemoryInfo *meminfo);
 extern ProcessInfo *SyscallProcessInfo();
 extern uint64_t SyscallNice(uint16_t pid, uint8_t newPriority);
 extern uint64_t SyscallToggleBlockProcess(uint16_t pid);
-extern int pipe(int fds[2]);
+extern int64_t pipe(char *name, int pipefd[2]);
 extern FdInfo *SyscallFdInfo(uint16_t pid);
 extern int64_t open(char *name, FifoMode mode);
 extern int64_t close(uint64_t fd);

@@ -19,7 +19,6 @@ void lsof(int argc, char **argv) {
 	FdInfo *info = SyscallFdInfo(stringToInt(argv[1], strlen(argv[1])));
 	printf("PROCESS NAME\t\tPID   FD  MODE\tPIPE NAME\n");
 	printf("=============================================================\n");
-
 	while (info != NULL) {
 		printf("%-20s %u %5u   %-10c  %-20s\n", info->processName, info->pid, info->fd, ((info->mode == 0) ? 'R' : 'W'), info->pipeName);
 		FdInfo *temp = info;
