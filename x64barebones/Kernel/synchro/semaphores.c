@@ -68,7 +68,7 @@ void semaphoreBinaryPost(uint16_t id) {
 				luckyPid = atomicExchange(&sem->blockedProcessesAccess->pids[actualPosition], 0);
 
 				if (luckyPid) {
-					// change status to RUN if everything is OK
+					blockProcess(luckyPid);
 				}
 				else {
 					schedyield(); // [!] Proceso que iba a bloquearse no llegó a anotarse!
@@ -170,7 +170,7 @@ void semaphorePost(uint16_t id) {
 			if (actualPosition >= SEM_BLK_PRC_ARR_SIZE) {
 				actualPosition = 0;
 			}
-			// change process status
+			blockProcess(luckyPid);
 		}
 		sem->blockedProcessesCounter->first = actualPosition;
 	}
@@ -190,7 +190,7 @@ void semaphoreWait(uint16_t id) {
 			if (sem->blockedProcessesCounter->last > SEM_BLK_PRC_ARR_SIZE) {
 				sem->blockedProcessesCounter->last = 0;
 			}
-			// change process status
+			blockProcess(id);
 			semaphoreBinaryPost(id);
 			schedyield();
 			semaphoreBinaryWait(id);

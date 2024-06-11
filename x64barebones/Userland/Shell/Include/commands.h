@@ -48,7 +48,7 @@ static const availableCommand avCommands[] = {
 	{"mm_test", FALSE, (int (*)(int, char **)) mm_test},
 	{"processes_test", FALSE, (int (*)(int, char **)) test_processes},
 	{"priority_test", FALSE, (int (*)(int, char **)) test_priority},
-	{"sync_test", FALSE, (int (*)(int, char **)) NULL},
+	{"sync_test", FALSE, (int (*)(int, char **)) testSemaphores},
 
 	{"snake", FALSE, (int (*)(int, char **)) snake},
 	{"ex", FALSE, (int (*)(int, char **)) testExceptions},

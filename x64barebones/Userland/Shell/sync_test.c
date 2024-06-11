@@ -16,16 +16,16 @@ int testProcessOfIncrementalLawOfEntropy(int argc, char **argv) {
     uint64_t *shared;
     uint64_t cycles;
     uint16_t idSemaphore;
-
+    printf("PROCESO HIJO");
     if (argc < 3) {
-        return -1;
+        exit(0);
     }
     shared = (uint64_t*)argv[1];
     cycles = stringToInt(argv[2], strlen(argv[2]));
     idSemaphore = stringToInt(argv[3], strlen(argv[3]));
 
     if (!semOpen(idSemaphore)) {
-        return -1;
+        exit(0);
     }
     for (uint64_t cont=0; cont < cycles; cont++) {
 
@@ -44,6 +44,7 @@ int testProcessOfIncrementalLawOfEntropy(int argc, char **argv) {
             testRace(shared);
         }
     }
+    exit(0);
 }
 
 int testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos, usa semaforos o no
@@ -51,7 +52,7 @@ int testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos, 
     static int64_t shared;
     uint64_t cycles;
     PID_t nProcesses = 2;
-    PID_t *processes;
+    PID_t *processesPids;
     char *argvForProcesses[4];
     uint16_t idSemaphore;
     uint8_t useSemaphore = 0;
@@ -59,11 +60,12 @@ int testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos, 
     char idSemaphoreString[24];
 
     if (argc < 4) {
-        return -1;
+        printf("Argument missing?\n");
+        exit(0);
     }
     cycles = stringToInt(argv[1], strlen(argv[1]));
     nProcesses = stringToInt(argv[2], strlen(argv[2]));
-    useSemaphore = stringToInt(argv[3], strlen(argv[3]));
+    useSemaphore = argv[3][0] == '1';
 
     if (cycles == 0) {
         cycles = 65535;
@@ -78,18 +80,19 @@ int testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos, 
         }
     }
 
-    processes = malloc(nProcesses * sizeof(PID_t));
+    processesPids = malloc(nProcesses * sizeof(PID_t));
     argvForProcesses[0] = "test_sem_process";
     argvForProcesses[1] = (char*)&shared;
     argvForProcesses[2] = cyclesString;
     argvForProcesses[3] = idSemaphoreString;
 
     for (PID_t cont=0; cont < nProcesses; cont++) {
-        // processes[cont] = execute(testProcessOfIncrementalLawOfEntropy, argvForProcesses, NULL);
+        processesPids[cont] = execv(testProcessOfIncrementalLawOfEntropy, argvForProcesses, BACKGROUND);
+        printf("Process_created\n");
     }
     ReturnStatus status;
     for (PID_t cont=0; cont < nProcesses; cont++) {
-        waitpid(processes[cont], &status);
+        waitpid(processesPids[cont], &status);
     }
 
     if (useSemaphore) {
@@ -97,4 +100,5 @@ int testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos, 
     }
     printf("VALUE: ");
     // printint +\n
+    exit(0);
 }
