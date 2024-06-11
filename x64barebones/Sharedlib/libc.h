@@ -121,13 +121,9 @@ extern FdInfo *SyscallFdInfo(uint16_t pid);
 extern int64_t open(char *name, FifoMode mode);
 extern int64_t close(uint64_t fd);
 extern int64_t dupFD(uint64_t fd);
-extern int64_t syscall_semaphoreCreate(uint32_t initialValue);
-extern int64_t syscall_semaphoreOpen(uint16_t id);
-extern int64_t syscall_semaphoreClose(uint16_t id);
-extern void syscall_semaphoreBinaryPost(uint16_t id);
-extern void syscall_semaphoreBinaryWait(uint16_t id);
-extern void syscall_semaphorePost(uint16_t id);
-extern void syscall_semaphoreWait(uint16_t id);
+extern void seminit(sem * s, int value);
+extern void sempost(sem * s);
+extern void semwait(sem * s);
 
 int64_t strcpy(char *dest, const char *src);
 int64_t strcmp(const char *str1, const char *str2);
@@ -165,8 +161,6 @@ PID_t kill(PID_t PID);
 void sleep(uint64_t ms);
 
 
-void seminit(sem * s, int value);
-void sempost(sem * s);
-void semwait(sem * s);
+
 
 #endif
