@@ -189,20 +189,20 @@ int64_t syscall_dup(uint64_t fd) {
 	return duplicateFD(fd);
 }
 
-void syscall_seminit(sem *s, int value) {
-	my_sem_init(s, value);
+int16_t syscall_seminit(int initialValue) {
+	return my_sem_init(initialValue);
 }
 
-void syscall_sempost(sem *s) {
-	my_sem_post(s);
+int16_t syscall_semdestroy(uint16_t id) {
+	return my_sem_init(id);
 }
 
-void syscall_semwait(sem *s) {
-	my_sem_wait(s);
+void syscall_sempost(int16_t id) {
+	my_sem_post(id);
 }
 
-
-
-
+void syscall_semwait(int16_t id) {
+	my_sem_wait(id);
+}
 
 typedef int (*EntryPoint)();

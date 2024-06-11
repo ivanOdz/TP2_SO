@@ -30,6 +30,7 @@ GLOBAL open
 GLOBAL close
 GLOBAL dupFD
 GLOBAL seminit
+GLOBAL semdestroy
 GLOBAL sempost
 GLOBAL semwait
 
@@ -421,18 +422,19 @@ seminit:
     pop rbp
     ret
     
-sempost:
+semdestroy:
     push rbp
     mov rbp, rsp    
 
     mov rax, 0x1F
+    mov rbx, rdi
     int 80h
 
     mov rsp, rbp
     pop rbp
     ret
 
-semwait:
+sempost:
     push rbp
     mov rbp, rsp    
 
@@ -443,7 +445,17 @@ semwait:
     pop rbp
     ret
 
+semwait:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x21
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
 invalidOpcode:
     ud2
     ret
-

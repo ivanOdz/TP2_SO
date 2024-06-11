@@ -2,11 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <semaphores.h>
 
-void my_sem_init(sem *s, int value) {
-  s->value = value;
-}
-
-extern int _xchg(int *lock, int value);
+static sem semaphores[MAX_SEMAPHORES] = {0};
 
 void acquire(int *lock) {
   while (_xchg(lock, 1) != 0);
@@ -16,22 +12,57 @@ void release(int *lock) {
   _xchg(lock, 0);
 }
 
-int lock = 0;
+int16_t my_sem_init(int initialValue) {
 
-void my_sem_wait(sem *s) {
-  while (1) {
-    acquire(&lock);
-    if (s->value > 0) {
-      s->value--;
-      release(&lock);
-      break;
+  for (int cont=0; cont < MAX_SEMAPHORES; cont++) {
+    if (semaphores[cont].inUse == 0) {
+      semaphores[cont].value = initialValue;
+      semaphores[cont].inUse = 1;
+      return cont;
     }
-    release(&lock);
   }
+  return MAX_SEMAPHORES-1;
 }
 
-void my_sem_post(sem *s) {
-  acquire(&lock);
-  s->value++;
-  release(&lock);
+int16_t my_sem_destroy(uint16_t id) {
+
+  if (id >= MAX_SEMAPHORES) {
+    return 0;
+  }
+  semaphores[id].lock = 0;
+  semaphores[id].value = 0;
+  semaphores[id].inUse = 0;
+
+  return 1;
+}
+
+void my_sem_wait(uint16_t id) {
+
+  if (id >= MAX_SEMAPHORES || !semaphores[id].inUse) {
+    return;
+  }
+
+  while (1) {
+
+    acquire(&semaphores[id].lock);
+    if (semaphores[id].value > 0) {
+      semaphores[id].value--;
+      release(&semaphores[id]);
+      break;
+    }
+    release(&semaphores[id].lock);
+    schedyield();
+  }
+
+}
+
+void my_sem_post(uint16_t id) {
+
+  if (id >= MAX_SEMAPHORES || !semaphores[id].inUse) {
+    return;
+  }
+
+  acquire(&semaphores[id].lock);
+  semaphores[id].value++;
+  release(&semaphores[id].lock);
 }

@@ -19,10 +19,7 @@ void clearBuffer(uint8_t *buffer);
 
 extern int haltProcess(int argc, char **argv);
 
-extern uint64_t atomicAdd(uint16_t *a, uint16_t b);
-extern uint64_t atomicExchange(void *a, uint16_t b);
-extern void *atomicCompareExchange(void *value, uint64_t expected, uint64_t newValue);
-extern void atomicHighValueCheck(uint16_t *value, uint16_t top, uint16_t resetValue);
-extern void atomicLowValueCheck(uint16_t *value, uint16_t bottom, uint16_t resetValue);
+extern int _xadd(int *a, int b);
+extern int _xchg(int *a, int b);
 
 #endif

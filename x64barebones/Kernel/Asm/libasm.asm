@@ -186,8 +186,6 @@ fabricateProcessStack:
 	mov rax, rsp
 	mov rsp, r8 ;restore old stack
 	ret
-GLOBAL _xadd
-GLOBAL _xchg
 
 _xadd:
   mov rax, rdi

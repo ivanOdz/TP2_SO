@@ -121,9 +121,10 @@ extern FdInfo *SyscallFdInfo(uint16_t pid);
 extern int64_t open(char *name, FifoMode mode);
 extern int64_t close(uint64_t fd);
 extern int64_t dupFD(uint64_t fd);
-extern void seminit(sem * s, int value);
-extern void sempost(sem * s);
-extern void semwait(sem * s);
+extern uint16_t seminit(int initialValue);
+extern uint16_t semdestroy(uint16_t id);
+extern void sempost(uint16_t id);
+extern void semwait(uint16_t id);
 
 int64_t strcpy(char *dest, const char *src);
 int64_t strcmp(const char *str1, const char *str2);
@@ -159,8 +160,6 @@ void yield();
 PID_t getPID();
 PID_t kill(PID_t PID);
 void sleep(uint64_t ms);
-
-
 
 
 #endif
