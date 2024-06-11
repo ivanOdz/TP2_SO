@@ -8,11 +8,8 @@ GLOBAL getPIT2Freq
 GLOBAL spkStop
 GLOBAL haltProcess
 GLOBAL fabricateProcessStack
-GLOBAL atomicExchange
-GLOBAL atomicCompareExchange
-GLOBAL atomicAdd
-GLOBAL atomicHighValueCheck
-GLOBAL atomicLowValueCheck
+GLOBAL _xadd
+GLOBAL _xchg
 
 ALIGN 16
 
@@ -189,35 +186,15 @@ fabricateProcessStack:
 	mov rax, rsp
 	mov rsp, r8 ;restore old stack
 	ret
+GLOBAL _xadd
+GLOBAL _xchg
 
-atomicExchange:
-		mov rax, rsi
-lock	xchg [rdi], rax
-		ret
+_xadd:
+  mov rax, rdi
+  lock xadd [rsi], eax
+  ret
 
-atomicCompareExchange: ; (&value, expectedValue, newValue)
-		mov rax, rsi
-lock	cmpxchg [rdi], rdx
-		ret
-
-atomicAdd:
-lock	xadd [rdi], rsi
-		ret
-
-atomicHighValueCheck: ; (&value, top, resetValue)
-
-		mov rbx, [rdi]
-		cmp rbx, rsi
-		jng atomicHighValueCheckEnd
-lock	cmpxchg [rdi], rdx
-atomicHighValueCheckEnd:
-		ret
-
-atomicLowValueCheck: ; (&value, bottom, resetValue)
-
-		mov rbx, [rdi]
-		cmp rsi, rbx
-		jng atomicLowValueCheckEnd
-lock	cmpxchg [rdi], rdx
-atomicLowValueCheckEnd:
-		ret
+_xchg:
+  mov rax, rsi
+  xchg [rdi], eax
+  ret

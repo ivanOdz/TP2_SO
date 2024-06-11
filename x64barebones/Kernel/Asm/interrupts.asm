@@ -55,13 +55,10 @@ EXTERN syscall_fdinfo
 EXTERN syscall_open
 EXTERN syscall_close
 EXTERN syscall_dup
-EXTERN syscall_semaphoreCreate
-EXTERN syscall_semaphoreOpen
-EXTERN syscall_semaphoreClose
-EXTERN syscall_semaphoreBinaryPost
-EXTERN syscall_semaphoreBinaryWait
-EXTERN syscall_semaphorePost
-EXTERN syscall_semaphoreWait
+EXTERN syscall_seminit
+EXTERN syscall_sempost
+EXTERN syscall_semwait
+
 
 SECTION .text
 
@@ -324,7 +321,7 @@ haltcpu:
 	ret
 
 SECTION .text
-	syscalls dq syscall_getRTC, syscall_clear, syscall_getRegisters, syscall_read, syscall_write, syscall_getFormat, syscall_setFormat, syscall_putBlock, syscall_getTicks, syscall_playSound, syscall_setTimer, syscall_malloc, syscall_free, syscall_meminfo, syscall_printMemory, syscall_execv, syscall_processInfo, syscall_nice, syscall_block, syscall_exit, syscall_waitpid, syscall_yield, syscall_getPID, syscall_kill, syscall_sleep, syscall_pipe, syscall_fdinfo, syscall_open, syscall_close, syscall_dup, syscall_semaphoreCreate, syscall_semaphoreOpen, syscall_semaphoreClose, syscall_semaphoreBinaryPost, syscall_semaphoreBinaryWait, syscall_semaphorePost, syscall_semaphoreWait
+	syscalls dq syscall_getRTC, syscall_clear, syscall_getRegisters, syscall_read, syscall_write, syscall_getFormat, syscall_setFormat, syscall_putBlock, syscall_getTicks, syscall_playSound, syscall_setTimer, syscall_malloc, syscall_free, syscall_meminfo, syscall_printMemory, syscall_execv, syscall_processInfo, syscall_nice, syscall_block, syscall_exit, syscall_waitpid, syscall_yield, syscall_getPID, syscall_kill, syscall_sleep, syscall_pipe, syscall_fdinfo, syscall_open, syscall_close, syscall_dup, syscall_semaphoreCreate, syscall_semaphoreOpen, syscall_semaphoreClose, syscall_semaphoreBinaryPost, syscall_semaphoreBinaryWait, syscall_semaphorePost, syscall_semaphoreWait, syscall_seminit, syscall_sempost, syscall_semwait
 
 SECTION .bss
 	aux resq 1

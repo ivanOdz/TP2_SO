@@ -189,32 +189,20 @@ int64_t syscall_dup(uint64_t fd) {
 	return duplicateFD(fd);
 }
 
-int64_t syscall_semaphoreCreate(uint32_t initialValue) {
-	return (int64_t)semaphoreCreate(initialValue);
+void syscall_seminit(sem *s, int value) {
+	my_sem_init(s, value);
 }
 
-int64_t syscall_semaphoreOpen(uint16_t id) {
-	return (int64_t)semaphoreOpen(id);
+void syscall_sempost(sem *s) {
+	my_sem_post(s);
 }
 
-int64_t syscall_semaphoreClose(uint16_t id) {
-	return (int64_t)semaphoreClose(id);
+void syscall_semwait(sem *s) {
+	my_sem_wait(s);
 }
 
-void syscall_semaphoreBinaryPost(uint16_t id) {
-	return semaphoreBinaryPost(id);
-}
 
-void syscall_semaphoreBinaryWait(uint16_t id) {
-	semaphoreBinaryWait(id);
-}
 
-void syscall_semaphorePost(uint16_t id) {
-	semaphorePost(id);
-}
 
-void syscall_semaphoreWait(uint16_t id) {
-	semaphoreWait(id);
-}
 
 typedef int (*EntryPoint)();

@@ -29,13 +29,10 @@ GLOBAL SyscallFdInfo
 GLOBAL open
 GLOBAL close
 GLOBAL dupFD
-GLOBAL semCreate
-GLOBAL semOpen
-GLOBAL semClose
-GLOBAL semBinaryPost
-GLOBAL semBinaryWait
-GLOBAL semPost
-GLOBAL semWait
+GLOBAL seminit
+GLOBAL sempost
+GLOBAL semwait
+
 
 ALIGN 16
 
@@ -412,22 +409,19 @@ dupFD:
     pop rbp
     ret
 
-invalidOpcode:
-    ud2
-    ret
-
-semCreate:
+seminit:
     push rbp
     mov rbp, rsp    
 
     mov rax, 0x1E
+    mov rbx, rdi
     int 80h
 
     mov rsp, rbp
     pop rbp
     ret
     
-semOpen:
+sempost:
     push rbp
     mov rbp, rsp    
 
@@ -438,7 +432,7 @@ semOpen:
     pop rbp
     ret
 
-semClose:
+semwait:
     push rbp
     mov rbp, rsp    
 
@@ -449,46 +443,7 @@ semClose:
     pop rbp
     ret
 
-semBinaryPost:
-    push rbp
-    mov rbp, rsp    
-
-    mov rax, 0x21
-    int 80h
-
-    mov rsp, rbp
-    pop rbp
+invalidOpcode:
+    ud2
     ret
 
-semBinaryWait:
-    push rbp
-    mov rbp, rsp    
-
-    mov rax, 0x22
-    int 80h
-
-    mov rsp, rbp
-    pop rbp
-    ret
-
-semPost:
-    push rbp
-    mov rbp, rsp    
-
-    mov rax, 0x23
-    int 80h
-
-    mov rsp, rbp
-    pop rbp
-    ret
-
-semWait:
-    push rbp
-    mov rbp, rsp    
-
-    mov rax, 0x24
-    int 80h
-
-    mov rsp, rbp
-    pop rbp
-    ret
