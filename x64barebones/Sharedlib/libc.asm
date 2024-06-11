@@ -438,7 +438,7 @@ semOpen:
     pop rbp
     ret
 
-semBinaryPost:
+semClose:
     push rbp
     mov rbp, rsp    
 
@@ -449,7 +449,7 @@ semBinaryPost:
     pop rbp
     ret
 
-semBinaryWait:
+semBinaryPost:
     push rbp
     mov rbp, rsp    
 
@@ -460,7 +460,7 @@ semBinaryWait:
     pop rbp
     ret
 
-semPost:
+semBinaryWait:
     push rbp
     mov rbp, rsp    
 
@@ -471,11 +471,22 @@ semPost:
     pop rbp
     ret
 
-semWait:
+semPost:
     push rbp
     mov rbp, rsp    
 
     mov rax, 0x23
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+semWait:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x24
     int 80h
 
     mov rsp, rbp
