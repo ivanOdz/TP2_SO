@@ -7,7 +7,7 @@ void testRace(uint64_t *shared) {
     int64_t copy = *shared;
     yield();
     copy += 1;
-    // yield();s
+    // yield();
     *shared = copy;
 }
 
@@ -21,8 +21,8 @@ int testProcessOfIncrementalLawOfEntropy(int argc, char **argv) {
         return -1;
     }
     shared = (uint64_t*)argv[1];
-    // cycles = atoi(argv[2]);
-    // idSemaphore = atoi(argv[3]);
+    cycles = stringToInt(argv[2], strlen(argv[2]));
+    idSemaphore = stringToInt(argv[3], strlen(argv[3]));
 
     if (!semOpen(idSemaphore)) {
         return -1;
@@ -61,12 +61,12 @@ int testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos, 
     if (argc < 4) {
         return -1;
     }
-    // cycles = atoi(argv[1]);
-    // nProcesses = atoi(argv[2]);
-    // useSemaphore = atoi(argv[3]);
+    cycles = stringToInt(argv[1], strlen(argv[1]));
+    nProcesses = stringToInt(argv[2], strlen(argv[2]));
+    useSemaphore = stringToInt(argv[3], strlen(argv[3]));
 
     if (cycles == 0) {
-        cycles = (long unsigned int)9223372036854775808;
+        cycles = 65535;
     }
     if (nProcesses == 0) {
         nProcesses = 2;
@@ -85,7 +85,16 @@ int testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos, 
     argvForProcesses[3] = idSemaphoreString;
 
     for (PID_t cont=0; cont < nProcesses; cont++) {
-        // processes[cont] = execute(testProcessOfIncrementalLawOfEntropy, );
-
+        // processes[cont] = execute(testProcessOfIncrementalLawOfEntropy, argvForProcesses, NULL);
     }
+    ReturnStatus status;
+    for (PID_t cont=0; cont < nProcesses; cont++) {
+        waitpid(processes[cont], &status);
+    }
+
+    if (useSemaphore) {
+        semClose(idSemaphore);
+    }
+    printf("VALUE: ");
+    // printint +\n
 }

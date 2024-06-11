@@ -71,7 +71,7 @@ void semaphoreBinaryPost(uint16_t id) {
 					// change status to RUN if everything is OK
 				}
 				else {
-					yield(); // [!] Proceso que iba a bloquearse no llegó a anotarse!
+					schedyield(); // [!] Proceso que iba a bloquearse no llegó a anotarse!
 				}
 			}
 			else {
@@ -96,11 +96,11 @@ void semaphoreBinaryWait(uint16_t id) {
 				if (sem->blockedProcessesAccess->pids[myPosition] == 0) {
 					sem->blockedProcessesAccess->pids[myPosition] = myPid;
 					blockProcess(myPid);
-					yield();
+					schedyield();
 				}
 			}
 			else {
-				yield();
+				schedyield();
 			}
 		}
 	}
@@ -144,7 +144,7 @@ uint16_t semaphoreOpen(uint16_t id) {
 uint16_t semaphoreClose(uint16_t id) {
 	semaphore *sem = semaphoreGetById(id);
 
-	if (sem != NULL) { // [?] Liberar si es que quedan procesos en los arreglos?
+	if (sem != NULL) {
 		semaphoreBinaryWait(id);
 		mySemaphores[id] = NULL;
 		freeMemory(sem->blockedProcessesAccess->pids);
@@ -192,7 +192,7 @@ void semaphoreWait(uint16_t id) {
 			}
 			// change process status
 			semaphoreBinaryPost(id);
-			yield();
+			schedyield();
 			semaphoreBinaryWait(id);
 		}
 		sem->counter--;
