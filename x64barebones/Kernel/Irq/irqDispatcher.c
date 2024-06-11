@@ -189,31 +189,31 @@ int64_t syscall_dup(uint64_t fd) {
 	return duplicateFD(fd);
 }
 
-int64_t syscall_semaphore_create(uint32_t initialValue) {
+int64_t syscall_semaphoreCreate(uint32_t initialValue) {
 	return (int64_t)semaphoreCreate(initialValue);
 }
 
-int64_t syscall_semaphore_open(uint16_t id) {
+int64_t syscall_semaphoreOpen(uint16_t id) {
 	return (int64_t)semaphoreOpen(id);
 }
 
-int64_t syscall_semaphore_close(uint16_t id) {
+int64_t syscall_semaphoreClose(uint16_t id) {
 	return (int64_t)semaphoreClose(id);
 }
 
-void syscall_semaphore_binary_post(uint16_t id) {
+void syscall_semaphoreBinaryPost(uint16_t id) {
 	return semaphoreBinaryPost(id);
 }
 
-void syscall_semaphore_binary_wait(uint16_t id) {
+void syscall_semaphoreBinaryWait(uint16_t id) {
 	semaphoreBinaryWait(id);
 }
 
-void syscall_semaphore_post(uint16_t id) {
+void syscall_semaphorePost(uint16_t id) {
 	semaphorePost(id);
 }
 
-void syscall_semaphore_wait(uint16_t id) {
+void syscall_semaphoreWait(uint16_t id) {
 	semaphoreWait(id);
 }
 

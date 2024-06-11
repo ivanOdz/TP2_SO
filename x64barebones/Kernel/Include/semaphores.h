@@ -2,6 +2,9 @@
 #define SEMAPHORES_H_
 
 #include <libc.h>
+#include <lib.h>
+#include <memoryManager.h>
+#include <scheduler.h>
 
 #define SEMAPHORES_MAX		 128
 #define SEM_BLK_PRC_ARR_SIZE 32

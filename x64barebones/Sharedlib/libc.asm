@@ -31,10 +31,11 @@ GLOBAL close
 GLOBAL dupFD
 GLOBAL semCreate
 GLOBAL semOpen
-GLOBAL semWait
-GLOBAL semPost
+GLOBAL semClose
 GLOBAL semBinaryPost
 GLOBAL semBinaryWait
+GLOBAL semPost
+GLOBAL semWait
 
 ALIGN 16
 
@@ -416,14 +417,67 @@ invalidOpcode:
     ret
 
 semCreate:
-ret
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x1E
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+    
 semOpen:
-ret
-semWait:
-ret
-semPost:
-ret
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x1F
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
 semBinaryPost:
-ret
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x20
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
 semBinaryWait:
-ret
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x21
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+semPost:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x22
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+semWait:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x23
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret

@@ -45,7 +45,7 @@ static void semaphoresInitialize() { // [!] semaphores[0] puede servir para tene
 
 	semaphoreClearBlockProcesses(candidate->blockedProcessesAccess);
 
-	if (atomicCompareExchange(mySemaphores[0], NULL, candidate) != candidate) {
+	if (atomicCompareExchange(mySemaphores[0], NULL, (uint64_t)candidate) != candidate) {
 		freeMemory(candidate);
 	}
 }
@@ -64,7 +64,7 @@ void semaphoreBinaryPost(uint16_t id) {
 				if (nextPosition >= SEM_BLK_PRC_ARR_SIZE) {
 					nextPosition = 0;
 				}
-				actualPosition = atomicCompareExchange(&sem->blockedProcessesAccess->first, actualPosition, nextPosition);
+				actualPosition = (uint64_t)atomicCompareExchange(&sem->blockedProcessesAccess->first, actualPosition, nextPosition);
 				luckyPid = atomicExchange(&sem->blockedProcessesAccess->pids[actualPosition], 0);
 
 				if (luckyPid) {
@@ -124,7 +124,7 @@ uint16_t semaphoreCreate(uint32_t initialValue) {
 
 	do {
 		newSemId = semaphoreFindFirstFree();
-	} while (newSemId && (atomicCompareExchange(mySemaphores[newSemId], NULL, newSem) != newSem));
+	} while (newSemId && (atomicCompareExchange(mySemaphores[newSemId], NULL, (uint64_t)newSem) != newSem));
 
 	if (newSemId) {
 		semaphoreBinaryPost(newSemId);
