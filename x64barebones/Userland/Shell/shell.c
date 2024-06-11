@@ -216,7 +216,7 @@ void runCommand(char *runMe) {
 	ReturnStatus wstatus;
 	int64_t pid;
 	int waits = 0;
-	int background = 0;
+	bool background = FALSE;
 	int pipefds[2] = {0};
 	for (int i = 0; strBuffer[i] != 0; i++) {
 		if (strBuffer[i] == '&' && strBuffer[i + 1] == 0) {

@@ -85,15 +85,6 @@ void keyboard_handler() {
 			putFifo(keyboardFifo, EOF, FALSE);
 			return;
 		}
-
-		if (c == 0x13) { // R (Panic! at the Kernel)
-			setFontSize(4);
-			drawWord(STD_ERR, "\ePanic! at the Kernel");
-			setFontSize(1);
-			for (int i = 0; i < 100000000; i++)
-				;
-			main();
-		}
 	}
 
 	// regular characters

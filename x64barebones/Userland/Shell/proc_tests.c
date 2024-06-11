@@ -6,8 +6,8 @@
 #define PROCESSES_DEFAULT	 100
 #define BIAS_DEFAULT		 50
 #define BURN_IN_DEFAULT		 3
-#define SLEEP_DEFAULT		 200
-#define BUSY_DEFAULT		 1000
+#define SLEEP_DEFAULT		 50
+#define BUSY_DEFAULT		 2000
 #define BUSY_OFFSET			 100000
 #define MAX_PRIORITY_DEFAULT 9
 #define MIN_PRIORITY_DEFAULT 1
@@ -243,6 +243,11 @@ void test_priority(int argc, char **argv) {
 			exit(4);
 		}
 	}
+	if (maxPriority < minPriority) {
+		fprintf(STD_ERR, "Invalid argument combinations: maxPriority cannot be smaller than minPriority. It don't make sense!\n");
+		printf(HELP_STRING_PRIO, PROCESSES_DEFAULT, BUSY_DEFAULT, BURN_IN_DEFAULT, MIN_PRIORITY_DEFAULT, MAX_PRIORITY_DEFAULT);
+		exit(5);
+	}
 	putchar('\e');
 	SyscallNice(getPID(), 9);
 	printf("Processes: %lu\tbusytime: %lu\tmin priority: %lu\tmax priority: %lu\tburn-in: %lu\n", maxProcesses, busytime, minPriority, maxPriority, burnin);
@@ -270,8 +275,7 @@ void test_priority(int argc, char **argv) {
 			}
 			else {
 				processes[spawned].PID = newProcess;
-				double progress = ((double) spawned / maxProcesses);
-				processes[spawned].priority = (int) (minPriority + (double) (maxPriority - minPriority + 1) * progress);
+				processes[spawned].priority = spawned % (maxPriority + 1 - minPriority) + minPriority;
 				SyscallNice(processes[spawned].PID, processes[spawned].priority);
 			}
 			printf("\rInstantiating processes (%d of %lu processes)", spawned + 1, maxProcesses);

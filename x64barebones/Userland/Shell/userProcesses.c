@@ -93,7 +93,7 @@ void greeting(int argc, char **argv) {
 	}
 	PID_t myPID = getPID();
 	while (TRUE) {
-		printf("\nHello! I'm %u\0", myPID);
+		printf("\nHello! I'm PID %u, and the machine has been up for %lu seconds, yay!\0", myPID, SyscallGetTicks() / HZ);
 		sleep(sleepTime);
 	}
 	exit(0);

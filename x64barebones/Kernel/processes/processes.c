@@ -87,7 +87,6 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 		process->fileDescriptors[i].pipe = parent->fileDescriptors[i].pipe;
 		process->fileDescriptors[i].mode = parent->fileDescriptors[i].mode;
 	}
-
 	return process;
 }
 
@@ -108,13 +107,10 @@ void exitProcess(int returnValue) {
 	// removeProcess(process->pid);
 	process->returnValue = returnValue;
 	process->status = ZOMBIE;
-	if (process->parentPid) {
-		PCB *parent = getProcess(process->parentPid);
+	PCB *parent = getProcess(process->parentPid);
+	if (parent) {
 		if (parent->runMode == RELEGATED)
 			parent->runMode = FOREGROUND;
-	}
-	if (process->runMode == BACKGROUND) {
-		freeProcess(process);
 	}
 	schedyield();
 }
