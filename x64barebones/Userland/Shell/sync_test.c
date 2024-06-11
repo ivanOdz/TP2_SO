@@ -1,22 +1,24 @@
 #include "./../Include/tests.h"
 #include <libc.h>
-// #define USE_BINARY_SEMAPHORE
 
 void testRace(uint64_t *shared) {
 
     int64_t copy = *shared;
     yield();
     copy += 1;
-    // yield();
     *shared = copy;
 }
+
+/*typedef struct Sem {
+  int value;
+} sem;
+*/
 
 int testProcessOfIncrementalLawOfEntropy(int argc, char **argv) {
 
     uint64_t *shared;
     uint64_t cycles;
     uint16_t idSemaphore;
-    printf("PROCESO HIJO");
     if (argc < 3) {
         exit(0);
     }
@@ -24,21 +26,13 @@ int testProcessOfIncrementalLawOfEntropy(int argc, char **argv) {
     cycles = stringToInt(argv[2], strlen(argv[2]));
     idSemaphore = stringToInt(argv[3], strlen(argv[3]));
 
-    if (!semOpen(idSemaphore)) {
-        exit(0);
-    }
+
     for (uint64_t cont=0; cont < cycles; cont++) {
 
         if (idSemaphore) {
-            #ifdef USE_BINARY_SEMAPHORE
-            semBinaryWait(idSemaphore);
+            semwait(idSemaphore);
             testRace(shared);
-            semBinaryPost(idSemaphore);
-            #else
-            semWait(idSemaphore);
-            testRace(shared);
-            semPost(idSemaphore);
-            #endif
+            sempost(idSemaphore);
         }
         else {
             testRace(shared);
