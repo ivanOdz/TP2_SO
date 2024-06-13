@@ -86,6 +86,14 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	for (int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
 		process->fileDescriptors[i].pipe = parent->fileDescriptors[i].pipe;
 		process->fileDescriptors[i].mode = parent->fileDescriptors[i].mode;
+		if (process->fileDescriptors[i].pipe) {
+			if (process->fileDescriptors[i].mode == READ) {
+				process->fileDescriptors[i].pipe->readEnds++;
+			}
+			else {
+				process->fileDescriptors[i].pipe->writeEnds++;
+			}
+		}
 	}
 	return process;
 }
@@ -104,7 +112,16 @@ PID_t execute(int (*processMain)(int argc, char **argv), char **argv, ProcessRun
 
 uint64_t exitProcess(int returnValue) {
 	PCB *process = getCurrentProcess();
-	// removeProcess(process->pid);
+	for (int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
+		if (process->fileDescriptors[i].pipe) {
+			if (process->fileDescriptors[i].mode == READ) {
+				process->fileDescriptors[i].pipe->readEnds--;
+			}
+			else {
+				process->fileDescriptors[i].pipe->writeEnds--;
+			}
+		}
+	}
 	process->returnValue = returnValue;
 	process->status = ZOMBIE;
 	PCB *parent = getProcess(process->parentPid);
