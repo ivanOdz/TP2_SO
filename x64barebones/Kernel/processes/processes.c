@@ -170,15 +170,16 @@ void killRunningForegroundProcess() {
 	}
 }
 
-void setProcessPriority(uint16_t pid, int8_t priority) {
+bool setProcessPriority(uint16_t pid, int8_t priority) {
 	PCB *process = getProcess(pid);
 	if (!process || priority < 1 || priority > 9) {
-		return;
+		return FALSE;
 	}
 	process->priority = priority;
+	return TRUE;
 }
 
-uint8_t blockProcess(uint16_t pid) {
+bool blockProcess(uint16_t pid) {
 	PCB *process = getProcess(pid);
 	if (!process) {
 		return FALSE;

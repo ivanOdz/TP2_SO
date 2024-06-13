@@ -290,10 +290,10 @@ uint64_t syscall_puts(uint8_t fd, char *buf, uint64_t size) {
 
 void updateScreen() {
 	char c;
-	while ((c = getFifo(errorFifo, FALSE)) != EOF) {
+	while ((c = getFifo(errorFifo, FALSE)) != EOF && c) {
 		printChar(c, STDERR_FG);
 	}
-	while ((c = getFifo(terminalFifo, FALSE)) != EOF) {
+	while ((c = getFifo(terminalFifo, FALSE)) != EOF && c) {
 		printChar(c, fontColor);
 	}
 	devnull->readCursor = devnull->writeCursor;

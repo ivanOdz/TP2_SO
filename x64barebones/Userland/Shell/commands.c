@@ -57,9 +57,7 @@ int command_tunes(int argc, char **argv) {
 			SyscallPutBlock(&ricky);
 		}
 	}
-	while (SyscallGetTicks() < 1000000) {
-		yield();
-	}
+	sleep(10000000000000);
 	return 0;
 }
 

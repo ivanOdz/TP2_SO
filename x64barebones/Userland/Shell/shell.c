@@ -4,9 +4,8 @@
 #include <libc.h>
 #include <stdint.h>
 
-#define COLORS_DEFAULT 0x0020FF00
-#define BUFFER_SIZE	   256
-#define HISTORY_SIZE   10
+#define BUFFER_SIZE	 256
+#define HISTORY_SIZE 10
 
 typedef struct commandBuffer {
 	char buffer[BUFFER_SIZE];

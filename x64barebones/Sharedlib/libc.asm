@@ -33,6 +33,7 @@ GLOBAL seminit
 GLOBAL semdestroy
 GLOBAL sempost
 GLOBAL semwait
+GLOBAL tryGetChar
 
 
 ALIGN 16
@@ -455,6 +456,20 @@ semwait:
     mov rsp, rbp
     pop rbp
     ret
+
+tryGetChar:
+    push rbp
+    mov rbp, rsp    
+
+    mov rax, 0x22
+    mov rbx, rdi
+
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
 
 invalidOpcode:
     ud2

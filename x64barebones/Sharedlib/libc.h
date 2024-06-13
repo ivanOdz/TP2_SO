@@ -103,6 +103,7 @@ typedef enum { READ = 0,
 
 extern uint64_t SyscallWrite(uint8_t fd, char *buffer, uint64_t size);
 extern uint64_t SyscallRead(uint8_t fd, char *buffer, uint64_t size);
+extern char tryGetChar(uint8_t fd);
 extern void SyscallClear();
 extern uint64_t SyscallGetRegisters();
 extern uint64_t SyscallGetRTC(time_type *buffer);

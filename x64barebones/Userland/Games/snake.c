@@ -70,8 +70,7 @@ void snake(int argc, char **argv) {
 		initScreen(players);
 		reset_positions();
 		game_loop(players);
-		putchar(0xd);
-		printf("Play Again ? [y/n]      ");
+		printf("\rPlay Again ? [y/n]      ");
 		do {
 			nextGame = get_directions();
 		} while (nextGame == 0);
@@ -121,7 +120,7 @@ uint8_t game_loop(uint8_t players) {
 		get_directions();
 	}
 	SyscallAudio(1, skelliecity, skelliecitylength);
-	printf("%c                                    ", 0xD);
+	printf("\r                                    ");
 	printScore(flags);
 	while (1) {
 		get_directions();
@@ -428,60 +427,58 @@ uint8_t check_limits(playersFlags *flags, position *nextHead1, position *nextHea
 }
 
 uint8_t get_directions() {
-	static char keyboard_buffer[256] = {0};
-	uint64_t read = SyscallRead(STD_IN, keyboard_buffer, 254);
+	char read = tryGetChar(STD_IN);
 	int8_t newDir1 = 0;
 	int8_t newDir2 = 0;
-	for (uint8_t i = 0; i < read; i++) {
-		switch (keyboard_buffer[i]) {
-			case 'w':
-			case 'W':
-				if (snake1[snakePos1.head].dir != DIR_S)
-					newDir1 = DIR_N;
-				break;
-			case 'a':
-			case 'A':
-				if (snake1[snakePos1.head].dir != DIR_E)
-					newDir1 = DIR_W;
-				break;
-			case 's':
-			case 'S':
-				if (snake1[snakePos1.head].dir != DIR_N)
-					newDir1 = DIR_S;
-				break;
-			case 'd':
-			case 'D':
-				if (snake1[snakePos1.head].dir != DIR_W)
-					newDir1 = DIR_E;
-				break;
-			case 'i':
-			case 'I':
-				if (snake2[snakePos2.head].dir != DIR_S)
-					newDir2 = DIR_N;
-				break;
-			case 'j':
-			case 'J':
-				if (snake2[snakePos2.head].dir != DIR_E)
-					newDir2 = DIR_W;
-				break;
-			case 'k':
-			case 'K':
-				if (snake2[snakePos2.head].dir != DIR_N)
-					newDir2 = DIR_S;
-				break;
-			case 'l':
-			case 'L':
-				if (snake2[snakePos2.head].dir != DIR_W)
-					newDir2 = DIR_E;
-				break;
-			case 'y':
-			case 'Y':
-				return 2;
-			case 'n':
-			case 'N':
-				return 1;
-		}
+	switch (read) {
+		case 'w':
+		case 'W':
+			if (snake1[snakePos1.head].dir != DIR_S)
+				newDir1 = DIR_N;
+			break;
+		case 'a':
+		case 'A':
+			if (snake1[snakePos1.head].dir != DIR_E)
+				newDir1 = DIR_W;
+			break;
+		case 's':
+		case 'S':
+			if (snake1[snakePos1.head].dir != DIR_N)
+				newDir1 = DIR_S;
+			break;
+		case 'd':
+		case 'D':
+			if (snake1[snakePos1.head].dir != DIR_W)
+				newDir1 = DIR_E;
+			break;
+		case 'i':
+		case 'I':
+			if (snake2[snakePos2.head].dir != DIR_S)
+				newDir2 = DIR_N;
+			break;
+		case 'j':
+		case 'J':
+			if (snake2[snakePos2.head].dir != DIR_E)
+				newDir2 = DIR_W;
+			break;
+		case 'k':
+		case 'K':
+			if (snake2[snakePos2.head].dir != DIR_N)
+				newDir2 = DIR_S;
+			break;
+		case 'l':
+		case 'L':
+			if (snake2[snakePos2.head].dir != DIR_W)
+				newDir2 = DIR_E;
+			break;
+		case 'y':
+		case 'Y':
+			return 2;
+		case 'n':
+		case 'N':
+			return 1;
 	}
+
 	if (newDir1)
 		snakePos1.dir = newDir1;
 	if (newDir2)

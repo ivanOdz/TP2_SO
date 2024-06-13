@@ -23,6 +23,8 @@ int64_t readFifo(FifoBuffer *fifo, char *dest, uint64_t size, bool blocking) {
 		dest[i++] = EOF;
 	if (i)
 		unblockFifo(fifo, WRITE);
+	if (!i && size && !blocking)
+		dest[i] = 0;
 	return i;
 }
 

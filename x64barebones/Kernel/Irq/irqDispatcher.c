@@ -48,16 +48,6 @@ uint64_t int_80() {
 	return int80_handler();
 }
 
-/*uint64_t syscall_write(uint8_t fd, char *buf, uint64_t size) {
-	switch (fd) {
-		case STD_OUT:
-		case STD_ERR:
-			return syscall_puts(fd, buf, size);
-		default:
-			return 0;
-	}
-}*/
-
 int64_t syscall_write(uint8_t fd, char *buf, uint64_t size) {
 	// Tengo que obtener el proceso actual, entrar al fd que me pasan,
 	// y escribir en el buffer, si es que tengo lugar, lo que me estan pasando.
@@ -80,9 +70,16 @@ int64_t syscall_read(uint8_t fd, char *buf, uint64_t size) {
 	return readFifo(process->fileDescriptors[fd].pipe, buf, size, TRUE);
 }
 
-uint64_t syscall_clear() {
-	clear();
-	return 0;
+// returns char if readable, 0 if there's nothing to be read, EOF if broken
+// meant for processes that may receive input but can't afford to block forever if they don't
+char syscall_tryGetChar(uint8_t fd) {
+	PCB *process = getCurrentProcess();
+	char c;
+	if (!process->fileDescriptors[fd].pipe) {
+		return -1;
+	}
+	readFifo(process->fileDescriptors[fd].pipe, &c, 1, FALSE);
+	return c;
 }
 
 uint64_t syscall_getRTC(time_type *buf) {
@@ -103,10 +100,12 @@ void syscall_putBlock(draw_type *draw) {
 uint64_t syscall_getTicks() {
 	return get_ticks();
 }
+
 uint64_t syscall_playSound(uint8_t flags, const uint8_t *buffer, uint64_t length) {
 	playSound(flags, buffer, length);
 	return 0;
 }
+
 uint64_t syscall_setTimer(uint16_t delay) {
 	setPIT0Freq(delay);
 	return 0;
@@ -122,10 +121,6 @@ uint64_t syscall_free(void *memory) {
 }
 uint64_t syscall_meminfo(MemoryInfo *meminfo) {
 	getMemoryInfo(meminfo);
-	return 0;
-}
-
-uint64_t syscall_printMemory() {
 	return 0;
 }
 
@@ -152,9 +147,8 @@ ProcessInfo *syscall_processInfo() {
 	return processInfo();
 }
 
-uint64_t syscall_nice(uint16_t pid, uint8_t newPriority) {
-	setProcessPriority(pid, newPriority);
-	return 0;
+bool syscall_nice(uint16_t pid, uint8_t newPriority) {
+	return setProcessPriority(pid, newPriority);
 }
 
 uint64_t syscall_block(uint16_t pid) {
