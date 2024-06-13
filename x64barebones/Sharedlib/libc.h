@@ -154,12 +154,11 @@ void *malloc(uint64_t size);
 void free(void *memory);
 void memoryManagerStats(MemoryInfo *meminfo);
 PID_t execv(void (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
-void exit(int returnValue);
+uint64_t exit(int returnValue);
 PID_t waitpid(PID_t PID, ReturnStatus *wstatus);
-void yield();
+uint64_t yield();
 PID_t getPID();
 PID_t kill(PID_t PID);
-void sleep(uint64_t ms);
-
+uint64_t sleep(uint64_t ms);
 
 #endif

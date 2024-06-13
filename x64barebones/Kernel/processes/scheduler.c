@@ -31,7 +31,7 @@ uint64_t schedyield() {
 	if (enableScheduler && currentProcess && currentProcess->process) {
 		uint64_t *myRax = (stackSwitcharoo + 14 * sizeof(int64_t));
 		currentProcess->process->raxPreserve = *myRax;
-		currentProcess->process->stackPointer = stackSwitcharoo;
+		// currentProcess->process->stackPointer = stackSwitcharoo;
 		currentProcess->process->lastTickRun = get_ticks();
 		stackSwitcharoo = pickNextProcess();
 		return currentProcess->process->raxPreserve;
@@ -135,7 +135,7 @@ uint64_t getProcessRunPriority(ProcessListNode *candidate, uint16_t distanceFrom
 		if (!checkUnblock(candidate))
 			return 0;
 	}
-	return (uint64_t) ((4L << candidate->process->priority) * ((double) processCount / distanceFromCurrent)) +
+	return (uint64_t) ((2L << candidate->process->priority) * ((double) processCount / distanceFromCurrent)) +
 		   (1L << ((get_ticks() - candidate->process->lastTickRun) / ((processCount + 1L << candidate->process->priority))));
 }
 

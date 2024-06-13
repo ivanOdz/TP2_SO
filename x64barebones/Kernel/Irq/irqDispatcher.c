@@ -6,11 +6,11 @@
 #include <memoryManager.h>
 #include <processes.h>
 #include <scheduler.h>
+#include <semaphores.h>
 #include <sound.h>
 #include <stdint.h>
 #include <time.h>
 #include <videoDriver.h>
-#include <semaphores.h>
 
 #define MAX_INTS	 256
 #define MAX_SYSCALLS 338
@@ -61,12 +61,13 @@ uint64_t int_80() {
 int64_t syscall_write(uint8_t fd, char *buf, uint64_t size) {
 	// Tengo que obtener el proceso actual, entrar al fd que me pasan,
 	// y escribir en el buffer, si es que tengo lugar, lo que me estan pasando.
+
 	PCB *process = getCurrentProcess();
-	if (!process->fileDescriptors[fd].pipe) {
+	if (fd > MAX_FILE_DESCRIPTORS || !process->fileDescriptors[fd].pipe) {
 		return -1;
 	}
 	uint64_t written = writeFifo(process->fileDescriptors[fd].pipe, buf, size, TRUE);
-	if (strcmp(process->fileDescriptors[fd].pipe->name, CONSOLE_NAME) == 0 || strcmp(process->fileDescriptors[fd].pipe->name, ERROR_NAME) == 0)
+	if (process->fileDescriptors[fd].pipe->name && (strcmp(process->fileDescriptors[fd].pipe->name, CONSOLE_NAME) == 0 || strcmp(process->fileDescriptors[fd].pipe->name, ERROR_NAME) == 0))
 		updateScreen();
 	return written;
 }
@@ -133,8 +134,7 @@ uint64_t syscall_execv(int (*processMain)(int argc, char **argv), char **argv, P
 }
 
 uint64_t syscall_exit(int returnValue) {
-	exitProcess(returnValue);
-	return 0;
+	return exitProcess(returnValue);
 }
 PID_t syscall_kill(PID_t PID) {
 	return killProcess(PID);

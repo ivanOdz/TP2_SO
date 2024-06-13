@@ -102,7 +102,7 @@ PID_t execute(int (*processMain)(int argc, char **argv), char **argv, ProcessRun
 	return process->pid;
 }
 
-void exitProcess(int returnValue) {
+uint64_t exitProcess(int returnValue) {
 	PCB *process = getCurrentProcess();
 	// removeProcess(process->pid);
 	process->returnValue = returnValue;
@@ -112,7 +112,7 @@ void exitProcess(int returnValue) {
 		if (parent->runMode == RELEGATED)
 			parent->runMode = FOREGROUND;
 	}
-	schedyield();
+	return schedyield();
 }
 
 PID_t waitPID(PID_t PID, ReturnStatus *wstatus) {

@@ -50,7 +50,7 @@ PCB *initProcess(void *kernelStack);
 PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
 void freeProcess(PCB *process);
 PID_t execute(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode);
-void exitProcess(int returnValue);
+uint64_t exitProcess(int returnValue);
 PID_t killProcess(PID_t PID);
 void killRunningForegroundProcess();
 PID_t waitPID(PID_t PID, ReturnStatus *wstatus);
