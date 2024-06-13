@@ -50,10 +50,10 @@ static uint64_t margenEnX;
 static uint64_t margenEnY;
 
 void snake(int argc, char **argv) {
-	text_format fmt = {0x00000000, 0x00C0C0C0, 3, 0};
-	SyscallSetFormat(&fmt);
-	// SyscallSetTimer(30000);
-
+	// text_format fmt = {0x00000000, 0x00C0C0C0, 1, 0};
+	// SyscallSetFormat(&fmt);
+	//  SyscallSetTimer(30000);
+	SyscallNice(getPID(), 9);
 	uint8_t nextGame = 1;
 	int status = 0;
 	uint8_t players = 2;
@@ -105,7 +105,6 @@ void reset_positions() {
 
 uint8_t game_loop(uint8_t players) {
 	uint8_t winner = 0;
-	uint64_t mNextFrame = SyscallGetTicks();
 	playersFlags flags = {0, 0, 0, 0};
 	position nextHead1 = {0, 0, 0};
 	position nextHead2 = {0, 0, 0};
@@ -153,12 +152,10 @@ uint8_t game_loop(uint8_t players) {
 				printf("Game Over!       Score: %5d          ", snakePos1.score);
 			else
 				printf("It's a draw!                             ");
-			mNextFrame = SyscallGetTicks() + TICKS_PER_FRAME * 50;
-			while (SyscallGetTicks() < mNextFrame)
-				;
+			sleep(MS_PER_FRAME * 60);
 			break;
 		}
-		sleep(66);
+		sleep(MS_PER_FRAME);
 	}
 
 	return winner;

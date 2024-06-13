@@ -22,9 +22,10 @@
 #define DIR_N ((int8_t) -1) // 0b11111111
 #define DIR_W ((int8_t) -2) // 0b11111110
 
-#define MAX_SNAKE_SIZE	512
-#define TICKS_PER_FRAME 5
-#define START_LEN		5
+#define MAX_SNAKE_SIZE 512
+#define FPS_TARGET	   15
+#define MS_PER_FRAME   1000 / FPS_TARGET
+#define START_LEN	   5
 
 #define TEXTURE_COMPACT_X 3
 #define TEXTURE_COMPACT_Y 3
