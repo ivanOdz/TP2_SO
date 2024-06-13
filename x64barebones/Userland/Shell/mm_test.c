@@ -90,7 +90,7 @@ void mm_test(int argc, char **argv) {
 	while (burnin--) {
 		printf("\nNew iteration (%lu left)\n", burnin);
 		memoryManagerStats(&mminfoo);
-		printf("Free Memory: 0x%lx\tOcupied Memory: 0x%lx\tAssigned Nodes:%lu\n", mminfoo.freeMemory, mminfoo.occupiedMemory, mminfoo.assignedNodes);
+		printf("Free Memory: 0x%lx\tOccupied Memory: 0x%lx\tAssigned Nodes:%lu\n", mminfoo.freeMemory, mminfoo.occupiedMemory, mminfoo.assignedNodes);
 		for (int i = 0; i < maxBlocks; i++) {
 			test[i] = NULL;
 			testsize[i] = 0;

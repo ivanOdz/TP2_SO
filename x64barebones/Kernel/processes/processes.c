@@ -83,7 +83,7 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	process->blockedOn.fd = 0;
 	process->blockedOn.timer = 0;
 	process->blockedOn.manual = FALSE;
-	for (int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
+	for (int i = 0; i < DEFAULT_QTY_FDS; i++) {
 		process->fileDescriptors[i].pipe = parent->fileDescriptors[i].pipe;
 		process->fileDescriptors[i].mode = parent->fileDescriptors[i].mode;
 		if (process->fileDescriptors[i].pipe) {
@@ -94,6 +94,9 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 				process->fileDescriptors[i].pipe->writeEnds++;
 			}
 		}
+	}
+	for (int i = DEFAULT_QTY_FDS; i < MAX_FILE_DESCRIPTORS; i++) {
+		process->fileDescriptors[i].pipe = NULL;
 	}
 	return process;
 }

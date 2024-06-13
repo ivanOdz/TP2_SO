@@ -261,7 +261,7 @@ _irq05Handler:
 _irq80Handler:
 	push rax	; syscall id
     irqHandlerMaster 6
-	pop rdx
+	add rsp, 8
 	iretq
 
 
