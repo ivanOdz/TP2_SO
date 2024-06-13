@@ -61,6 +61,7 @@ EXTERN syscall_sempost
 EXTERN syscall_semwait
 EXTERN syscall_tryGetChar
 
+ALIGN 16
 
 SECTION .text
 
@@ -259,10 +260,12 @@ _irq05Handler:
 
 ; INT 80h
 _irq80Handler:
-	push rax	; syscall id
-    irqHandlerMaster 6
-	add rsp, 8
-	iretq
+		cmp rax, 0x22
+		jg	.exit
+		push rax	; syscall id
+    	irqHandlerMaster 6
+		add rsp, 8
+.exit	iretq
 
 
 ; Zero Division Exception

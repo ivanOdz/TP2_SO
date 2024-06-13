@@ -27,6 +27,9 @@ extern uint64_t syscall_getRegisters(uint8_t fd, uint8_t *buf, uint64_t size);
 static uint64_t (*irqList[])(void) = {&int_00, &int_01, &nullHandler, &nullHandler, &nullHandler, &nullHandler, &int_80};
 
 uint64_t irqDispatcher(uint64_t irq) {
+	if(irq > 6){
+		return 0;
+	}
 	updateCurrentStack();
 	return (*irqList[irq])();
 }
