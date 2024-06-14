@@ -192,11 +192,11 @@ void processTestLoop(int argc, char **argv) {
 }
 
 void test_priority(int argc, char **argv) {
-	uint64_t maxProcesses = PROCESSES_DEFAULT;
-	uint64_t busytime = BUSY_DEFAULT;
-	uint64_t burnin = BURN_IN_DEFAULT;
-	uint64_t minPriority = MIN_PRIORITY_DEFAULT;
-	uint64_t maxPriority = MAX_PRIORITY_DEFAULT;
+	int maxProcesses = PROCESSES_DEFAULT;
+	int busytime = BUSY_DEFAULT;
+	int burnin = BURN_IN_DEFAULT;
+	int minPriority = MIN_PRIORITY_DEFAULT;
+	int maxPriority = MAX_PRIORITY_DEFAULT;
 	for (int arg = 1; arg < argc; arg++) {
 		if (strcmp(argv[arg], "-help") == 0) {
 			printf(HELP_STRING_PRIO, PROCESSES_DEFAULT, BUSY_DEFAULT, BURN_IN_DEFAULT, MIN_PRIORITY_DEFAULT, MAX_PRIORITY_DEFAULT);
@@ -250,7 +250,7 @@ void test_priority(int argc, char **argv) {
 	}
 	putchar('\e');
 	SyscallNice(getPID(), 9);
-	printf("Processes: %lu\tbusytime: %lu\tmin priority: %lu\tmax priority: %lu\tburn-in: %lu\n", maxProcesses, busytime, minPriority, maxPriority, burnin);
+	printf("Processes: %d\tbusytime: %d\tmin priority: %d\tmax priority: %d\tburn-in: %d\n", maxProcesses, busytime, minPriority, maxPriority, burnin);
 	ProcessPriorityType *processes = malloc(maxProcesses * burnin * sizeof(ProcessPriorityType));
 	if (!processes)
 		exit(5);
@@ -266,7 +266,7 @@ void test_priority(int argc, char **argv) {
 
 	putchar('\n');
 	for (int spawned = 0, awaiting = 0; spawned < maxProcesses * burnin || awaiting > 0;) {
-		printf("\rInstantiating %lu processes (%lu launched, %lu live, %lu returned)", maxProcesses * burnin, spawned, awaiting, spawned - awaiting);
+		printf("\rInstantiating %d processes (%d launched, %d live, %d returned)", maxProcesses * burnin, spawned, awaiting, spawned - awaiting);
 		while (awaiting < maxProcesses && spawned < maxProcesses * burnin) {
 			args[0] = "Test process";
 			uintToBase(busytime * BUSY_OFFSET, arg2buf, 10);
@@ -285,7 +285,7 @@ void test_priority(int argc, char **argv) {
 				spawned++;
 				awaiting++;
 			}
-			printf("\rInstantiating %lu processes (%lu launched, %lu live, %lu returned)", maxProcesses * burnin, spawned, awaiting, spawned - awaiting);
+			printf("\rInstantiating %d processes (%d launched, %d live, %d returned)", maxProcesses * burnin, spawned, awaiting, spawned - awaiting);
 		}
 		ReturnStatus r;
 		PID_t back = waitpid(0, &r);

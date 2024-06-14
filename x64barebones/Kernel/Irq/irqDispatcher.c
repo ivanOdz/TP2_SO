@@ -6,7 +6,6 @@
 #include <memoryManager.h>
 #include <processes.h>
 #include <scheduler.h>
-#include <semaphores.h>
 #include <sound.h>
 #include <stdint.h>
 #include <time.h>
@@ -27,7 +26,7 @@ extern uint64_t syscall_getRegisters(uint8_t fd, uint8_t *buf, uint64_t size);
 static uint64_t (*irqList[])(void) = {&int_00, &int_01, &nullHandler, &nullHandler, &nullHandler, &nullHandler, &int_80};
 
 uint64_t irqDispatcher(uint64_t irq) {
-	if(irq > 6){
+	if (irq > 6) {
 		return 0;
 	}
 	updateCurrentStack();
@@ -56,7 +55,7 @@ int64_t syscall_write(uint8_t fd, char *buf, uint64_t size) {
 	// y escribir en el buffer, si es que tengo lugar, lo que me estan pasando.
 
 	PCB *process = getCurrentProcess();
-	if (fd > MAX_FILE_DESCRIPTORS || !process->fileDescriptors[fd].pipe) {
+	if (fd >= MAX_FILE_DESCRIPTORS || !process->fileDescriptors[fd].pipe) {
 		return -1;
 	}
 	uint64_t written = writeFifo(process->fileDescriptors[fd].pipe, buf, size, TRUE);
@@ -187,19 +186,21 @@ int64_t syscall_dup(uint64_t fd) {
 }
 
 int16_t syscall_seminit(int initialValue) {
-	return my_sem_init(initialValue);
+	// return ksem_init(initialValue);
+	return 0;
 }
 
 int16_t syscall_semdestroy(uint16_t id) {
-	return my_sem_init(id);
+	// return ksem_init(id);
+	return 0;
 }
 
 void syscall_sempost(int16_t id) {
-	my_sem_post(id);
+	// ksem_post(id);
 }
 
 void syscall_semwait(int16_t id) {
-	my_sem_wait(id);
+	// ksem_wait(id);
 }
 
 typedef int (*EntryPoint)();

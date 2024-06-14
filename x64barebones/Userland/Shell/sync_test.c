@@ -1,53 +1,58 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 #include <libc.h>
 #include <tests.h>
 
-void testRace(uint64_t *shared) {
-	int64_t copy = *shared;
-	yield();
-	copy += 1;
-	*shared = copy;
-}
+#define DEFAULT_PROCESSES 10
+
+static uint64_t shared = 0;
 
 /*typedef struct Sem {
   int value;
 } sem;
 */
 
-int testProcessOfIncrementalLawOfEntropy(int argc, char **argv) {
-	uint64_t *shared;
+void racyInc() {
+	uint64_t aux = shared;
+	yield(); // This makes the race condition highly probable
+	aux++;
+	shared = aux;
+}
+
+void semSlaveProcess(int argc, char **argv) {
 	uint64_t cycles;
-	uint16_t idSemaphore;
-	if (argc < 3) {
+	int16_t idSemaphore;
+	if (argc < 2) {
 		exit(0);
 	}
-	shared = (uint64_t *) argv[1];
-	cycles = stringToInt(argv[2], strlen(argv[2]));
-	idSemaphore = stringToInt(argv[3], strlen(argv[3]));
+	cycles = stringToInt(argv[1], strlen(argv[1]));
+	if (argv[2][0])
+		idSemaphore = stringToInt(argv[2], strlen(argv[2]));
+	else
+		idSemaphore = -1;
 
 	for (uint64_t cont = 0; cont < cycles; cont++) {
-		if (idSemaphore) {
-			semwait(idSemaphore);
-			testRace(shared);
-			sempost(idSemaphore);
+		if (idSemaphore >= 0) {
+			sem_wait(idSemaphore);
+			racyInc();
+			sem_post(idSemaphore);
 		}
 		else {
-			testRace(shared);
+			racyInc();
 		}
 	}
 	exit(0);
 }
 
-int testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos, usa semaforos o no
+void testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos, usa semaforos o no
 
-	static int64_t shared;
 	uint64_t cycles;
-	PID_t nProcesses = 2;
+	uint16_t nProcesses = DEFAULT_PROCESSES;
 	PID_t *processesPids;
-	char *argvForProcesses[4];
-	uint16_t idSemaphore;
-	uint8_t useSemaphore = 0;
-	char cyclesString[24];
-	char idSemaphoreString[24];
+	char *argvForProcesses[5];
+	int16_t idSemaphore = -1;
+	bool useSemaphore = FALSE;
 
 	if (argc < 4) {
 		printf("Argument missing?\n");
@@ -64,31 +69,37 @@ int testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos, 
 		nProcesses = 2;
 	}
 	if (useSemaphore) {
-		// idSemaphore = semCreate(1);
-		if (!idSemaphore) {
-			return -1;
+		idSemaphore = sem_init(1);
+		if (idSemaphore == -1) {
+			exit(-1);
 		}
 	}
 
 	processesPids = malloc(nProcesses * sizeof(PID_t));
-	argvForProcesses[0] = "test_sem_process";
-	argvForProcesses[1] = (char *) &shared;
-	argvForProcesses[2] = cyclesString;
-	argvForProcesses[3] = idSemaphoreString;
+	if (!processesPids)
+		exit(-1);
+	shared = 0;
+	char semIDstr[4];
+	if (idSemaphore >= 0)
+		uintToBase(idSemaphore, semIDstr, 10);
+	else
+		semIDstr[0] = 0;
 
+	argvForProcesses[0] = "test_sem_process";
+	argvForProcesses[1] = argv[1];
+	argvForProcesses[2] = semIDstr;
 	for (PID_t cont = 0; cont < nProcesses; cont++) {
-		processesPids[cont] = execv(testProcessOfIncrementalLawOfEntropy, argvForProcesses, BACKGROUND);
-		printf("Process_created\n");
+		processesPids[cont] = execv(semSlaveProcess, argvForProcesses, FOREGROUND);
 	}
+	printf("Huzzah!\n");
 	ReturnStatus status;
 	for (PID_t cont = 0; cont < nProcesses; cont++) {
-		waitpid(processesPids[cont], &status);
+		waitpid(0, &status);
 	}
 
 	if (useSemaphore) {
-		// semClose(idSemaphore);
+		sem_destroy(idSemaphore);
 	}
-	printf("VALUE: ");
-	// printint +\n
+	printf("VALUE: %lu\n", shared);
 	exit(0);
 }

@@ -330,3 +330,64 @@ uint32_t randBetween(uint32_t start, uint32_t end) {
 void memoryManagerStats(MemoryInfo *meminfo) {
 	SyscallMemInfo(meminfo);
 }
+
+static sem_t semaphores[MAX_SEMAPHORES] = {0};
+
+void acquire(bool *lock) {
+	while (_xchg(lock, TRUE) != 0)
+		;
+}
+
+void release(bool *lock) {
+	_xchg(lock, FALSE);
+}
+
+int16_t sem_init(int initialValue) {
+	for (int cont = 0; cont < MAX_SEMAPHORES; cont++) {
+		if (!semaphores[cont].inUse) {
+			semaphores[cont].value = initialValue;
+			semaphores[cont].inUse = TRUE;
+			semaphores[cont].lock = FALSE;
+			return cont;
+		}
+	}
+	return -1;
+}
+
+int16_t sem_destroy(uint16_t id) {
+	if (id >= MAX_SEMAPHORES) {
+		return 0;
+	}
+	semaphores[id].lock = 0;
+	semaphores[id].value = 0;
+	semaphores[id].inUse = 0;
+
+	return 1;
+}
+
+void sem_wait(uint16_t id) {
+	if (id >= MAX_SEMAPHORES || !semaphores[id].inUse) {
+		return;
+	}
+
+	while (TRUE) {
+		acquire(&semaphores[id].lock);
+		if (semaphores[id].value) {
+			semaphores[id].value--;
+			release(&semaphores[id].lock);
+			break;
+		}
+		release(&semaphores[id].lock);
+		yield();
+	}
+}
+
+void sem_post(uint16_t id) {
+	if (id >= MAX_SEMAPHORES || !semaphores[id].inUse) {
+		return;
+	}
+
+	acquire(&semaphores[id].lock);
+	semaphores[id].value++;
+	release(&semaphores[id].lock);
+}

@@ -29,12 +29,10 @@ GLOBAL SyscallFdInfo
 GLOBAL open
 GLOBAL close
 GLOBAL dupFD
-GLOBAL seminit
-GLOBAL semdestroy
-GLOBAL sempost
-GLOBAL semwait
 GLOBAL tryGetChar
 
+GLOBAL _xadd
+GLOBAL _xchg
 
 ALIGN 16
 
@@ -411,52 +409,6 @@ dupFD:
     pop rbp
     ret
 
-seminit:
-    push rbp
-    mov rbp, rsp    
-
-    mov rax, 0x1E
-    mov rbx, rdi
-    int 80h
-
-    mov rsp, rbp
-    pop rbp
-    ret
-    
-semdestroy:
-    push rbp
-    mov rbp, rsp    
-
-    mov rax, 0x1F
-    mov rbx, rdi
-    int 80h
-
-    mov rsp, rbp
-    pop rbp
-    ret
-
-sempost:
-    push rbp
-    mov rbp, rsp    
-
-    mov rax, 0x20
-    int 80h
-
-    mov rsp, rbp
-    pop rbp
-    ret
-
-semwait:
-    push rbp
-    mov rbp, rsp    
-
-    mov rax, 0x21
-    int 80h
-
-    mov rsp, rbp
-    pop rbp
-    ret
-
 tryGetChar:
     push rbp
     mov rbp, rsp    
@@ -469,6 +421,17 @@ tryGetChar:
     mov rsp, rbp
     pop rbp
     ret
+
+    
+_xadd:
+  mov rax, rdi
+  xadd [rsi], eax
+  ret
+
+_xchg:
+  mov rax, rsi
+  xchg [rdi], al
+  ret
 
 
 invalidOpcode:

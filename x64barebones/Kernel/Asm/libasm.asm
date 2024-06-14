@@ -186,13 +186,3 @@ fabricateProcessStack:
 	mov rax, rsp
 	mov rsp, r8 ;restore old stack
 	ret
-
-_xadd:
-  mov rax, rdi
-  lock xadd [rsi], eax
-  ret
-
-_xchg:
-  mov rax, rsi
-  xchg [rdi], eax
-  ret

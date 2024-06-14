@@ -28,6 +28,8 @@
 #define COLORS_ORANGE 0x00EF3F00
 #define COLORS_CIAN	  0x0000E0FF
 
+#define MAX_SEMAPHORES 256
+
 typedef char bool;
 
 typedef enum { FOREGROUND = 0,
@@ -101,6 +103,12 @@ typedef enum { READ = 0,
 			   WRITE = 1
 } FifoMode;
 
+typedef struct sem_t {
+	int value;
+	bool lock;
+	bool inUse;
+} sem_t;
+
 extern uint64_t SyscallWrite(uint8_t fd, char *buffer, uint64_t size);
 extern uint64_t SyscallRead(uint8_t fd, char *buffer, uint64_t size);
 extern char tryGetChar(uint8_t fd);
@@ -122,10 +130,6 @@ extern FdInfo *SyscallFdInfo(uint16_t pid);
 extern int64_t open(char *name, FifoMode mode);
 extern int64_t close(uint64_t fd);
 extern int64_t dupFD(uint64_t fd);
-extern uint16_t seminit(int initialValue);
-extern uint16_t semdestroy(uint16_t id);
-extern void sempost(uint16_t id);
-extern void semwait(uint16_t id);
 
 int64_t strcpy(char *dest, const char *src);
 int64_t strcmp(const char *str1, const char *str2);
@@ -161,5 +165,12 @@ uint64_t yield();
 PID_t getPID();
 PID_t kill(PID_t PID);
 uint64_t sleep(uint64_t ms);
+
+int16_t sem_init(int initialValue);
+int16_t sem_destroy(uint16_t id);
+void sem_wait(uint16_t id);
+void sem_post(uint16_t id);
+extern bool _xadd(bool *lock, bool state);
+extern bool _xchg(bool *lock, bool state);
 
 #endif

@@ -1,6 +1,7 @@
 #ifndef LIB_H
 #define LIB_H
 
+#include <libc.h>
 #include <stdint.h>
 
 void *memset(void *destination, int32_t character, uint64_t length);
@@ -18,8 +19,5 @@ void printRegs(stack_registers regs, uint64_t fd);
 void clearBuffer(uint8_t *buffer);
 
 extern int haltProcess(int argc, char **argv);
-
-extern int _xadd(int *a, int b);
-extern int _xchg(int *a, int b);
 
 #endif
