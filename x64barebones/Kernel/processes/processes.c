@@ -47,7 +47,7 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	if (!process) {
 		return NULL;
 	}
-	process->stackBasePointer = (uint8_t *) allocMemory(STACK_DEFAULT_SIZE);
+	process->stackBasePointer = allocMemory(STACK_DEFAULT_SIZE);
 	if (!process->stackBasePointer) {
 		freeMemory(process);
 		return NULL;
@@ -63,6 +63,10 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 		argv[argc++] = (char *) process->stackPointer;
 	}
 	process->argv = allocMemory(argc * sizeof(char *));
+	if (!process->argv) {
+		freeProcess(process);
+		return NULL;
+	}
 	for (int i = 0; i < argc; i++) {
 		process->argv[i] = argv[i];
 	}

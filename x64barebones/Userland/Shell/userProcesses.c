@@ -248,6 +248,7 @@ void phylo(int argc, char **argv) {
 					}
 					phyloArgv[0] = "Glutton phylosopher";
 					phyloArgv[1] = phyloNumber;
+					phyloArgv[2] = NULL;
 					uintToBase(i, phyloNumber, 10);
 					execv(phyloProcess, phyloArgv, BACKGROUND);
 					for (int j = 0; j <= i; j++) {
