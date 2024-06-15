@@ -6,7 +6,7 @@
 
 #ifdef LIST
 
-#define BLOCK_SIZE	  8 /// 8 chars = 64 bits
+#define BLOCK_SIZE	  8
 #define LIST_MEM_SIZE 8192
 
 typedef struct BlockNode {
@@ -39,17 +39,18 @@ MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_
 		staticAllocatedNodes[i].base = NULL;
 		staticAllocatedNodes[i].next = NULL;
 	}
+
 	return &memMan;
 }
 
 void *allocMemory(const uint64_t size) {
-	if (!size)
+	if (!size) {
 		return NULL;
+	}
 	uint64_t blocksToBeAssigned = size / BLOCK_SIZE;
-	if (size % BLOCK_SIZE)
+	if (size % BLOCK_SIZE) {
 		blocksToBeAssigned++;
-
-	/// No first node
+	}
 	if (!memMan.first) {
 		memMan.first = staticAllocatedNodes;
 		memMan.first->base = memMan.startAddress;
@@ -57,11 +58,11 @@ void *allocMemory(const uint64_t size) {
 		memMan.first->next = NULL;
 		return memMan.startAddress;
 	}
-	/// big enough gap between first node and mem start
 	if ((memMan.startAddress != memMan.first->base) && (memMan.first->base >= (memMan.startAddress + blocksToBeAssigned * BLOCK_SIZE))) {
 		BlockNode *newNode = getNextFree();
-		if (!newNode)
+		if (!newNode) {
 			return NULL;
+		}
 		newNode->base = memMan.startAddress;
 		newNode->blocks = blocksToBeAssigned;
 		newNode->next = memMan.first;
@@ -69,17 +70,21 @@ void *allocMemory(const uint64_t size) {
 		return memMan.startAddress;
 	}
 	BlockNode *currentNode = memMan.first;
-	while (currentNode->next && currentNode->base + (currentNode->blocks + blocksToBeAssigned) * BLOCK_SIZE > currentNode->next->base)
+	while (currentNode->next && currentNode->base + (currentNode->blocks + blocksToBeAssigned) * BLOCK_SIZE > currentNode->next->base) {
 		currentNode = currentNode->next;
-	if (!currentNode->next && currentNode->base + (currentNode->blocks + blocksToBeAssigned) * BLOCK_SIZE >= memMan.startAddress + memMan.totalMemory)
+	}
+	if (!currentNode->next && currentNode->base + (currentNode->blocks + blocksToBeAssigned) * BLOCK_SIZE >= memMan.startAddress + memMan.totalMemory) {
 		return NULL;
+	}
 	BlockNode *newNode = getNextFree();
-	if (!newNode)
+	if (!newNode) {
 		return NULL;
+	}
 	newNode->next = currentNode->next;
 	newNode->base = currentNode->base + currentNode->blocks * BLOCK_SIZE;
 	newNode->blocks = blocksToBeAssigned;
 	currentNode->next = newNode;
+
 	return newNode->base;
 }
 
@@ -94,11 +99,6 @@ void getMemoryInfo(MemoryInfo *mminfo) {
 	mminfo->maxFragmentedSize = 0;
 	mminfo->minFragmentedSize = mminfo->totalMemory;
 
-	/// Mientras recorro la lista, cuento cuanta memoria esta ocupada
-	/// freeMemory la calculo con la memoria total - memoria ocuapda
-	/// FragmentedMemoryPercentage -> memoria total libre entre nodos/memoria entre primer nodo y donde termina el ultimo nodo
-
-	/// Si el primer nodo es NULL, tengo toda la memoria libre, sin fragmentacion.
 	if (current == NULL) {
 		mminfo->freeMemory = memMan.totalMemory;
 		mminfo->endAddress = memMan.first;
@@ -108,7 +108,7 @@ void getMemoryInfo(MemoryInfo *mminfo) {
 	while (current != NULL) {
 		currentNodeMemorySize = current->blocks * BLOCK_SIZE;
 		mminfo->occupiedMemory += currentNodeMemorySize;
-		if (current->next != NULL) { /// Si el siguiente nodo no es null, puedo tener memoria fragmentada
+		if (current->next != NULL) {
 			uint64_t fragmented = current->next->base - (current->base + currentNodeMemorySize);
 			mminfo->fragmentedMemory += fragmented;
 			if (fragmented > mminfo->maxFragmentedSize)
@@ -116,12 +116,10 @@ void getMemoryInfo(MemoryInfo *mminfo) {
 			if (fragmented < mminfo->minFragmentedSize)
 				mminfo->minFragmentedSize = fragmented;
 		}
-		else { /// Si el siguiente nodo es null, ya puedo calcular la dir final
+		else {
 			mminfo->endAddress = current->base + currentNodeMemorySize;
 		}
-		/// Si el siguiente nodo es null, ya estoy en el ultimo nodo. no calculo memoryFreeBetweenNodes.
-		// Avanzo
-		current = current->next;
+		current = current->next;	// Avanzo
 	}
 	mminfo->freeMemory = memMan.totalMemory - mminfo->occupiedMemory;
 }
@@ -137,8 +135,9 @@ BlockNode *getNextFree() {
 
 uint8_t freeMemory(void *ptrAllocatedMemory) {
 	BlockNode *current = memMan.first;
-	if (!current)
+	if (!current) {
 		return 0;
+	}
 	if (current->base == ptrAllocatedMemory) {
 		current->blocks = 0;
 		current->base = NULL;

@@ -20,7 +20,6 @@ typedef struct BlockedOn {
 	int8_t fd;
 	int64_t timer;
 	uint8_t manual;
-	// sem_t semaphore;
 } BlockedOn;
 
 typedef struct FileDescriptors {
@@ -31,8 +30,8 @@ typedef struct FileDescriptors {
 typedef struct PCB {
 	PID_t pid;
 	PID_t parentPid;
-	void *stackBasePointer; // base del stack
-	void *stackPointer;		// puntero a la posicion actual
+	void *stackBasePointer; // Base del stack
+	void *stackPointer;		// Puntero a la posicion actual
 	char *name;
 	char **argv;
 	ProcessRunMode runMode;

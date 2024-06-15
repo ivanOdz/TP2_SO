@@ -10,8 +10,9 @@
 static FifoBuffer *pipesList[PIPES_QTY] = {0};
 
 int64_t readFifo(FifoBuffer *fifo, char *dest, uint64_t size, bool blocking) {
-	if (blocking)
+	if (blocking) {
 		blockFifo(fifo, READ);
+	}
 	uint64_t i = 0;
 	while (i < size && !wouldBlock(fifo, READ)) {
 		dest[i++] = *(fifo->readCursor++);
@@ -19,18 +20,22 @@ int64_t readFifo(FifoBuffer *fifo, char *dest, uint64_t size, bool blocking) {
 			fifo->readCursor = fifo->buffer;
 		}
 	}
-	if (i < size && wouldBlock(fifo, READ) && !fifo->writeEnds)
+	if (i < size && wouldBlock(fifo, READ) && !fifo->writeEnds) {
 		dest[i++] = EOF;
-	if (i)
+	}
+	if (i) {
 		unblockFifo(fifo, WRITE);
-	if (!i && size && !blocking)
+	}
+	if (!i && size && !blocking) {
 		dest[i] = 0;
+	}
 	return i;
 }
 
 int64_t writeFifo(FifoBuffer *fifo, char *src, uint64_t size, bool blocking) {
-	if (blocking)
+	if (blocking) {
 		blockFifo(fifo, WRITE);
+	}
 	uint64_t i = 0;
 	while (i < size && !wouldBlock(fifo, WRITE)) {
 		*(fifo->writeCursor++) = src[i++];
@@ -38,14 +43,16 @@ int64_t writeFifo(FifoBuffer *fifo, char *src, uint64_t size, bool blocking) {
 			fifo->writeCursor = fifo->buffer;
 		}
 	}
-	if (i)
+	if (i) {
 		unblockFifo(fifo, READ);
+	}
 	return i;
 }
 
 bool putFifo(FifoBuffer *fifo, char c, bool blocking) {
 	return writeFifo(fifo, &c, 1, blocking);
 }
+
 char getFifo(FifoBuffer *fifo, bool blocking) {
 	char c = EOF;
 	readFifo(fifo, &c, 1, blocking);
@@ -59,7 +66,7 @@ bool wouldBlock(FifoBuffer *fifo, FifoMode blockMode) {
 
 void blockFifo(FifoBuffer *fifo, FifoMode blockMode) {
 	if (wouldBlock(fifo, blockMode) && ((blockMode == READ && fifo->writeEnds) || (blockMode == WRITE))) {
-		// CHANGE STATE A BLOCKED
+		// CAMBIAR A ESTADO BLOQEADO
 		PCB *process = getCurrentProcess();
 		process->blockedOn.fd = TRUE;
 		process->status = BLOCKED;
@@ -73,10 +80,12 @@ void blockFifo(FifoBuffer *fifo, FifoMode blockMode) {
 
 		BlockedProcessesNode *current = (blockMode == READ) ? fifo->blockedProcessesOnRead : fifo->blockedProcessesOnWrite;
 		if (current == NULL) {
-			if (blockMode == READ)
+			if (blockMode == READ) {
 				fifo->blockedProcessesOnRead = blockProcess;
-			else
+			}
+			else {
 				fifo->blockedProcessesOnWrite = blockProcess;
+			}
 		}
 		else {
 			while (current->next != NULL) {
@@ -84,7 +93,6 @@ void blockFifo(FifoBuffer *fifo, FifoMode blockMode) {
 			}
 			current->next = blockProcess;
 		}
-		// YIELD
 		process->stackPointer = forceyield();
 	}
 }
@@ -113,14 +121,15 @@ void unblockFifo(FifoBuffer *fifo, FifoMode blockMode) {
 
 int64_t getPipeIndex() {
 	for (int index = 0; index < PIPES_QTY; index++) {
-		if (!pipesList[index])
+		if (!pipesList[index]) {
 			return index;
+		}
 	}
 
 	return -1;
 }
 
-// Un pipe solo se puede abrir si es con nombre.
+// Un pipe solo se puede abrir si es con nombre
 FifoBuffer *openFifo(char *name, FifoMode mode) {
 	int i;
 	for (i = 0; i < PIPES_QTY; i++) {
@@ -157,7 +166,7 @@ FifoBuffer *createFifo(char *name) {
 	if (name) {
 		uint64_t size = strlen(name);
 		newPipe->name = allocMemory(size);
-		strcpy(newPipe->name, name); // si el nombre es la cadena vacia 0, es un pipe anonimo.
+		strcpy(newPipe->name, name);	// Si el nombre es la cadena vacia 0, es un pipe anonimo.
 	}
 	else {
 		newPipe->name = "";

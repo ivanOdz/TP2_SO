@@ -151,7 +151,7 @@ SECTION .text
 	mov r15, rdx ; y yo estoy preservandolos con pushState y popState
 	call irqDispatcher
 
-	; signal pic EOI (End of Interrupt)
+	; Signal pic EOI (End of Interrupt)
 	push rax
 	mov al, 20h
 	out 20h, al
@@ -166,7 +166,7 @@ SECTION .text
 	mov [stackSwitcharoo], rsp
 
 
-	mov rdi, %1 		; pasaje de parametro
+	mov rdi, %1 		P; pasaje de parámetro
 	call exceptionDispatcher
 	mov rsp, [stackSwitcharoo]
 
@@ -194,7 +194,6 @@ _cli:
 	cli
 	ret
 
-
 _sti:
 	sti
 	ret
@@ -210,7 +209,7 @@ picMasterMask:
 picSlaveMask:
 	push    rbp
     mov     rbp, rsp
-    mov     ax, di  ; ax = mascara de 16 bits
+    mov     ax, di  	; ax = máscara de 16 bits
     out	0A1h,al
     pop     rbp
     retn
@@ -288,7 +287,7 @@ int80_handler:
     mov rdi, rbx           ; cargo los argumentos de la syscall
     mov rsi, r13
 	mov rdx, r15
-    call rax               ; llamo a la syscall.
+    call rax               ; llamo a la syscall
     mov rsp, rbp           ; desarmo el stack
     pop rbp
     ret
