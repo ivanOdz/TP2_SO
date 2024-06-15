@@ -21,10 +21,10 @@ struct vbe_mode_info_structure {
 	uint8_t w_char;		   // unused...
 	uint8_t y_char;		   // ...
 	uint8_t planes;
-	uint8_t bpp;   // bits per pixel in this mode
-	uint8_t banks; // deprecated; total number of banks in this mode
+	uint8_t bpp;		   // bits per pixel in this mode
+	uint8_t banks;		   // deprecated; total number of banks in this mode
 	uint8_t memory_model;
-	uint8_t bank_size; // deprecated; size of a bank, almost always 64 KB but may be 16 KB...
+	uint8_t bank_size;	   // deprecated; size of a bank, almost always 64 KB but may be 16 KB...
 	uint8_t image_pages;
 	uint8_t reserved0;
 
@@ -38,7 +38,7 @@ struct vbe_mode_info_structure {
 	uint8_t reserved_position;
 	uint8_t direct_color_attributes;
 
-	uint8_t *framebuffer; // physical address of the linear frame buffer; write here to draw to the screen
+	uint8_t *framebuffer; 		  // physical address of the linear frame buffer; write here to draw to the screen
 	uint32_t off_screen_mem_off;
 	uint16_t off_screen_mem_size; // size of memory in the framebuffer but not being displayed on the screen
 	uint8_t reserved1[206];
@@ -99,7 +99,6 @@ void *memmove(void *dest, const void *src, uint64_t n) {
 	else {
 		pd += n;
 		ps += n;
-
 		while (n--) {
 			*--pd = *--ps;
 		}
@@ -141,13 +140,13 @@ void putBuffer(uint8_t *buffer, uint32_t color) {
 
 void drawchar_transparent(char c, uint64_t x, uint64_t y, uint32_t fgcolor) {
 	uint64_t cx, cy;
-	static const uint64_t mask[8] = {128, 64, 32, 16, 8, 4, 2, 1}; // Cambiamos el orden de los bits en el array mask
+	static const uint64_t mask[8] = {128, 64, 32, 16, 8, 4, 2, 1};	// Cambiamos el orden de los bits en el array mask
 	const uint8_t *glyph = font + (uint8_t) c * 16;
 	uint8_t *buffer = framebuffer + y * VBE_mode_info->pitch + x * (VBE_mode_info->bpp >> 3);
 
 	for (cy = 0; cy < charHeight; cy++) {
 		for (cx = 0; cx < charWidth; cx++) {
-			if (glyph[cy / fontSize] & mask[cx / fontSize]) { // Verificamos si el bit correspondiente está encendido
+			if (glyph[cy / fontSize] & mask[cx / fontSize]) {		// Verificamos si el bit correspondiente está encendido
 				putBuffer(buffer + cx * (VBE_mode_info->bpp >> 3), fgcolor);
 			}
 		}
@@ -222,8 +221,7 @@ void drawWord(uint8_t fd, char *word) {
 // Manejar el carácter de salto de línea (\n)
 void nextLine() {
 	if (cursor_y + 2 * charHeight - 10 >= VBE_mode_info->height - Y_OFFSET) {
-		// Realiza un desplazamiento hacia arriba
-		scrollUp();
+		scrollUp();				// Realiza un desplazamiento hacia arriba
 	}
 	else {
 		cursor_y += charHeight; // Mover a la siguiente línea
@@ -234,8 +232,9 @@ void nextLine() {
 // Manejar el carácter de tabulación (\t)
 // Asumiendo que un tabulador es equivalente a 4 espacios
 void setTab() {
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++) {
 		printChar(' ', fontColor);
+	}
 }
 
 void clear() {
@@ -280,7 +279,6 @@ void printCursor() {
 uint64_t syscall_puts(uint8_t fd, char *buf, uint64_t size) {
 	uint32_t foreground = (fd == STD_ERR) ? STDERR_FG : fontColor;
 	uint64_t i;
-
 	for (i = 0; i < size; i++) {
 		printChar(buf[i], foreground);
 	}

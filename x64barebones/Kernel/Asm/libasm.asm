@@ -38,8 +38,7 @@ cpuVendor:
 	pop rbp
 	ret
 
-
-; funcion para obtener la hora real de la computadora
+; Función para obtener la hora real de la computadora
 getRTC:
 	push rbp
 	mov rbp, rsp
@@ -51,25 +50,25 @@ getRTC:
     mov al, 0x8B
     out 0x70, al
 
-	; obtengo los segundos
+	; Obtengo los segundos
 	mov al, 0x00
 	out 70h, al
 	in al, 71h
 	mov [rdi+2], al     ; segundos
 
-	; obtengo los minutos
+	; Obtengo los minutos
 	mov al, 0x02
 	out 70h, al
 	in al, 71h
 	mov [rdi+1], al     ; minutos
 
-	; obtengo las horas
+	; Obtengo las horas
 	mov al, 0x04
 	out 70h, al
 	in al, 71h
 	mov [rdi], al       ; horas
 
-	; Activo las interrupciones seteando el bit 7 del registro B.
+	; Activo las interrupciones seteando el bit 7 del registro B
 	mov al, 0x8A
     out 0x70, al
 
@@ -79,20 +78,18 @@ getRTC:
 	mov rax, 3
 	ret
 
-
-getKey: 
+getKey:
 
     push rbp
     mov rbp, rsp
     mov rax, 0
 
-    ; coloco en la parte baja de eax la tecla que se presiono
+    ; Coloco en la parte baja de eax la tecla que se presiono
     in al, 0x60
 
     mov rsp, rbp
     pop rbp
     ret
-
 	
 setPIT0Freq:
 	mov al, 0x36
@@ -103,7 +100,6 @@ setPIT0Freq:
 	out 0x40, al
 	ret
 
-
 setPIT2Freq:
 	mov al, 0xB6
 	out 0x43, al
@@ -112,7 +108,6 @@ setPIT2Freq:
 	mov al, ah
 	out 0x42, al
 	ret
-
 
 getPIT2Freq:
 	mov rax, 0
@@ -127,13 +122,11 @@ getPIT2Freq:
 	pop rbx
 	ret
 
-
 spkMov:
 	in al, 0x61
 	or al, 0x3
 	out 0x61, al
 	ret
-
 
 spkStop:
 	in al, 0x61
@@ -146,11 +139,11 @@ haltProcess:
 	ret
 
 fabricateProcessStack:
-	;receives stackbase, argc, argv and rip as pointers (so rdi, rsi, rdx, rcx respectively)
-	;will pass argc as int and argv as pointer (strings have been copied somewhere safe)
-	mov r8, rsp		;preserve this stack so i can return later
-	and rdi, 0xFFFFFFFFFFFFFFBF ;align to quad-word if not aligned
-	mov rsp, rdi	;temp stack switcharoo
+	; receives stackbase, argc, argv and rip as pointers (so rdi, rsi, rdx, rcx respectively)
+	; will pass argc as int and argv as pointer (strings have been copied somewhere safe)
+	mov r8, rsp		; preserve this stack so i can return later
+	and rdi, 0xFFFFFFFFFFFFFFBF ; align to quad-word if not aligned
+	mov rsp, rdi	; temp stack switcharoo
 
 	mov rax, 0
 	push rax	;20 ss

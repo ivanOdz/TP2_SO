@@ -19,9 +19,9 @@ extern int main();
 
 #define VALIDKEYS 128
 
-#define SHIFT	3 // 1 & 2
+#define SHIFT	3	// 1 & 2
 #define CAPS	4
-#define CONTROL 24 // 8 & 16
+#define CONTROL 24	// 8 & 16
 
 static const char toAscii[VALIDKEYS] = {0, '\e', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 8, 9,
 										'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', 10, 0, 'a', 's',

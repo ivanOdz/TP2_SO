@@ -51,16 +51,15 @@ uint64_t int_80() {
 }
 
 int64_t syscall_write(uint8_t fd, char *buf, uint64_t size) {
-	// Tengo que obtener el proceso actual, entrar al fd que me pasan,
-	// y escribir en el buffer, si es que tengo lugar, lo que me estan pasando.
-
+	// Tengo que obtener el proceso actual, entrar al fd que me pasan, y escribir en el buffer, si es que tengo lugar, lo que me estan pasando.
 	PCB *process = getCurrentProcess();
 	if (fd >= MAX_FILE_DESCRIPTORS || !process->fileDescriptors[fd].pipe) {
 		return -1;
 	}
 	uint64_t written = writeFifo(process->fileDescriptors[fd].pipe, buf, size, TRUE);
-	if (process->fileDescriptors[fd].pipe->name && (strcmp(process->fileDescriptors[fd].pipe->name, CONSOLE_NAME) == 0 || strcmp(process->fileDescriptors[fd].pipe->name, ERROR_NAME) == 0))
+	if (process->fileDescriptors[fd].pipe->name && (strcmp(process->fileDescriptors[fd].pipe->name, CONSOLE_NAME) == 0 || strcmp(process->fileDescriptors[fd].pipe->name, ERROR_NAME) == 0)) {
 		updateScreen();
+	}
 	return written;
 }
 
@@ -71,9 +70,7 @@ int64_t syscall_read(uint8_t fd, char *buf, uint64_t size) {
 	}
 	return readFifo(process->fileDescriptors[fd].pipe, buf, size, TRUE);
 }
-
-// returns char if readable, 0 if there's nothing to be read, EOF if broken
-// meant for processes that may receive input but can't afford to block forever if they don't
+// returns char if readable, 0 if there's nothing to be read, EOF if broken meant for processes that may receive input but can't afford to block forever if they don't
 char syscall_tryGetChar(uint8_t fd) {
 	PCB *process = getCurrentProcess();
 	char c;
@@ -186,21 +183,19 @@ int64_t syscall_dup(uint64_t fd) {
 }
 
 int16_t syscall_seminit(int initialValue) {
-	// return ksem_init(initialValue);
-	return 0;
+	return 0;		// return ksem_init(initialValue);
 }
 
 int16_t syscall_semdestroy(uint16_t id) {
-	// return ksem_init(id);
-	return 0;
+	return 0;		// return ksem_init(id);
 }
 
 void syscall_sempost(int16_t id) {
-	// ksem_post(id);
+	return;			// ksem_post(id);
 }
 
 void syscall_semwait(int16_t id) {
-	// ksem_wait(id);
+	return; 		// ksem_wait(id);
 }
 
 typedef int (*EntryPoint)();

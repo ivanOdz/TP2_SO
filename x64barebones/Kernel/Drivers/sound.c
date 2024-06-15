@@ -18,7 +18,7 @@ typedef struct {
 
 static song_type bg, sfx;
 
-// esta pensado para hacer sonar un stream tipo midi pero muy simplificado donde cada par de uint8s indica freq del parlante y tiempo hasta la proxima nota respectivamente
+// Esta pensado para hacer sonar un stream tipo midi pero muy simplificado donde cada par de uint8s indica freq del parlante y tiempo hasta la proxima nota respectivamente
 void playSound(uint8_t flags, const uint8_t *snd, uint64_t length) {
 	if (flags & IS_SFX) {
 		sfx.length = length;
@@ -78,8 +78,9 @@ void soundNext() {
 			playing->current = 0;
 		}
 		else {
-			if (playing->buffer == bg.buffer)
+			if (playing->buffer == bg.buffer) {
 				spkStop();
+			}
 			playing->length = 0;
 		}
 	}

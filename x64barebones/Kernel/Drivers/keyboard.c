@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <keyboard.h>
 
-static uint8_t flags = 0; // bit 0 shift left, bit 1 shift right, bit 2 caps lock, bit 3 left ctrl, bit 4 right ctrl
+static uint8_t flags = 0;	// bit 0 shift left, bit 1 shift right, bit 2 caps lock, bit 3 left ctrl, bit 4 right ctrl
 
 static FifoBuffer *keyboardFifo;
 
@@ -11,20 +11,21 @@ void initializeKeyboardDriver() {
 	keyboardFifo->writeEnds++;
 }
 
-uint8_t
-isAlpha(uint8_t c) {
-	if (c >= 0x41 && c <= 0x5A)
+uint8_t isAlpha(uint8_t c) {
+	if (c >= 0x41 && c <= 0x5A) {
 		return TRUE;
-	if (c >= 0x61 && c <= 0x7A)
+	}
+	if (c >= 0x61 && c <= 0x7A) {
 		return TRUE;
-
+	}
 	return FALSE;
 }
 
 void keyboard_handler() {
 	uint8_t c = getKey();
-	if (!keyboardFifo)
+	if (!keyboardFifo) {
 		return;
+	}
 	if (c == 0xE0) {  // 0xE0 is modifier for multimedia keys & numpad
 		c = getKey(); // the following keycode contains the actual key pressed
 		switch (c) {
@@ -72,21 +73,23 @@ void keyboard_handler() {
 			flags &= 0xFF - 0x08;
 			break;
 	}
-
 	// specific signals
 	if (flags & CONTROL) {
+		uint8_t retNow = 0;
 		switch (c) {
+			case 0x2E: // C (Kill)
+				killRunningForegroundProcess();
+				retNow = 1;
+				break;
+			case 0x20: // D (EOF)
+				putFifo(keyboardFifo, EOF, FALSE);
+				retNow = 1;
+				break;
 		}
-		if (c == 0x2E) { // C (Kill)
-			killRunningForegroundProcess();
-			return;
-		}
-		if (c == 0x20) { // D (EOF)
-			putFifo(keyboardFifo, EOF, FALSE);
+		if (retNow) {
 			return;
 		}
 	}
-
 	// regular characters
 	if (c <= 0x3B) {
 		uint8_t ascii = toAscii[c];

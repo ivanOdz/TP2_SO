@@ -16,8 +16,9 @@ uint64_t timer_handler() {
 		printCursor();
 	}
 
-	if (stackSwitcharoo)
+	if (stackSwitcharoo) {
 		return schedyield();
+	}
 	return 0;
 }
 
