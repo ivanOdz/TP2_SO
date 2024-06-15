@@ -62,7 +62,11 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 		strcpy((char *) process->stackPointer, argv[argc]);
 		argv[argc++] = (char *) process->stackPointer;
 	}
-	process->stackPointer = fabricateProcessStack(process->stackPointer, argc, argv, processMain);
+	process->argv = allocMemory(argc * sizeof(char *));
+	for (int i = 0; i < argc; i++) {
+		process->argv[i] = argv[i];
+	}
+	process->stackPointer = fabricateProcessStack(process->stackPointer, argc, process->argv, processMain);
 	process->name = argv[0];
 	process->pid = nextPid++;
 	process->parentPid = parent->pid;
@@ -106,8 +110,7 @@ PID_t execute(int (*processMain)(int argc, char **argv), char **argv, ProcessRun
 	if (!process)
 		return 0;
 	if (!addProcess(process)) {
-		freeMemory(process->stackBasePointer);
-		freeMemory(process);
+		freeProcess(process);
 		return 0;
 	}
 	return process->pid;
@@ -160,6 +163,7 @@ void processSleep(uint64_t ms) {
 
 void freeProcess(PCB *process) {
 	freeMemory(process->stackBasePointer - STACK_DEFAULT_SIZE + sizeof(uint64_t));
+	freeMemory(process->argv);
 	removeProcess(process);
 	freeMemory(process);
 }

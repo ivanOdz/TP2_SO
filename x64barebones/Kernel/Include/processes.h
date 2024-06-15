@@ -34,7 +34,7 @@ typedef struct PCB {
 	void *stackBasePointer; // base del stack
 	void *stackPointer;		// puntero a la posicion actual
 	char *name;
-	uint8_t **argv;
+	char **argv;
 	ProcessRunMode runMode;
 	int64_t returnValue;
 	uint8_t killed;
