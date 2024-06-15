@@ -38,8 +38,9 @@ void lsof(int argc, char **argv) {
 void time(int argc, char **argv) {
 	time_type time;
 	int8_t offset = 0;
-	if (argc > 1)
+	if (argc > 1) {
 		offset = stringToInt(argv[1], strlen(argv[1]));
+	}
 	if (offset > 12 || offset < -12) {
 		fprintf(STD_ERR, "invalid offset\n");
 		offset = 0;
@@ -109,8 +110,9 @@ void greeting(int argc, char **argv) {
 void cat(int argc, char **argv) {
 	char c;
 	while ((c = getchar()) != EOF) {
-		if (c)
+		if (c) {
 			putchar(c);
+		}
 	}
 	putchar(c);
 	exit(0);
@@ -119,10 +121,11 @@ void cat(int argc, char **argv) {
 void filter(int argc, char **argv) {
 	char c;
 	while ((c = getchar()) != EOF) {
-		if (c)
-			if (c != 'a' && c != 'A' && c != 'e' && c != 'E' && c != 'i' && c != 'I' &&
-				c != 'o' && c != 'O' && c != 'u' && c != 'U')
+		if (c) {
+			if (c != 'a' && c != 'A' && c != 'e' && c != 'E' && c != 'i' && c != 'I' && c != 'o' && c != 'O' && c != 'u' && c != 'U') {
 				putchar(c);
+			}
+		}
 	}
 	putchar(c);
 	exit(0);
@@ -132,8 +135,9 @@ void wc(int argc, char **argv) {
 	char c;
 	int lines = 0;
 	while ((c = getchar()) != EOF) {
-		if (c == '\n')
+		if (c == '\n') {
 			lines++;
+		}
 	}
 	putchar(c);
 	exit(lines);
@@ -169,19 +173,22 @@ void phylo(int argc, char **argv) {
 	phyloSemaphores = malloc(MAX_PHYLOS * sizeof(int));
 	phyloStatus = malloc(MAX_PHYLOS * sizeof(char));
 	printMutex = sem_init(0);
-	if (printMutex == -1)
+	if (printMutex == -1) {
 		exit(1);
+	}
 	editMutex = sem_init(INITIAL_PHYLOS);
-	if (editMutex == -1)
+	if (editMutex == -1) {
 		exit(1);
+	}
 	ReturnStatus wstatus;
 	char *phyloArgv[3];
 	char phyloNumber[4];
 	for (int i = 0; i < INITIAL_PHYLOS; i++) {
 		phyloSemaphores[i] = sem_init(1);
 		phyloStatus[i] = '.';
-		if (phyloSemaphores[i] < 0)
+		if (phyloSemaphores[i] < 0) {
 			exit(1);
+		}
 	}
 	for (int i = INITIAL_PHYLOS; i < MAX_PHYLOS; i++) {
 		phyloStatus[i] = '0';
@@ -249,8 +256,9 @@ void phylo(int argc, char **argv) {
 					putchar('\n');
 					break;
 				}
-				if (i + 1 == MAX_PHYLOS)
+				if (i + 1 == MAX_PHYLOS) {
 					exit(2);
+				}
 			}
 		}
 		if (c == 'r' || c == 'R') {
@@ -289,8 +297,9 @@ void phylo(int argc, char **argv) {
 					putchar('\n');
 					break;
 				}
-				if (i + 1 == MAX_PHYLOS)
+				if (i + 1 == MAX_PHYLOS) {
 					exit(2);
+				}
 			}
 		}
 		sem_wait(printMutex);
