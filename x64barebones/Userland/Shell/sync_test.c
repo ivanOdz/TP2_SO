@@ -39,10 +39,12 @@ void semSlaveProcess(int argc, char **argv) {
 		exit(0);
 	}
 	cycles = stringToInt(argv[1], strlen(argv[1]));
-	if (argv[2][0])
+	if (argv[2][0]) {
 		idSemaphore = stringToInt(argv[2], strlen(argv[2]));
-	else
+	}
+	else {
 		idSemaphore = -1;
+	}
 
 	for (uint64_t cont = 0; cont < cycles; cont++) {
 		if (idSemaphore >= 0) {
@@ -121,10 +123,12 @@ void testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos,
 		}
 
 		shared = 0;
-		if (idSemaphore >= 0)
+		if (idSemaphore >= 0) {
 			uintToBase(idSemaphore, semIDstr, 10);
-		else
+		}
+		else {
 			semIDstr[0] = 0;
+		}
 
 		argvForProcesses[0] = "test_sem_process";
 		argvForProcesses[1] = countStr;
@@ -149,8 +153,9 @@ void testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos,
 		if (useSemaphore) {
 			sem_destroy(idSemaphore);
 		}
-		if (useSemaphore == BOTH)
+		if (useSemaphore == BOTH) {
 			useSemaphore--;
+		}
 	} while (useSemaphore--);
 	exit(0);
 }

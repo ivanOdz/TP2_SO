@@ -105,8 +105,9 @@ void test_processes(int argc, char **argv) {
 	SyscallGetRTC(&time);
 	srand(time.hora << 16 | time.min << 8 | time.seg);
 	ProcessTestType *processes = malloc(maxProcesses * sizeof(ProcessTestType));
-	if (!processes)
+	if (!processes) {
 		exit(5);
+	}
 	char *args[2];
 	while (burnin--) {
 		printf("\nNew iteration (%lu left)\n", burnin);
@@ -127,8 +128,9 @@ void test_processes(int argc, char **argv) {
 				processes[spawned].status = RUNNING;
 			}
 			printf("\rInstantiating processes (%d of %lu processes)", spawned + 1, maxProcesses);
-			if (sleepAmount)
+			if (sleepAmount) {
 				sleep(sleepAmount);
+			}
 		}
 		printf("\nInstantiated %d processes\n", spawned);
 		printf("\nKilling / blocking processes (0 processes alive, 0 processes blocked)");
@@ -140,13 +142,13 @@ void test_processes(int argc, char **argv) {
 			} while (!processes[index].PID);
 			if (randBetween(0, 100) >= bias) {
 				PID_t newProcess = kill(processes[index].PID);
-
 				if (!newProcess) {
 					fprintf(STD_ERR, "%cERROR KILLING PROCESS %d    \n", 0xD, processes[index].PID);
 				}
 				else {
-					if (processes[index].status == BLOCKED)
+					if (processes[index].status == BLOCKED) {
 						blocked--;
+					}
 					spawned--;
 					processes[index].status = KILLED;
 					processes[index].PID = 0;
@@ -175,8 +177,9 @@ void test_processes(int argc, char **argv) {
 				}
 			}
 			printf("\rKilling / blocking processes (%d processes alive, %d processes blocked)    ", spawned, blocked);
-			if (sleepAmount)
+			if (sleepAmount) {
 				sleep(sleepAmount);
+			}
 		}
 		puts("\n\n");
 	}
@@ -252,8 +255,9 @@ void test_priority(int argc, char **argv) {
 	SyscallNice(getPID(), 9);
 	printf("Processes: %d\tbusytime: %d\tmin priority: %d\tmax priority: %d\tburn-in: %d\n", maxProcesses, busytime, minPriority, maxPriority, burnin);
 	ProcessPriorityType *processes = malloc(maxProcesses * burnin * sizeof(ProcessPriorityType));
-	if (!processes)
+	if (!processes) {
 		exit(5);
+	}
 
 	char *args[3];
 	char arg2buf[20];
@@ -311,6 +315,7 @@ void processPriorityLoop(int argc, char **argv) {
 	uint64_t startTicks = SyscallGetTicks();
 	long loopme = stringToInt(argv[1], strlen(argv[1]));
 	for (long i = 0; i < loopme; i++) {
+		continue;
 	}
 	uint64_t ticksRunning = SyscallGetTicks() - startTicks;
 	exit(ticksRunning);

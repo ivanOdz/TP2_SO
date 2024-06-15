@@ -1,13 +1,13 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include "snake.h"
-#include "db.h"
-#include "sc.h"
+#include <db.h>
+#include <sc.h>
+#include <snake.h>
+
 typedef struct {
 	uint16_t x;
 	uint16_t y;
 	int8_t dir;
-
 } position;
 
 typedef struct {
@@ -15,7 +15,6 @@ typedef struct {
 	uint16_t tail; // Indice de arreglo (izquierda)
 	int8_t dir;	   // Direccion
 	uint16_t score;
-
 } snake_position;
 
 typedef struct {
@@ -24,7 +23,6 @@ typedef struct {
 	uint8_t grow1 : 1;
 	uint8_t grow2 : 1;
 	uint8_t players : 2;
-
 } playersFlags;
 
 static void reset_positions();
@@ -50,19 +48,18 @@ static uint64_t margenEnX;
 static uint64_t margenEnY;
 
 void snake(int argc, char **argv) {
-	// text_format fmt = {0x00000000, 0x00C0C0C0, 1, 0};
-	// SyscallSetFormat(&fmt);
-	//  SyscallSetTimer(30000);
 	SyscallNice(getPID(), 9);
 	uint8_t nextGame = 1;
 	int status = 0;
 	uint8_t players = 2;
 	if (argc >= 2) {
 		players = stringToInt(argv[1], strlen(argv[1]));
-		if (players > 2)
+		if (players > 2) {
 			players = 2; // De argumento
-		if (players < 1)
+		}
+		if (players < 1) {
 			players = 1;
+		}
 	}
 	else
 		players = 1;
@@ -146,12 +143,15 @@ uint8_t game_loop(uint8_t players) {
 			else if (flags.lose2) {
 				winner = 1;
 			}
-			if (winner && flags.players == 2)
+			if (winner && flags.players == 2) {
 				printf("Player %1d won!    Scores: %5d vs. %5d", winner, snakePos1.score, snakePos2.score);
-			else if (!winner && flags.players == 1)
+			}
+			else if (!winner && flags.players == 1) {
 				printf("Game Over!       Score: %5d          ", snakePos1.score);
-			else
+			}
+			else {
 				printf("It's a draw!                             ");
+			}
 			sleep(MS_PER_FRAME * 60);
 			break;
 		}
@@ -345,8 +345,9 @@ void move_heads(playersFlags *flags, position *nextHead1, position *nextHead2) {
 		snake2[snakePos2.head].dir = nextHead2->dir;
 		print_block(nextHead2->x, nextHead2->y, texture_head_snake2, nextHead2->dir);
 	}
-	if (flags->grow1 | flags->grow2)
+	if (flags->grow1 | flags->grow2) {
 		newApple(flags);
+	}
 
 	flags->grow1 = 0;
 	flags->grow2 = 0;
@@ -395,11 +396,13 @@ uint8_t check_positions(playersFlags *flags, position *nextHead1, position *next
 		nextHead2->dir = snakePos2.dir;
 	}
 
-	if (check_limits(flags, nextHead1, nextHead2))
+	if (check_limits(flags, nextHead1, nextHead2)) {
 		return 1;
+	}
 
-	if (check_collision(flags, nextHead1, nextHead2))
+	if (check_collision(flags, nextHead1, nextHead2)) {
 		return 1;
+	}
 
 	if (nextHead1->x == apple.x && nextHead1->y == apple.y) {
 		flags->grow1 = 1;
@@ -476,9 +479,11 @@ uint8_t get_directions() {
 			return 1;
 	}
 
-	if (newDir1)
+	if (newDir1) {
 		snakePos1.dir = newDir1;
-	if (newDir2)
+	}
+	if (newDir2) {
 		snakePos2.dir = newDir2;
+	}
 	return 0;
 }

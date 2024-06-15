@@ -29,8 +29,9 @@ void shell(int argc, char **argv) {
 		exit(1);
 	}
 	commandBuffer *history[10];
-	for (int i = 0; i < HISTORY_SIZE; i++)
+	for (int i = 0; i < HISTORY_SIZE; i++) {
 		history[i] = NULL;
+	}
 	int historyIndex = 0;
 	emptyCommandBuffer(command);
 	runCommand("help");
@@ -57,8 +58,9 @@ void shell(int argc, char **argv) {
 							printf("%s\n", command->buffer);
 						}
 						runCommand(command->buffer);
-						if (history[HISTORY_SIZE - 1])
+						if (history[HISTORY_SIZE - 1]) {
 							free(history[HISTORY_SIZE - 1]);
+						}
 						for (int i = HISTORY_SIZE - 1; i; i--) {
 							history[i] = history[i - 1];
 						}
@@ -131,14 +133,16 @@ void shell(int argc, char **argv) {
 						shell_fmt.enableCursorBlink = 0;
 						SyscallSetFormat(&shell_fmt);
 					}
-					if (command->editCursor)
+					if (command->editCursor) {
 						command->editCursor--;
+					}
 					printEdit(command);
 					break;
 				case 0x10: // right arrow
 					deleteChars(command);
-					if (command->editCursor < command->position)
+					if (command->editCursor < command->position) {
 						command->editCursor++;
+					}
 					if (command->editCursor == command->position) {
 						shell_fmt.enableCursorBlink = 1;
 						SyscallSetFormat(&shell_fmt);
@@ -174,8 +178,9 @@ void shell(int argc, char **argv) {
 }
 
 void printEdit(commandBuffer *command) {
-	if (command->editCursor)
+	if (command->editCursor) {
 		SyscallWrite(STD_OUT, command->buffer, command->editCursor);
+	}
 	if (command->editCursor == command->position) {
 		shell_fmt.enableCursorBlink = 1;
 		SyscallSetFormat(&shell_fmt);
@@ -191,8 +196,9 @@ void printEdit(commandBuffer *command) {
 	shell_fmt.fg = colorSwap;
 	SyscallSetFormat(&shell_fmt);
 	int remainingChars = command->position - (command->editCursor + 1);
-	if (remainingChars)
+	if (remainingChars) {
 		SyscallWrite(STD_OUT, command->buffer + command->editCursor + 1, remainingChars);
+	}
 }
 
 void emptyCommandBuffer(commandBuffer *command) {
@@ -203,10 +209,11 @@ void emptyCommandBuffer(commandBuffer *command) {
 	command->editCursor = 0;
 }
 void deleteChars(commandBuffer *command) {
-	if (command->position)
+	if (command->position) {
 		for (int i = command->position; i; i--) {
 			putchar('\b');
 		}
+	}
 }
 
 void runCommand(char *runMe) {
@@ -278,10 +285,12 @@ void runCommand(char *runMe) {
 	while (!background && waits--) {
 		PID_t exited = waitpid(0, &wstatus);
 		SyscallSetFormat(&shell_fmt);
-		if (wstatus.aborted)
+		if (wstatus.aborted) {
 			fprintf(STD_ERR, "%u was killed\n", exited);
-		if (wstatus.returnValue)
+		}
+		if (wstatus.returnValue) {
 			printf("Process %u exited with code %d\n", exited, wstatus.returnValue);
+		}
 	}
 	puts(">> ");
 	return;
@@ -306,8 +315,9 @@ PID_t run(char *command, bool isBackground) {
 			while (position < BUFFER_SIZE && strBuffer[position] == ' ') {
 				position++;
 			}
-			if (position < BUFFER_SIZE && strBuffer[position] != 0)
+			if (position < BUFFER_SIZE && strBuffer[position] != 0) {
 				argv[argc++] = strBuffer + position;
+			}
 		}
 	}
 	argv[argc] = NULL;
@@ -321,8 +331,9 @@ PID_t run(char *command, bool isBackground) {
 				}
 				else {
 					PID_t childPID = execv((void (*)(int, char **)) avCommands[cont].function, argv, isBackground);
-					if (!childPID)
+					if (!childPID) {
 						fprintf(STD_ERR, "Couldn't execute %s\n", strBuffer);
+					}
 					return childPID;
 				}
 			}

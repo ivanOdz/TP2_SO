@@ -33,28 +33,33 @@ void mm_test(int argc, char **argv) {
 		}
 		else if (strcmp(argv[arg], "-maxmemsize") == 0) {
 			maxMemSize = argumentParse(arg++, argc, argv);
-			if (!maxMemSize)
+			if (!maxMemSize) {
 				exit(1);
+			}
 		}
 		else if (strcmp(argv[arg], "-maxblocksize") == 0) {
 			maxBlockSize = argumentParse(arg++, argc, argv);
-			if (!maxBlockSize)
+			if (!maxBlockSize) {
 				exit(1);
+			}
 		}
 		else if (strcmp(argv[arg], "-minblocksize") == 0) {
 			minBlockSize = argumentParse(arg++, argc, argv);
-			if (!minBlockSize)
+			if (!minBlockSize) {
 				exit(1);
+			}
 		}
 		else if (strcmp(argv[arg], "-burnin") == 0) {
 			burnin = argumentParse(arg++, argc, argv);
-			if (!burnin)
+			if (!burnin) {
 				exit(1);
+			}
 		}
 		else if (strcmp(argv[arg], "-maxblocks") == 0) {
 			maxBlocks = argumentParse(arg++, argc, argv);
-			if (!maxBlocks)
+			if (!maxBlocks) {
 				exit(1);
+			}
 		}
 		else {
 			fprintf(STD_ERR, "Invalid argument provided (got %s)\n", argv[arg]);
@@ -82,8 +87,9 @@ void mm_test(int argc, char **argv) {
 	MemoryInfo mminfoo;
 	memoryManagerStats(&mminfoo);
 
-	if (!maxMemSize)
+	if (!maxMemSize) {
 		maxMemSize = mminfoo.freeMemory >> 20;
+	}
 	printf("Starting memtest - abuse...\n");
 	printf("MM Type: %c, Max memory: %lu MiB, Max Blocks: %lu, Max Block Size: %lu bytes, Min Block Size: %lu bytes, Burn-in: %lu\n", mminfoo.mmType, maxMemSize, maxBlocks, maxBlockSize, minBlockSize, burnin);
 	memoryManagerStats(&mminfoo);
