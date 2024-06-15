@@ -139,7 +139,6 @@ void mm_test(int argc, char **argv) {
 			}
 			printf("\rTesting allocated memory for overlaps and corruption (%d)", testNum + 1);
 		}
-		// SyscallPrintMem();
 		printf("\nFreeing allocated memory...\n");
 		for (int i = 0; i < assigned; i++) {
 			free(test[i]);

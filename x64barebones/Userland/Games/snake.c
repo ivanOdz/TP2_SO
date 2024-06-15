@@ -132,7 +132,7 @@ uint8_t game_loop(uint8_t players) {
 		}
 
 		if (lost) {
-			SyscallAudio(0, Dogbass, Dogbasslength); // stop musica
+			SyscallAudio(0, Dogbass, Dogbasslength); // parar musica
 			putchar(0xD);							 // carriage return
 			if (flags.lose1 && flags.lose2) {
 				winner = 0;

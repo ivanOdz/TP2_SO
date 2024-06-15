@@ -107,7 +107,7 @@ void shell(int argc, char **argv) {
 						}
 					}
 					break;
-				case 0x1E: // up arrow
+				case 0x1E: // flecha arriba
 					if (historyIndex < HISTORY_SIZE && history[historyIndex]) {
 						deleteChars(command);
 						command->position = strcpy(command->buffer, history[historyIndex++]->buffer);
@@ -115,7 +115,7 @@ void shell(int argc, char **argv) {
 						puts(command->buffer);
 					}
 					break;
-				case 0x1F: // down arrow
+				case 0x1F: // flecha abajo
 					if (historyIndex) {
 						deleteChars(command);
 						command->position = strcpy(command->buffer, history[--historyIndex]->buffer);
@@ -127,7 +127,7 @@ void shell(int argc, char **argv) {
 						emptyCommandBuffer(command);
 					}
 					break;
-				case 0x11: // left arrow
+				case 0x11: // felcha izquierda
 					deleteChars(command);
 					if (shell_fmt.enableCursorBlink) {
 						shell_fmt.enableCursorBlink = 0;
@@ -138,7 +138,7 @@ void shell(int argc, char **argv) {
 					}
 					printEdit(command);
 					break;
-				case 0x10: // right arrow
+				case 0x10: // flecha derecha
 					deleteChars(command);
 					if (command->editCursor < command->position) {
 						command->editCursor++;
@@ -302,13 +302,13 @@ PID_t run(char *command, bool isBackground) {
 	int argc;
 	char *argv[BUFFER_SIZE];
 
-	// trim whitespace & get command
+	// Borrar espacios en blanco y obtener el comando
 	int position = 0;
 	while (position < BUFFER_SIZE && strBuffer[position] == ' ') {
 		position++;
 	}
 	argv[0] = strBuffer + position;
-	// Get arguments
+	// Obtener argumentos
 	for (argc = 1; position < BUFFER_SIZE && strBuffer[position] != 0; position++) {
 		if (strBuffer[position] == ' ') {
 			strBuffer[position++] = 0;
@@ -322,7 +322,7 @@ PID_t run(char *command, bool isBackground) {
 	}
 	argv[argc] = NULL;
 	for (uint64_t cont = 0; cont < AVAILABLE_COMMANDS; cont++) {
-		// Search for command and execute
+		// Buscar por comando y ejecutarlo
 		if (strcmp(argv[0], (avCommands[cont]).name) == 0) {
 			if (avCommands[cont].function != NULL) {
 				if (avCommands[cont].builtin) {

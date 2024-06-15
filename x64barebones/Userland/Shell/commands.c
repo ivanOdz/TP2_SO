@@ -9,9 +9,9 @@
 
 int command_help(int argc, char **argv) {
 	uint32_t lastColor = text_color_get();
-	// Print text
+	// Imprimir texto
 	puts(STR_PREAMBLE_FOR_COMANDS);
-	// Print available commands in BLUE
+	// Imprimir comandos disponibles en azul
 	text_color_set(COLORS_CIAN);
 
 	for (uint64_t cont = 0; cont < AVAILABLE_COMMANDS; cont++) {

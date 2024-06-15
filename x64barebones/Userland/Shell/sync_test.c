@@ -27,7 +27,7 @@ static uint64_t shared = 0;
 
 void racyInc() {
 	uint64_t aux = shared;
-	yield(); // This makes the race condition highly probable
+	yield(); 
 	aux++;
 	shared = aux;
 }

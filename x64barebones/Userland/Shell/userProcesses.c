@@ -208,7 +208,7 @@ void phylo(int argc, char **argv) {
 				if (phyloSemaphores[i + 1] == -1) {
 					printf("See you next dinner!\n");
 					for (int j = 0; j < i; j++) {
-						sem_wait(editMutex); // block all philosophers from eating so we can manipulate shit without breaking anything
+						sem_wait(editMutex); // Blockea todos los filosofos de comer para que podamos manipular los semaforos sin romper nada
 					}
 					for (int j = 0; j < i; j++) {
 						sem_destroy(phyloSemaphores[j]);
@@ -237,10 +237,10 @@ void phylo(int argc, char **argv) {
 					printf("Setting up table for another philosopher, please wait...");
 
 					for (int j = 0; j < i; j++) {
-						sem_wait(editMutex); // block all philosophers from eating so we can manipulate shit without breaking anything
+						sem_wait(editMutex); // Blockea todos los filosofos de comer para que podamos manipular los semaforos sin romper nada
 					}
-					sem_wait(phyloSemaphores[i - 1]); // ensure no one is using the problematic fork (letting go isn't blocked, so they'll leave it eventually)
-					sem_post(phyloSemaphores[i - 1]); // reset the status because, again, we dont wanna break anything
+					sem_wait(phyloSemaphores[i - 1]);
+					sem_post(phyloSemaphores[i - 1]);
 					phyloSemaphores[i] = sem_init(1);
 					phyloStatus[i] = '.';
 					if (phyloSemaphores[i] < 0) {
@@ -251,7 +251,7 @@ void phylo(int argc, char **argv) {
 					uintToBase(i, phyloNumber, 10);
 					execv(phyloProcess, phyloArgv, BACKGROUND);
 					for (int j = 0; j <= i; j++) {
-						sem_post(editMutex); // we've added the sem and the status and the philosopher, so we can let go. Let 'em eat, poor things.
+						sem_post(editMutex);
 					}
 					putchar('\n');
 					break;
@@ -267,7 +267,7 @@ void phylo(int argc, char **argv) {
 					printf("Setting up table for one less philosopher, please wait...");
 
 					for (int j = 0; j < i; j++) {
-						sem_wait(editMutex); // block all philosophers from eating so we can manipulate shit without breaking anything
+						sem_wait(editMutex); // Blockea todos los filosofos de comer para que podamos manipular los semaforos sin romper nada
 					}
 					if (i == 1) {
 						sem_destroy(phyloSemaphores[1]);
@@ -285,13 +285,13 @@ void phylo(int argc, char **argv) {
 						sem_destroy(printMutex);
 						exit(0);
 					}
-					sem_wait(phyloSemaphores[i - 1]); // ensure no one is using the problematic fork (letting go isn't blocked, so they'll leave it eventually)
-					sem_post(phyloSemaphores[i - 1]); // reset the status because, again, we dont wanna break anything
+					sem_wait(phyloSemaphores[i - 1]);
+					sem_post(phyloSemaphores[i - 1]);
 					sem_destroy(phyloSemaphores[i]);
 					phyloSemaphores[i] = -1;
 					phyloStatus[i] = 0;
 					for (int j = 0; j < i; j++) {
-						sem_post(editMutex); // we've added the sem and the status and the philosopher, so we can let go. Let 'em eat, poor things.
+						sem_post(editMutex);
 					}
 					waitpid(0, &wstatus);
 					putchar('\n');
