@@ -19,8 +19,7 @@
 #define c	  0xefc60000UL
 #define f	  1812433253UL
 
-typedef struct
-{
+typedef struct {
 	uint32_t state_array[n]; // the array for the state vector
 	int state_index;		 // index into state vector array
 } mt_state;
@@ -62,8 +61,9 @@ int64_t strcmp(const char *str1, const char *str2) {
 
 int64_t strincludes(const char *contains, const char *contained) {
 	while (*contained != '\0') {
-		if (*(contains++) != *(contained++))
+		if (*(contains++) != *(contained++)) {
 			return FALSE;
+		}
 	}
 	return TRUE;
 }
@@ -77,8 +77,9 @@ int64_t stringToInt(char *str, uint32_t strlen) {
 		strlen--;
 	}
 	for (int i = 0; strlen != i; i++) {
-		if (str[i] > '9' || str[i] < '0')
+		if (str[i] > '9' || str[i] < '0') {
 			return 0;
+		}
 		ans += pow(10, (strlen - i - 1)) * (str[i] - '0');
 	}
 	return ans * sign;
@@ -86,11 +87,9 @@ int64_t stringToInt(char *str, uint32_t strlen) {
 
 uint64_t strlen(const char *str) {
 	uint64_t cont;
-
 	for (cont = 0; str[cont] != '\0'; cont++) {
 		continue;
 	}
-
 	return cont;
 }
 
@@ -141,7 +140,6 @@ void fprintf(uint8_t fd, char *fmt, ...) {
 
 void fprintf_args(uint8_t fd, char *fmt, va_list args) {
 	char buffer[0xFF] = {0};
-
 	uint64_t i, j;
 	uint64_t padding;
 	for (i = 0, j = 0; fmt[i] != 0; i++) {
@@ -155,11 +153,13 @@ void fprintf_args(uint8_t fd, char *fmt, va_list args) {
 			}
 			j = i;
 
-			while (fmt[i] >= '0' && fmt[i] <= '9')
+			while (fmt[i] >= '0' && fmt[i] <= '9') {
 				i++;
+			}
 			padding = stringToInt((fmt + j), i - j);
-			if (padding >= 100)
+			if (padding >= 100) {
 				padding = 99;
+			}
 			if (fmt[i] == 'l') {
 				i++;
 			}
@@ -199,16 +199,18 @@ uint64_t argumentParse(int arg, int argc, char **argv) {
 	}
 	else {
 		uint64_t result = stringToInt(argv[arg + 1], strlen(argv[arg + 1]));
-		if (!result && argv[arg + 1][0] != '0')
+		if (!result && argv[arg + 1][0] != '0') {
 			fprintf(STD_ERR, "Argument error, expected value for %s, got %s\n", argv[arg], argv[arg + 1]);
+		}
 		return result;
 	}
 }
 
 void printPadded(uint8_t fd, char *buffer, uint8_t pad, uint64_t totalLen, uint8_t padRight) {
 	uint32_t bufferLen = strlen(buffer);
-	if (!totalLen && bufferLen)
+	if (!totalLen && bufferLen) {
 		totalLen = bufferLen;
+	}
 	if (padRight) {
 		SyscallWrite(fd, buffer, (bufferLen < totalLen) ? bufferLen : totalLen);
 		for (uint64_t i = strlen(buffer); i < totalLen; i++) {
@@ -248,9 +250,7 @@ char getchar() {
 
 void text_color_set(uint32_t color) {
 	text_format format;
-
 	SyscallGetFormat(&format);
-
 	if (format.fg != color) {
 		format.fg = color;
 		SyscallSetFormat(&format);
@@ -259,67 +259,61 @@ void text_color_set(uint32_t color) {
 
 uint32_t text_color_get() {
 	text_format format;
-
 	SyscallGetFormat(&format);
-
 	return format.fg;
 }
 
 // MERSENNE TWISTER ALGHORITH BORROWED FROM https://en.wikipedia.org/wiki/Mersenne_Twister
 void srand(uint32_t seed) {
 	randState = malloc(sizeof(mt_state));
-	if (!randState)
+	if (!randState) {
 		return;
+	}
 	uint32_t *state_array = &(randState->state_array[0]);
-
 	state_array[0] = seed; // suggested initial seed = 19650218UL
-
 	for (int i = 1; i < n; i++) {
 		seed = f * (seed ^ (seed >> (w - 2))) + i; // Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier.
 		state_array[i] = seed;
 	}
-
 	randState->state_index = 0;
 }
 
 uint32_t rand() {
-	if (!randState)
+	if (!randState) {
 		return 0;
+	}
 	uint32_t *state_array = &(randState->state_array[0]);
 
 	int k = randState->state_index; // point to current state location
 
-	//  int k = k - n;                   // point to state n iterations before
-	//  if (k < 0) k += n;               // modulo n circular indexing
-	// the previous 2 lines actually do nothing
-	//  for illustrative purposes only
+	//  int k = k - n; point to state n iterations before | if (k < 0) k += n; modulo n circular indexing the previous 2 lines actually do nothing for illustrative purposes only
 
 	int j = k - (n - 1); // point to state n-1 iterations before
-	if (j < 0)
+	if (j < 0) {
 		j += n; // modulo n circular indexing
+	}
 
 	uint32_t x = (state_array[k] & UMASK) | (state_array[j] & LMASK);
-
 	uint32_t xA = x >> 1;
-	if (x & 0x00000001UL)
+	if (x & 0x00000001UL) {
 		xA ^= a;
+	}
 
 	j = k - (n - m); // point to state n-m iterations before
-	if (j < 0)
+	if (j < 0) {
 		j += n; // modulo n circular indexing
-
+	}
 	x = state_array[j] ^ xA; // compute next value in the state
 	state_array[k++] = x;	 // update new state value
 
-	if (k >= n)
-		k = 0;					// modulo n circular indexing
+	if (k >= n) {
+		k = 0; // modulo n circular indexing
+	}
 	randState->state_index = k; // 0 <= state_index <= n-1   always
-
-	uint32_t y = x ^ (x >> u); // tempering
+	uint32_t y = x ^ (x >> u);	// tempering
 	y = y ^ ((y << s) & b);
 	y = y ^ ((y << t) & c);
 	uint32_t z = y ^ (y >> l);
-
 	return z;
 }
 
@@ -361,7 +355,6 @@ int16_t sem_destroy(uint16_t id) {
 	semaphores[id].lock = 0;
 	semaphores[id].value = 0;
 	semaphores[id].inUse = 0;
-
 	return 1;
 }
 
@@ -369,7 +362,6 @@ void sem_wait(uint16_t id) {
 	if (id >= MAX_SEMAPHORES || !semaphores[id].inUse) {
 		return;
 	}
-
 	while (TRUE) {
 		acquire(&semaphores[id].lock);
 		if (semaphores[id].value) {
@@ -386,7 +378,6 @@ void sem_post(uint16_t id) {
 	if (id >= MAX_SEMAPHORES || !semaphores[id].inUse) {
 		return;
 	}
-
 	acquire(&semaphores[id].lock);
 	semaphores[id].value++;
 	release(&semaphores[id].lock);

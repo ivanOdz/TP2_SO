@@ -81,7 +81,6 @@ typedef struct ProcessInfo {
 	char *processStatus;
 	uint8_t priority;
 	struct ProcessInfo *nextProcessInfo;
-
 } ProcessInfo;
 
 typedef struct FdInfo {

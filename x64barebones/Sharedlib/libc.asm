@@ -88,6 +88,7 @@ SyscallRead:
     mov rsp, rbp
     pop rbp
     ret
+
 SyscallWrite:
     push rbp
     mov rbp, rsp    
@@ -277,6 +278,7 @@ SyscallToggleBlockProcess:
     mov rsp, rbp
     pop rbp
     ret
+
 exit:
     push rbp
     mov rbp, rsp    
@@ -301,6 +303,7 @@ waitpid:
     mov rsp, rbp
     pop rbp
     ret
+
 yield:
     push rbp
     mov rbp, rsp    
@@ -311,6 +314,7 @@ yield:
     mov rsp, rbp
     pop rbp
     ret
+
 getPID:
     push rbp
     mov rbp, rsp    
@@ -422,7 +426,6 @@ tryGetChar:
     pop rbp
     ret
 
-    
 _xadd:
   mov rax, rdi
   xadd [rsi], eax
