@@ -13,7 +13,7 @@ void drawWord(uint8_t fd, char *word);
 void nextLine();
 void setTab();
 void drawchar_transparent(char c, uint64_t x, uint64_t y, uint32_t fgcolor);
-void print(char *word); // imprime un string en formato C.
+void print(char *word); // Imprime un string en formato C.
 void printChar(char c, uint32_t fg);
 void setFontSize(uint8_t fontSize);
 void scrollUp();

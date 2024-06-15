@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <keyboard.h>
 
-static uint8_t flags = 0;	// bit 0 shift left, bit 1 shift right, bit 2 caps lock, bit 3 left ctrl, bit 4 right ctrl
+static uint8_t flags = 0;	// bit 0 desplazar izquierda, bit 1 desplazar derecha, bit 2 bloquear mayúscula, bit 3 ctrl izquierdo, bit 4 ctrl derecho
 
 static FifoBuffer *keyboardFifo;
 
@@ -26,41 +26,41 @@ void keyboard_handler() {
 	if (!keyboardFifo) {
 		return;
 	}
-	if (c == 0xE0) {  // 0xE0 is modifier for multimedia keys & numpad
-		c = getKey(); // the following keycode contains the actual key pressed
+	if (c == 0xE0) {  // 0xE0 es el modificador para las teclas y teclado numérico de multimedia
+		c = getKey(); // Los siguientes códigos de tecla contienenla tecla presionada
 		switch (c) {
-			case 0x48:								// up
-				putFifo(keyboardFifo, 0x1E, FALSE); // code for up arrow in font
+			case 0x48:								// Subir
+				putFifo(keyboardFifo, 0x1E, FALSE); // Código de flecha de arriba
 				break;
-			case 0x50:								// down
-				putFifo(keyboardFifo, 0x1F, FALSE); // code for down arrow in font
+			case 0x50:								// Bajar
+				putFifo(keyboardFifo, 0x1F, FALSE); // Código de flecha de abajo
 				break;
-			case 0x4B:								// left
-				putFifo(keyboardFifo, 0x11, FALSE); // code for left arrow in font
+			case 0x4B:								// Izquierda
+				putFifo(keyboardFifo, 0x11, FALSE); // Código de flecha izquierda
 				break;
-			case 0x4D:								// right
-				putFifo(keyboardFifo, 0x10, FALSE); // code for right arrow in font
+			case 0x4D:								// Derecha
+				putFifo(keyboardFifo, 0x10, FALSE); // Código de flecha derecha
 				break;
-			case 0x1D: // right ctrl pressed
+			case 0x1D: // ctrl derecho apretado
 				flags |= 0x10;
 				break;
-			case 0x9D: // right ctrl released
+			case 0x9D: // ctrl derecho soltado
 				flags &= 0xFF - 0x10;
 				break;
 		}
 		return;
 	}
 	switch (c) {
-		case 0x2A: // shift izq pressed
+		case 0x2A: // shift izquiedo presionado
 			flags |= 0x01;
 			break;
-		case 0x36: // shift der pressed
+		case 0x36: // shift derecho presionado
 			flags |= 0x02;
 			break;
-		case 0xAA: // shift izq released
+		case 0xAA: // shift izquierdo soltado
 			flags &= 0xFF - 0x01;
 			break;
-		case 0xB6: // shift der released
+		case 0xB6: // shift derecho soltado
 			flags &= 0xFF - 0x02;
 			break;
 		case 0x3A: // caps lock toggled

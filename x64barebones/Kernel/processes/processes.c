@@ -54,7 +54,7 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	}
 	PCB *parent = getCurrentProcess();
 
-	process->stackBasePointer += STACK_DEFAULT_SIZE - sizeof(uint64_t); // stack works backwards
+	process->stackBasePointer += STACK_DEFAULT_SIZE - sizeof(uint64_t); // El stack funciona hacia abajo
 	process->stackPointer = process->stackBasePointer;
 	int argc = 0;
 	while (argv[argc]) {
@@ -76,10 +76,10 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 
 	if (process->parentPid && process->runMode == FOREGROUND) {
 		PCB *parent = getProcess(process->parentPid);
-		if (parent && parent->runMode == FOREGROUND)
+		if (parent && parent->runMode == FOREGROUND) {
 			parent->runMode = RELEGATED;
+		}
 	}
-
 	process->returnValue = 0;
 	process->killed = FALSE;
 	process->lastTickRun = get_ticks();
@@ -87,6 +87,7 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	process->blockedOn.fd = 0;
 	process->blockedOn.timer = 0;
 	process->blockedOn.manual = FALSE;
+
 	for (int i = 0; i < DEFAULT_QTY_FDS; i++) {
 		process->fileDescriptors[i].pipe = parent->fileDescriptors[i].pipe;
 		process->fileDescriptors[i].mode = parent->fileDescriptors[i].mode;
@@ -107,8 +108,9 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 
 PID_t execute(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode) {
 	PCB *process = createProcess(processMain, argv, runMode);
-	if (!process)
+	if (!process) {
 		return 0;
+	}
 	if (!addProcess(process)) {
 		freeProcess(process);
 		return 0;
@@ -132,8 +134,9 @@ uint64_t exitProcess(int returnValue) {
 	process->status = ZOMBIE;
 	PCB *parent = getProcess(process->parentPid);
 	if (parent) {
-		if (parent->runMode == RELEGATED)
+		if (parent->runMode == RELEGATED) {
 			parent->runMode = FOREGROUND;
+		}
 	}
 	return schedyield();
 }
@@ -169,17 +172,20 @@ void freeProcess(PCB *process) {
 }
 
 PID_t killProcess(PID_t PID) {
-	if (PID < 2)
+	if (PID < 2) {
 		return 0;
+	}
 	PCB *process = getProcess(PID);
-	if (!process)
+	if (!process) {
 		return 0;
+	}
 	process->blockedOn.manual = 0;
 	process->returnValue = -1;
 	process->killed = TRUE;
 	process->status = ZOMBIE;
-	if (process == getCurrentProcess())
+	if (process == getCurrentProcess()) {
 		schedyield();
+	}
 	PCB *parent = getProcess(process->parentPid);
 	if (!parent) {
 		freeProcess(process);
@@ -209,8 +215,9 @@ bool blockProcess(uint16_t pid) {
 		return FALSE;
 	}
 	if (process->status == BLOCKED) {
-		if (process->blockedOn.waitPID == NULL && process->blockedOn.fd == 0)
+		if (process->blockedOn.waitPID == NULL && process->blockedOn.fd == 0) {
 			process->status = READY;
+		}
 		process->blockedOn.manual = FALSE;
 		return FALSE;
 	}
@@ -257,11 +264,13 @@ int64_t createPipe(char *name, int pipefd[2]) {
 
 int64_t openFD(char *name, FifoMode mode) {
 	PCB *process = getCurrentProcess();
-	if (!process)
+	if (!process) {
 		return -1;
+	}
 	FifoBuffer *fifo = openFifo(name, mode);
-	if (!fifo)
+	if (!fifo) {
 		return -1;
+	}
 	for (int index = 0; index < MAX_FILE_DESCRIPTORS; index++) {
 		if (!process->fileDescriptors[index].pipe) {
 			process->fileDescriptors[index].pipe = fifo;
@@ -274,21 +283,26 @@ int64_t openFD(char *name, FifoMode mode) {
 
 int64_t closeFD(int fd) {
 	PCB *process = getCurrentProcess();
-	if (!process)
+	if (!process) {
 		return -1;
-	if (fd >= MAX_FILE_DESCRIPTORS || !process->fileDescriptors[fd].pipe)
+	}
+	if (fd >= MAX_FILE_DESCRIPTORS || !process->fileDescriptors[fd].pipe) {
 		return -1;
+	}
 	closeFifo(process->fileDescriptors[fd].pipe, process->fileDescriptors[fd].mode);
 	process->fileDescriptors[fd].pipe = NULL;
+
 	return 0;
 }
 
 int64_t duplicateFD(int fd) {
 	PCB *process = getCurrentProcess();
-	if (!process)
+	if (!process) {
 		return -1;
-	if (fd >= MAX_FILE_DESCRIPTORS || !process->fileDescriptors[fd].pipe)
+	}
+	if (fd >= MAX_FILE_DESCRIPTORS || !process->fileDescriptors[fd].pipe) {
 		return -1;
+	}
 	for (int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
 		if (!process->fileDescriptors[i].pipe) {
 			process->fileDescriptors[i].pipe = process->fileDescriptors[fd].pipe;

@@ -139,11 +139,9 @@ haltProcess:
 	ret
 
 fabricateProcessStack:
-	; receives stackbase, argc, argv and rip as pointers (so rdi, rsi, rdx, rcx respectively)
-	; will pass argc as int and argv as pointer (strings have been copied somewhere safe)
-	mov r8, rsp		; preserve this stack so i can return later
-	and rdi, 0xFFFFFFFFFFFFFFBF ; align to quad-word if not aligned
-	mov rsp, rdi	; temp stack switcharoo
+	mov r8, rsp		; Preserva el stack así lo puedo retornar luego
+	and rdi, 0xFFFFFFFFFFFFFFBF ; Alinea a 4 palabras
+	mov rsp, rdi	; Temp. stack switcharoo
 
 	mov rax, 0
 	push rax	;20 ss
@@ -156,17 +154,17 @@ fabricateProcessStack:
 	mov rax, 0x8
 	push rax	;17 cs
 
-	push rcx	;16 RIP -> function to run
+	push rcx	;16 RIP -> función para correr
 
 	mov rax, 0
-	push rax    ;15 rax again
+	push rax    ;15 rax devuelta
 	push rax	;14 rbx
 	push rax	;13 rcx
 	push rax	;12 rdx
 
 	push rdi	;11 rbp -> stack base
-	push rsi	;10 rdi -> argc as 1st argument
-	push rdx	;9  rsi -> argv as 2nd argument
+	push rsi	;10 rdi -> argc como primer argumento
+	push rdx	;9  rsi -> argv como segundo argumento
 
 	push rax	;8  r8
 	push rax	;7  r9
@@ -177,5 +175,5 @@ fabricateProcessStack:
 	push rax	;2  r14
 	push rax	;1  r15
 	mov rax, rsp
-	mov rsp, r8 ;restore old stack
+	mov rsp, r8 ; restaurar el stack viejo
 	ret

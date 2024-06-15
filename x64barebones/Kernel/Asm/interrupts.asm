@@ -166,7 +166,7 @@ SECTION .text
 	mov [stackSwitcharoo], rsp
 
 
-	mov rdi, %1 		P; pasaje de parámetro
+	mov rdi, %1 		 ; Pasaje de parámetro
 	call exceptionDispatcher
 	mov rsp, [stackSwitcharoo]
 
