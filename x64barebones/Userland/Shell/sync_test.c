@@ -64,6 +64,7 @@ void testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos,
 	char *argvForProcesses[5];
 	int16_t idSemaphore = -1;
 	bool useSemaphore = SEM_DEFAULT;
+	char semIDstr[4];
 
 	for (int arg = 1; arg < argc; arg++) {
 		if (strcmp(argv[arg], "-help") == 0) {
@@ -120,7 +121,6 @@ void testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos,
 		}
 
 		shared = 0;
-		char semIDstr[4];
 		if (idSemaphore >= 0)
 			uintToBase(idSemaphore, semIDstr, 10);
 		else
@@ -141,7 +141,7 @@ void testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos,
 		putchar('\n');
 		ReturnStatus status;
 		for (int cont = 0; cont < nProcesses; cont++) {
-			printf("\rWaiting for %d processes to return (shared counter thus far is %lu. Expected to be %d)", nProcesses - cont - 1, shared, nProcesses * cycles);
+			printf("\rWaiting for %d processes to return (shared counter thus far is %lu. Expected to be %lu)", nProcesses - cont - 1, shared, nProcesses * cycles);
 			waitpid(0, &status);
 		}
 

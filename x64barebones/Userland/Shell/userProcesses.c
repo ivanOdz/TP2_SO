@@ -166,15 +166,13 @@ void phylo(int argc, char **argv) {
 	time_type time;
 	SyscallGetRTC(&time);
 	srand(time.hora << 12 | time.min << 6 | time.seg);
-	int localSemaphores[MAX_PHYLOS];
-	char localStatus[MAX_PHYLOS] = {0};
-	phyloSemaphores = localSemaphores;
-	phyloStatus = localStatus;
+	phyloSemaphores = malloc(MAX_PHYLOS * sizeof(int));
+	phyloStatus = malloc(MAX_PHYLOS * sizeof(char));
 	printMutex = sem_init(0);
 	if (printMutex == -1)
 		exit(1);
 	editMutex = sem_init(INITIAL_PHYLOS);
-	if (printMutex == -1)
+	if (editMutex == -1)
 		exit(1);
 	ReturnStatus wstatus;
 	char *phyloArgv[3];
@@ -216,6 +214,10 @@ void phylo(int argc, char **argv) {
 					for (int j = 0; j < i; j++) {
 						waitpid(0, &wstatus);
 					}
+					free(phyloSemaphores);
+					free(phyloStatus);
+					sem_destroy(editMutex);
+					sem_destroy(printMutex);
 					printf("Done! Now you leave as well or so help me.\n");
 					break;
 				}
@@ -269,6 +271,10 @@ void phylo(int argc, char **argv) {
 						sem_post(editMutex);
 						waitpid(0, &wstatus);
 						waitpid(0, &wstatus);
+						free(phyloSemaphores);
+						free(phyloStatus);
+						sem_destroy(editMutex);
+						sem_destroy(printMutex);
 						exit(0);
 					}
 					sem_wait(phyloSemaphores[i - 1]); // ensure no one is using the problematic fork (letting go isn't blocked, so they'll leave it eventually)
