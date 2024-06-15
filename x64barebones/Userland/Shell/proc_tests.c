@@ -12,7 +12,7 @@
 #define MAX_PRIORITY_DEFAULT 9
 #define MIN_PRIORITY_DEFAULT 1
 #define HELP_STRING_PROC	 "\
-\ntest_processes is a program designed to stress test the system scheduler and process management alghorithms by spawning a lot\n\
+\nprocesses_test is a program designed to stress test the system scheduler and process management alghorithms by spawning a lot\n\
 of processes and randomly blocking and killing them. This test can run many times in a row. You can also set a kill-block bias\
 and a sleep time between operations. If one of these operations fails, you'll see a red warning. All arguments can be ommited.\n\
 Arguments:\n\n\
@@ -24,10 +24,10 @@ Arguments:\n\n\
 -sleep x\t\t sets the sleep interval in ms between block / kill attempts, mostly for output readability, otherwise it may\n\
 \t\t\t\t go by too fast to read. Can be set to 0 to disable sleep altogether (ex. -sleep 500) (default %d)\n\n\
 -burnin x\t\tsets how many times this test should loop (ex.- burnin 3) (default %d)\n\n\
-Usage example:\n\t\ttest_processes -processes 100 -bias 20 -burnin 1 -sleep 100\n\n "
+Usage example:\n\t\ttest_processes -processes 100 -bias 20 -burnin 1 -sleep 100\n\n"
 
 #define HELP_STRING_PRIO "\
-\ntest_priorities is a test designed to prove that the scheduling alghorithm can effectively prioritize process execution\n\
+\npriority_test is a test designed to prove that the scheduling alghorithm can effectively prioritize process execution\n\
 by running many identical processes that will all run a simple yet long loop within, and count how many system ticks each\n\
 one takes. This test does not throw errors (unless process creation fails). All arguments can be ommited.\n\
 Arguments\n\n\
@@ -41,7 +41,7 @@ Arguments\n\n\
 \t\t\t\t uniformly between processes. (range 1-9) (ex. -minpriority 3) (default %d)\n\n\
 -maxpriority x   sets the maximum priority to assign to the processes. The test will attempt to distribute the priorities\n\
 \t\t\t\t uniformly between processes. (range 1-9) (ex. -maxpriority 7) (default %d)\n\n\
-Usage example:\n\t\ttest_priorities -processes 100 -busytime 2000 - burnin 1 - minpriority 1 -maxpriority 9\n\n "
+Usage example:\n\t\ttest_priorities -processes 100 -busytime 2000 - burnin 1 - minpriority 1 -maxpriority 9\n\n"
 
 typedef struct ProcessTestType {
 	PID_t PID;
@@ -71,7 +71,7 @@ void test_processes(int argc, char **argv) {
 		else if (strcmp(argv[arg], "-processes") == 0) {
 			maxProcesses = argumentParse(arg++, argc, argv);
 			if (!maxProcesses || maxProcesses > 999) {
-				fprintf(STD_ERR, "INVALID -maxprocesses paramenter. Expected 1-999, got %s", argv[arg]);
+				fprintf(STD_ERR, "INVALID -processes paramenter. Expected 1-999, got %s", argv[arg]);
 				exit(1);
 			}
 		}
