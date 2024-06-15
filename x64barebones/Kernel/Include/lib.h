@@ -14,7 +14,7 @@ char *cpuVendor(char *result);
 char getChar();
 
 void printRegs(stack_registers regs, uint64_t fd);
-void clearBuffer(uint8_t *buffer);
+void clearBuffer(char *buffer);
 
 extern int haltProcess(int argc, char **argv);
 
