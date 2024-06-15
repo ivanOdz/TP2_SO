@@ -33,8 +33,8 @@ void clearBSS(void *bssAddress, uint64_t bssSize) {
 }
 
 void *getStackBase() {
-	return (void *) ((uint64_t) &endOfKernel + PageSize * 8 // The size of the stack itself, 32KiB
-					 - sizeof(uint64_t)						// Begin at the top of the stack
+	return (void *) ((uint64_t) &endOfKernel + PageSize * 8 
+					 - sizeof(uint64_t)						
 	);
 }
 
@@ -61,7 +61,6 @@ int main() {
 	setPIT0Freq(1193182 / HZ);
 	_sti();
 
-	// syscall_puts(STD_ERR, (uint8_t *) "Shell has quit, kernel halting", 31);
 	while (TRUE) {
 		haltProcess(0, NULL);
 	}

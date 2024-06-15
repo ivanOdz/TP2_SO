@@ -20,8 +20,8 @@
 #define f	  1812433253UL
 
 typedef struct {
-	uint32_t state_array[n]; // the array for the state vector
-	int state_index;		 // index into state vector array
+	uint32_t state_array[n]; // El arreglo de estados 
+	int state_index;		 // El indice dentro del vecotr de estados
 } mt_state;
 
 static mt_state *randState;
@@ -56,7 +56,7 @@ int64_t strcmp(const char *str1, const char *str2) {
 		str2++;
 	}
 
-	return 0; // str1 equals str2 (same content)
+	return 0; // str1 equals str2 (mismo contenido)
 }
 
 int64_t strincludes(const char *contains, const char *contained) {
@@ -98,7 +98,7 @@ uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
 	char *p1, *p2;
 	uint32_t digits = 0;
 
-	// Calculate characters for each digit
+	// Calcular los caracteres para cada digito
 	do {
 		uint32_t remainder = value % base;
 		*p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
@@ -106,10 +106,10 @@ uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
 
 	} while (value /= base);
 
-	// Terminate string in buffer
+	// Arregla el NULL al final de la cadena
 	*p = 0;
 
-	// Reverse string in buffer
+	// Invertir el string dentro del buffer
 	p1 = buffer;
 	p2 = p - 1;
 
@@ -182,7 +182,7 @@ void fprintf_args(uint8_t fd, char *fmt, va_list args) {
 					uintToBase(va_arg(args, uint64_t), buffer, 16);
 					printPadded(fd, buffer, '0', padding, padRight);
 				case 'l':
-					break; // we ignore this because we always print as uint64_t but PVS wants the l
+					break; // PVS requeria este ultimo case.
 			}
 
 			j = ++i;
@@ -270,9 +270,9 @@ void srand(uint32_t seed) {
 		return;
 	}
 	uint32_t *state_array = &(randState->state_array[0]);
-	state_array[0] = seed; // suggested initial seed = 19650218UL
+	state_array[0] = seed; // Semilla inicial sugerida = 19650218UL
 	for (int i = 1; i < n; i++) {
-		seed = f * (seed ^ (seed >> (w - 2))) + i; // Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier.
+		seed = f * (seed ^ (seed >> (w - 2))) + i; // Knuth TAOCP Vol2. 3rd Ed. P.106 para el multiplicador.
 		state_array[i] = seed;
 	}
 	randState->state_index = 0;
@@ -284,11 +284,11 @@ uint32_t rand() {
 	}
 	uint32_t *state_array = &(randState->state_array[0]);
 
-	int k = randState->state_index; // point to current state location
+	int k = randState->state_index; // puntero a la ubicacion del estado actual
 
 	//  int k = k - n; point to state n iterations before | if (k < 0) k += n; modulo n circular indexing the previous 2 lines actually do nothing for illustrative purposes only
 
-	int j = k - (n - 1); // point to state n-1 iterations before
+	int j = k - (n - 1); // apunta al estado n-1 iteraciones antes
 	if (j < 0) {
 		j += n; // modulo n circular indexing
 	}
@@ -299,18 +299,18 @@ uint32_t rand() {
 		xA ^= a;
 	}
 
-	j = k - (n - m); // point to state n-m iterations before
+	j = k - (n - m); // punta al estado n-m iteraciones antes
 	if (j < 0) {
 		j += n; // modulo n circular indexing
 	}
-	x = state_array[j] ^ xA; // compute next value in the state
-	state_array[k++] = x;	 // update new state value
+	x = state_array[j] ^ xA; // computar el siguente valor en el estado
+	state_array[k++] = x;	 // acutalizar el nuevo valor de estado
 
 	if (k >= n) {
 		k = 0; // modulo n circular indexing
 	}
 	randState->state_index = k; // 0 <= state_index <= n-1   always
-	uint32_t y = x ^ (x >> u);	// tempering
+	uint32_t y = x ^ (x >> u);
 	y = y ^ ((y << s) & b);
 	y = y ^ ((y << t) & c);
 	uint32_t z = y ^ (y >> l);
