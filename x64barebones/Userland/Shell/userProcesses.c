@@ -1,8 +1,63 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <libc.h>
+#include <userProcesses.h>
+
 #define MAX_PHYLOS	   100
 #define INITIAL_PHYLOS 5
+#define PHYLO_NAMES	   50
+static const char *philosopherNames[PHYLO_NAMES] = {
+	"Aristotle",
+	"Plato",
+	"Socrates",
+	"Diogenes",
+	"Epicurus",
+	"Confucius",
+	"Immanuel Kant",
+	"Simone de Beauvoir",
+	"Jean-Paul Sartre",
+	"Nietzsche",
+	"Musashi Miyamoto",
+	"Sun Tzu",
+	"Hannah Arendt",
+	"Hypatia of Alexandria",
+	"Judith Butler",
+	"Bell Hooks",
+	"Voltaire",
+	"Karl Marx",
+	"Jean-Jacques Rousseau",
+	"David Hume",
+	"Niccolo Machiavelli",
+	"John Dewey",
+	"Rene Descartes",
+	"Karl Popper",
+	"Cornel West",
+	"Angela Davis",
+	"Dante",
+	"Blaise Pascal",
+	"John Locke",
+	"Mary Wollstonecraft",
+	"Ayn Rand",
+	"Parmenides",
+	"Mozi",
+	"Avicenna",
+	"Thomas Hobbes",
+	"Adam Smith",
+	"Leo Tolstoy",
+	"Michel Foucault",
+	"Dong Zhongshu",
+	"Mencius",
+	"Ramanuja",
+	"Noam Chomsky",
+	"Daniel Dennett",
+	"Jennifer Saul",
+	"Sally Haslanger",
+	"Linda Martin Alcoff",
+	"Kitaro Nishida",
+	"Fukuzawa Yukichi",
+	"Masanobu Fukuoka",
+	"Daisaku Ikeda",
+};
 
 static int *phyloSemaphores;
 static int printMutex;
@@ -254,7 +309,7 @@ void phylo(int argc, char **argv) {
 					for (int j = 0; j <= i; j++) {
 						sem_post(editMutex);
 					}
-					putchar('\n');
+					printf(" %s has joined the chat!\n", philosopherNames[randBetween(0, PHYLO_NAMES)]);
 					break;
 				}
 				if (i + 1 == MAX_PHYLOS) {
@@ -295,7 +350,7 @@ void phylo(int argc, char **argv) {
 						sem_post(editMutex);
 					}
 					waitpid(0, &wstatus);
-					putchar('\n');
+					printf(" %s has left the chat!\n", philosopherNames[randBetween(0, PHYLO_NAMES)]);
 					break;
 				}
 				if (i + 1 == MAX_PHYLOS) {
