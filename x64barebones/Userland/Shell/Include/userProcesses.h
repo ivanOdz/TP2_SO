@@ -11,4 +11,5 @@ void greeting(int argc, char **argv);
 void cat(int argc, char **argv);
 void filter(int argc, char **argv);
 void wc(int argc, char **argv);
+void phylo(int argc, char **argv);
 #endif

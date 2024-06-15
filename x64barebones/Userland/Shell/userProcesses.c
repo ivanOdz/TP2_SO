@@ -1,6 +1,13 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <libc.h>
+#define MAX_PHYLOS	   100
+#define INITIAL_PHYLOS 5
+
+static int *phyloSemaphores;
+static int printMutex;
+static int editMutex;
+static char *phyloStatus;
 
 void ps(int argc, char **argv) {
 	ProcessInfo *info = SyscallProcessInfo();
@@ -130,4 +137,162 @@ void wc(int argc, char **argv) {
 	}
 	putchar(c);
 	exit(lines);
+}
+
+void phyloProcess(int argc, char **argv) {
+	int phyloNumber = stringToInt(argv[1], strlen(argv[1]));
+	while (phyloSemaphores[phyloNumber] != -1) {
+		sleep(randBetween(1, 5000));
+		sem_wait(editMutex);
+		if (phyloSemaphores[phyloNumber] == -1) {
+			sem_post(editMutex);
+			exit(0);
+		}
+		sem_wait(phyloSemaphores[phyloNumber]);
+		sem_wait((phyloSemaphores[phyloNumber + 1] == -1) ? phyloSemaphores[0] : phyloSemaphores[phyloNumber + 1]);
+		sem_post(editMutex);
+		phyloStatus[phyloNumber] = 'E';
+		sem_post(printMutex);
+		sleep(randBetween(1, 5000));
+		sem_post(phyloSemaphores[phyloNumber]);
+		sem_post((phyloSemaphores[phyloNumber + 1] == -1) ? phyloSemaphores[0] : phyloSemaphores[phyloNumber + 1]);
+		phyloStatus[phyloNumber] = '.';
+		sleep(5000);
+	}
+	exit(0);
+}
+
+void phylo(int argc, char **argv) {
+	time_type time;
+	SyscallGetRTC(&time);
+	srand(time.hora << 12 | time.min << 6 | time.seg);
+	int localSemaphores[MAX_PHYLOS];
+	char localStatus[MAX_PHYLOS] = {0};
+	phyloSemaphores = localSemaphores;
+	phyloStatus = localStatus;
+	printMutex = sem_init(0);
+	if (printMutex == -1)
+		exit(1);
+	editMutex = sem_init(INITIAL_PHYLOS);
+	if (printMutex == -1)
+		exit(1);
+	ReturnStatus wstatus;
+	char *phyloArgv[3];
+	char phyloNumber[4];
+	for (int i = 0; i < INITIAL_PHYLOS; i++) {
+		phyloSemaphores[i] = sem_init(1);
+		phyloStatus[i] = '.';
+		if (phyloSemaphores[i] < 0)
+			exit(1);
+	}
+	for (int i = INITIAL_PHYLOS; i < MAX_PHYLOS; i++) {
+		phyloStatus[i] = '0';
+		phyloSemaphores[i] = -1;
+	}
+	for (int i = 0; i < INITIAL_PHYLOS; i++) {
+		phyloArgv[0] = "Glutton philosopher";
+		phyloArgv[1] = phyloNumber;
+		uintToBase(i, phyloNumber, 10);
+		execv(phyloProcess, phyloArgv, BACKGROUND);
+	}
+	char c;
+	while (TRUE) {
+		c = tryGetChar(STD_IN);
+		if (c == 'q' || c == 'Q' || c == EOF) {
+			for (int i = 0; i < MAX_PHYLOS; i++) {
+				if (phyloSemaphores[i + 1] == -1) {
+					printf("See you next dinner!\n");
+					for (int j = 0; j < i; j++) {
+						sem_wait(editMutex); // block all philosophers from eating so we can manipulate shit without breaking anything
+					}
+					for (int j = 0; j < i; j++) {
+						sem_destroy(phyloSemaphores[j]);
+						phyloSemaphores[j] = -1;
+					}
+					for (int j = 0; j < i; j++) {
+						sem_post(editMutex);
+					}
+					printf("Diogenes doesn't wanna leave again. Please wait while we evict him... (this may take a moment while we call the cops on him)\n");
+					for (int j = 0; j < i; j++) {
+						waitpid(0, &wstatus);
+					}
+					printf("Done! Now you leave as well or so help me.\n");
+					break;
+				}
+			}
+			exit(0);
+		}
+		if (c == 'a' || c == 'A') {
+			for (int i = 0; i < MAX_PHYLOS; i++) {
+				if (phyloSemaphores[i] == -1) {
+					printf("Setting up table for another philosopher, please wait...");
+
+					for (int j = 0; j < i; j++) {
+						sem_wait(editMutex); // block all philosophers from eating so we can manipulate shit without breaking anything
+					}
+					sem_wait(phyloSemaphores[i - 1]); // ensure no one is using the problematic fork (letting go isn't blocked, so they'll leave it eventually)
+					sem_post(phyloSemaphores[i - 1]); // reset the status because, again, we dont wanna break anything
+					phyloSemaphores[i] = sem_init(1);
+					phyloStatus[i] = '.';
+					if (phyloSemaphores[i] < 0) {
+						exit(1);
+					}
+					phyloArgv[0] = "Glutton phylosopher";
+					phyloArgv[1] = phyloNumber;
+					uintToBase(i, phyloNumber, 10);
+					execv(phyloProcess, phyloArgv, BACKGROUND);
+					for (int j = 0; j <= i; j++) {
+						sem_post(editMutex); // we've added the sem and the status and the philosopher, so we can let go. Let 'em eat, poor things.
+					}
+					putchar('\n');
+					break;
+				}
+				if (i + 1 == MAX_PHYLOS)
+					exit(2);
+			}
+		}
+		if (c == 'r' || c == 'R') {
+			for (int i = 0; i < MAX_PHYLOS; i++) {
+				if (phyloSemaphores[i + 1] == -1) {
+					printf("Setting up table for one less philosopher, please wait...");
+
+					for (int j = 0; j < i; j++) {
+						sem_wait(editMutex); // block all philosophers from eating so we can manipulate shit without breaking anything
+					}
+					if (i == 1) {
+						sem_destroy(phyloSemaphores[1]);
+						phyloSemaphores[1] = -1;
+						sem_destroy(phyloSemaphores[0]);
+						phyloSemaphores[0] = -1;
+						printf("\nThere are not enough philosophers left for an intresting evening. See you next dinner!\n");
+						sem_post(editMutex);
+						sem_post(editMutex);
+						waitpid(0, &wstatus);
+						waitpid(0, &wstatus);
+						exit(0);
+					}
+					sem_wait(phyloSemaphores[i - 1]); // ensure no one is using the problematic fork (letting go isn't blocked, so they'll leave it eventually)
+					sem_post(phyloSemaphores[i - 1]); // reset the status because, again, we dont wanna break anything
+					sem_destroy(phyloSemaphores[i]);
+					phyloSemaphores[i] = -1;
+					phyloStatus[i] = 0;
+					for (int j = 0; j < i; j++) {
+						sem_post(editMutex); // we've added the sem and the status and the philosopher, so we can let go. Let 'em eat, poor things.
+					}
+					waitpid(0, &wstatus);
+					putchar('\n');
+					break;
+				}
+				if (i + 1 == MAX_PHYLOS)
+					exit(2);
+			}
+		}
+		sem_wait(printMutex);
+		for (int i = 0; phyloSemaphores[i] != -1; i++) {
+			if (phyloStatus[i]) {
+				printf("%c ", phyloStatus[i]);
+			}
+		}
+		putchar('\n');
+	}
 }

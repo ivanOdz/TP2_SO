@@ -62,6 +62,6 @@ static const availableCommand avCommands[] = {
 	{"cat", FALSE, (int (*)(int, char **)) cat},
 	{"filter", FALSE, (int (*)(int, char **)) filter},
 	{"wc", FALSE, (int (*)(int, char **)) wc},
-	{"phylo", FALSE, (int (*)(int, char **)) NULL},
+	{"phylo", FALSE, (int (*)(int, char **)) phylo},
 };
 #endif
