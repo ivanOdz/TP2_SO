@@ -51,7 +51,7 @@ void keyboard_handler() {
 		return;
 	}
 	switch (c) {
-		case 0x2A: // shift izquiedo presionado
+		case 0x2A: // shift izquierdo presionado
 			flags |= 0x01;
 			break;
 		case 0x36: // shift derecho presionado
@@ -63,17 +63,17 @@ void keyboard_handler() {
 		case 0xB6: // shift derecho soltado
 			flags &= 0xFF - 0x02;
 			break;
-		case 0x3A: // caps lock toggled
+		case 0x3A: // caps lock invertir
 			flags ^= 0x04;
 			break;
-		case 0x1D: // left ctrl pressed
+		case 0x1D: // ctrl izquierdo presionado
 			flags |= 0x08;
 			break;
-		case 0x9D: // left ctrl pressed
+		case 0x9D: // ctrl izquierdo presionado
 			flags &= 0xFF - 0x08;
 			break;
 	}
-	// specific signals
+	// Señales específicas
 	if (flags & CONTROL) {
 		uint8_t retNow = 0;
 		switch (c) {
@@ -90,23 +90,23 @@ void keyboard_handler() {
 			return;
 		}
 	}
-	// regular characters
+	// Caracteres regulares
 	if (c <= 0x3B) {
 		uint8_t ascii = toAscii[c];
 
 		if (ascii != 0) {
 			if (flags & SHIFT) {
-				if (isAlpha(ascii) && ((flags & CAPS) > 0)) { // also caps lock and is letter -> lower case
+				if (isAlpha(ascii) && ((flags & CAPS) > 0)) { // Minúscula
 					putFifo(keyboardFifo, toAscii[c], FALSE);
 				}
-				else { // no caps lock / caps lock but not letter -> regular shift
+				else { // shift regular
 					putFifo(keyboardFifo, mods[c], FALSE);
 				}
 			}
-			else if (isAlpha(ascii) && ((flags & 0x04) > 0)) { // no shift but caps lock and is letter -> upper case
+			else if (isAlpha(ascii) && ((flags & 0x04) > 0)) { // Mayúscula
 				putFifo(keyboardFifo, mods[c], FALSE);
 			}
-			else { // w/o modifier
+			else { // Modificador w/o
 				putFifo(keyboardFifo, toAscii[c], FALSE);
 			}
 		}
