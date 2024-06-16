@@ -5,13 +5,8 @@
 #include <stddef.h>
 
 #ifdef BUDDY
-#define BLOCK_SIZE	  8 	// 8 chars = 64 bits
+#define BLOCK_SIZE	  8 // 8 chars = 64 bits
 #define LIST_MEM_SIZE 8192
-#define MIN_MEM_SIZE  8
-#define MAX_LEVELS	  32
-
-// #define BUDDY_ITERATIVE
-#define BUDDY_RECURSIVE
 
 typedef struct BlockNode {
 	void *addr;
@@ -22,27 +17,23 @@ typedef struct BlockNode {
 
 typedef struct MemoryManagerCDT {
 	void *startAddress;
-	BlockNode *root;		// Root considered at level 0
+	BlockNode *root;
 	uint64_t totalBlocks;
-	uint64_t largestAvailableMemoryBlock;
-	uint32_t levels;
-	uint32_t minBlockMemory;
 } MemoryManagerCDT;
 
 BlockNode list[LIST_MEM_SIZE] = {0};
-BlockNode *route[MAX_LEVELS] = {0};
 
 static MemoryManagerCDT memMan;
 
-void *findMemory(uint64_t size, BlockNode *node, uint8_t virginNode);
+void *findMemory(uint64_t size, BlockNode *node, bool virginNode);
 BlockNode *newNode(void *address, uint64_t size);
 BlockNode *getNextFree();
-uint8_t binarySearch(void *addr, BlockNode *node, uint8_t *found);
+bool binaryDelete(void *addr, BlockNode *node, bool *found);
 void deleteNode(BlockNode *node);
 void *getMemoryRecursive(MemoryInfo *meminfo, BlockNode *node, void *lastUsedAddress);
 
 MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_t memAmount) {
-	if (managedMemory == NULL || memAmount < MIN_MEM_SIZE) {
+	if (managedMemory == NULL || memAmount < BLOCK_SIZE) {
 		return NULL;
 	}
 	memMan.startAddress = managedMemory;
@@ -63,13 +54,9 @@ MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_
 		list[i].blocks = 0;
 	}
 	memMan.root = NULL;
-	memMan.levels = 0;
-	memMan.minBlockMemory = MIN_MEM_SIZE;
 
 	return &memMan;
 }
-
-#ifdef BUDDY_RECURSIVE
 
 void *allocMemory(uint64_t size) {
 	if (!size) {
@@ -84,12 +71,12 @@ void *allocMemory(uint64_t size) {
 		if (!memMan.root) {
 			return NULL;
 		}
-		return findMemory(size_pow2, memMan.root, 1);
+		return findMemory(size_pow2, memMan.root, TRUE);
 	}
-	return findMemory(size_pow2, memMan.root, 0);
+	return findMemory(size_pow2, memMan.root, FALSE);
 }
 
-void *findMemory(uint64_t blocks, BlockNode *node, uint8_t virginNode) {
+void *findMemory(uint64_t blocks, BlockNode *node, bool virginNode) {
 	if (node->blocks < blocks) {
 		return NULL;
 	}
@@ -97,7 +84,7 @@ void *findMemory(uint64_t blocks, BlockNode *node, uint8_t virginNode) {
 	if (minimal && virginNode) {
 		return node->addr;
 	}
-	// Quiero DFS o como se llame, asi priorizo ir por ramas ya existentes
+	// Quiero DFS o como se llame, asi priorizo ir por ramas ya existentes (best-fit)
 	if (!node->left) {
 		if (!node->right) {
 			if (virginNode) {
@@ -117,7 +104,7 @@ void *findMemory(uint64_t blocks, BlockNode *node, uint8_t virginNode) {
 		}
 		if (!minimal) {
 			node->left = newNode(node->addr, node->blocks / 2);
-			result = findMemory(blocks, node->left, 1);
+			result = findMemory(blocks, node->left, TRUE);
 			if (result == NULL) {
 				deleteNode(node->left);
 				node->left = NULL;
@@ -132,23 +119,21 @@ void *findMemory(uint64_t blocks, BlockNode *node, uint8_t virginNode) {
 			return result;
 		}
 		node->right = newNode(node->addr + (node->blocks * BLOCK_SIZE / 2), node->blocks / 2);
-		result = findMemory(blocks, node->right, 1);
+		result = findMemory(blocks, node->right, TRUE);
 		if (result == NULL) {
 			deleteNode(node->right);
 			node->right = NULL;
 		}
 		return result;
 	}
-	void *result = findMemory(blocks, node->left, 0);
+	void *result = findMemory(blocks, node->left, FALSE);
 	if (result) {
 		return result;
 	}
-	result = findMemory(blocks, node->right, 0);
+	result = findMemory(blocks, node->right, FALSE);
 
 	return result;
 }
-
-#endif
 
 BlockNode *newNode(void *address, uint64_t blocks) {
 	BlockNode *myNode = getNextFree();
@@ -163,48 +148,51 @@ BlockNode *newNode(void *address, uint64_t blocks) {
 	return myNode;
 }
 
-uint8_t freeMemory(void *ptrAllocatedMemory) {
-	uint8_t found = 0;
+bool freeMemory(void *ptrAllocatedMemory) {
+	bool found = FALSE;
 	if (memMan.root) {
-		binarySearch(ptrAllocatedMemory, memMan.root, &found);
+		binaryDelete(ptrAllocatedMemory, memMan.root, &found);
 	}
 	return found;
 }
 
-uint8_t binarySearch(void *addr, BlockNode *node, uint8_t *found) {
+// recibe direccion a encontrar y borrar y el nodo a analizar.
+// *found retorna si lo encontro o no
+// retorna si borro el nodo en *node o no.
+bool binaryDelete(void *addr, BlockNode *node, bool *found) {
 	if (node->addr == addr && !node->left && !node->right) {
 		deleteNode(node);
-		*found = 1;
-		return 1;
+		*found = TRUE;
+		return TRUE;
 	}
 	void *breakAddr = node->addr + (node->blocks * BLOCK_SIZE) / 2;
 	if (addr >= breakAddr) {
-		if (!node->right) {			// if its here, it must be in right
-			return 0;
+		if (!node->right) { // if its here, it must be in right
+			return FALSE;
 		}
-		if (binarySearch(addr, node->right, found)) {
-			node->right = NULL;		// found & deleted. should I delete myself as well?
+		if (binaryDelete(addr, node->right, found)) {
+			node->right = NULL; // found & deleted. should I delete myself as well?
 			if (node->left == NULL) {
 				deleteNode(node);
-				return 1;
+				return TRUE;
 			}
-			return 0;
+			return FALSE;
 		}
 	}
 	else {
-		if (!node->left) {			// if its here it must be in left
-			return 0;
+		if (!node->left) { // if its here it must be in left
+			return FALSE;
 		}
-		if (binarySearch(addr, node->left, found)) {
-			node->left = NULL;		// found & deleted. should I delete myself as well?
+		if (binaryDelete(addr, node->left, found)) {
+			node->left = NULL; // found & deleted. should I delete myself as well?
 			if (node->right == NULL) {
 				deleteNode(node);
-				return 1;
+				return TRUE;
 			}
-			return 0;
+			return FALSE;
 		}
 	}
-	return 0;
+	return FALSE;
 }
 
 void deleteNode(BlockNode *node) {
@@ -220,7 +208,7 @@ void deleteNode(BlockNode *node) {
 
 BlockNode *getNextFree() {
 	for (uint32_t i = 0; i < LIST_MEM_SIZE; i++) {
-		if (list[i].blocks == 0) {
+		if (!list[i].blocks) {
 			return &list[i];
 		}
 	}
@@ -250,7 +238,7 @@ void getMemoryInfo(MemoryInfo *meminfo) {
 //			 1 rama  -> me adentro a una y retorno la otra
 //			 0 ramas -> sumo memoria, comparo addr ultima y sumo frag y free, retorno
 void *getMemoryRecursive(MemoryInfo *meminfo, BlockNode *node, void *lastUsedAddress) {
-	if (!node->left && !node->right) {		// leaf
+	if (!node->left && !node->right) { // hoja
 		meminfo->occupiedMemory += node->blocks * BLOCK_SIZE;
 		meminfo->assignedNodes++;
 		if (node->addr != lastUsedAddress) {
@@ -266,13 +254,13 @@ void *getMemoryRecursive(MemoryInfo *meminfo, BlockNode *node, void *lastUsedAdd
 		return node->addr + node->blocks * BLOCK_SIZE;
 	}
 
-	if (node->left)	{						// branch
+	if (node->left) { // rama
 		lastUsedAddress = getMemoryRecursive(meminfo, node->left, lastUsedAddress);
 	}
 	if (node->right) {
 		lastUsedAddress = getMemoryRecursive(meminfo, node->right, lastUsedAddress);
 	}
-	
+
 	return lastUsedAddress;
 }
 

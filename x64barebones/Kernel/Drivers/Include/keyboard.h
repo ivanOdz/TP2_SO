@@ -8,20 +8,14 @@
 #include <stdint.h>
 #include <videoDriver.h>
 
-void setStandardFileDescriptors(PCB *process);
 void initializeKeyboardDriver();
-void keyboard_handler();
-uint64_t consume_keys(char *buf, uint64_t size);
-int64_t consume_keys2(char *dest, FifoBuffer *src, uint64_t size);
-extern int main();
-
-#define STD_IN 0
+void keyboardHandler();
 
 #define VALIDKEYS 128
 
-#define SHIFT	3	// 1 & 2
+#define SHIFT	3 // 1 & 2
 #define CAPS	4
-#define CONTROL 24	// 8 & 16
+#define CONTROL 24 // 8 & 16
 
 static const char toAscii[VALIDKEYS] = {0, '\e', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 8, 9,
 										'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', 10, 0, 'a', 's',
@@ -34,6 +28,5 @@ static const char mods[VALIDKEYS] = {0, '\e', '!', '@', '#', '$', '%', '^', '&',
 									 'V', 'B', 'N', 'M', '<', '>', '?', 0, '*', 0, ' ', 0};
 
 extern uint8_t getKey();
-uint8_t consume_key();
 
 #endif

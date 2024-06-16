@@ -9,53 +9,53 @@
 
 static FifoBuffer *pipesList[PIPES_QTY] = {0};
 
-int64_t readFifo(FifoBuffer *fifo, char *dest, uint64_t size, bool blocking) {
-	if (blocking) {
+int64_t readFifo(FifoBuffer *fifo, char *dest, uint64_t size, bool isBlocking) {
+	if (isBlocking) {
 		blockFifo(fifo, READ);
 	}
-	uint64_t i = 0;
-	while (i < size && !wouldBlock(fifo, READ)) {
-		dest[i++] = *(fifo->readCursor++);
+	uint64_t read = 0;
+	while (read < size && !wouldBlock(fifo, READ)) {
+		dest[read++] = *(fifo->readCursor++);
 		if (fifo->readCursor >= fifo->buffer + PIPES_BUFFER_SIZE) { // BUFFER CIRCULAR
 			fifo->readCursor = fifo->buffer;
 		}
 	}
-	if (i < size && wouldBlock(fifo, READ) && !fifo->writeEnds) {
-		dest[i++] = EOF;
+	if (read < size && wouldBlock(fifo, READ) && !fifo->writeEnds) {
+		dest[read++] = EOF;
 	}
-	if (i) {
+	if (read) {
 		unblockFifo(fifo, WRITE);
 	}
-	if (!i && size && !blocking) {
-		dest[i] = 0;
+	if (!read && size && !isBlocking) {
+		dest[read] = 0;
 	}
-	return i;
+	return read;
 }
 
-int64_t writeFifo(FifoBuffer *fifo, char *src, uint64_t size, bool blocking) {
-	if (blocking) {
+int64_t writeFifo(FifoBuffer *fifo, char *src, uint64_t size, bool isBlocking) {
+	if (isBlocking) {
 		blockFifo(fifo, WRITE);
 	}
-	uint64_t i = 0;
-	while (i < size && !wouldBlock(fifo, WRITE)) {
-		*(fifo->writeCursor++) = src[i++];
+	uint64_t written = 0;
+	while (written < size && !wouldBlock(fifo, WRITE)) {
+		*(fifo->writeCursor++) = src[written++];
 		if (fifo->writeCursor >= fifo->buffer + PIPES_BUFFER_SIZE) { // BUFFER CIRCULAR
 			fifo->writeCursor = fifo->buffer;
 		}
 	}
-	if (i) {
+	if (written) {
 		unblockFifo(fifo, READ);
 	}
-	return i;
+	return written;
 }
 
-bool putFifo(FifoBuffer *fifo, char c, bool blocking) {
-	return writeFifo(fifo, &c, 1, blocking);
+bool putFifo(FifoBuffer *fifo, char c, bool isBlocking) {
+	return writeFifo(fifo, &c, 1, isBlocking);
 }
 
-char getFifo(FifoBuffer *fifo, bool blocking) {
+char getFifo(FifoBuffer *fifo, bool isBlocking) {
 	char c = EOF;
-	readFifo(fifo, &c, 1, blocking);
+	readFifo(fifo, &c, 1, isBlocking);
 	return c;
 }
 
@@ -66,20 +66,20 @@ bool wouldBlock(FifoBuffer *fifo, FifoMode blockMode) {
 
 void blockFifo(FifoBuffer *fifo, FifoMode blockMode) {
 	if (wouldBlock(fifo, blockMode) && ((blockMode == READ && fifo->writeEnds) || (blockMode == WRITE))) {
-		// CAMBIAR A ESTADO BLOQEADO
+		// CAMBIAR A ESTADO BLOQUEADO
 		PCB *process = getCurrentProcess();
 		process->blockedOn.fd = TRUE;
 		process->status = BLOCKED;
 
 		BlockedProcessesNode *blockProcess = allocMemory(sizeof(BlockedProcessesNode));
-		if (blockProcess == NULL) {
+		if (!blockProcess) {
 			return;
 		}
 		blockProcess->blockedPid = getCurrentPID();
 		blockProcess->next = NULL;
 
 		BlockedProcessesNode *current = (blockMode == READ) ? fifo->blockedProcessesOnRead : fifo->blockedProcessesOnWrite;
-		if (current == NULL) {
+		if (!current) {
 			if (blockMode == READ) {
 				fifo->blockedProcessesOnRead = blockProcess;
 			}
@@ -88,7 +88,7 @@ void blockFifo(FifoBuffer *fifo, FifoMode blockMode) {
 			}
 		}
 		else {
-			while (current->next != NULL) {
+			while (current->next) {
 				current = current->next;
 			}
 			current->next = blockProcess;
@@ -104,7 +104,8 @@ void unblockFifo(FifoBuffer *fifo, FifoMode blockMode) {
 		PCB *process;
 		while (blocked) {
 			aux = blocked->next;
-			if ((process = getProcess(blocked->blockedPid))) {
+			process = getProcess(blocked->blockedPid);
+			if (process) {
 				process->blockedOn.fd = FALSE;
 			}
 			freeMemory(blocked);
@@ -206,19 +207,26 @@ void setFdInfo(PCB *process, FdInfo *node, uint16_t fd) {
 
 FdInfo *fdInfo(uint16_t pid) {
 	PCB *process = getProcess(pid);
-	if (process == NULL || process->fileDescriptors[0].pipe == NULL) {
+	int fdnum = 0;
+	if (!process) {
 		return NULL;
 	}
+	while (!process->fileDescriptors[fdnum].pipe) {
+		fdnum++;
+	}
 	FdInfo *first = allocMemory(sizeof(FdInfo));
-	setFdInfo(process, first, 0);
+	setFdInfo(process, first, fdnum);
 	FdInfo *newFdInfo = first;
-	for (int i = 1; process->fileDescriptors[i].pipe; i++) {
-		newFdInfo->nextFdInfo = allocMemory(sizeof(FdInfo));
-
-		if (newFdInfo->nextFdInfo) {
-			newFdInfo = newFdInfo->nextFdInfo;
-			setFdInfo(process, newFdInfo, i);
+	fdnum++;
+	while (fdnum < MAX_FILE_DESCRIPTORS) {
+		if (process->fileDescriptors[fdnum].pipe) {
+			newFdInfo->nextFdInfo = allocMemory(sizeof(FdInfo));
+			if (newFdInfo->nextFdInfo) {
+				newFdInfo = newFdInfo->nextFdInfo;
+				setFdInfo(process, newFdInfo, fdnum);
+			}
 		}
+		fdnum++;
 	}
 	return first;
 }

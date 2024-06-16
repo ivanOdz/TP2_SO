@@ -11,8 +11,8 @@ typedef struct ProcessListNode {
 
 void initScheduler(void *kernelStack);
 void updateCurrentStack();
-uint8_t addProcess(PCB *pcb);
-uint8_t removeProcess(PCB *process);
+bool addProcess(PCB *pcb);
+bool removeProcess(PCB *process);
 PID_t getCurrentPID();
 PCB *getCurrentProcess();
 PCB *getProcess(PID_t pid);

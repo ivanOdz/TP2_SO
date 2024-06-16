@@ -3,13 +3,14 @@
 #include <libc.h>
 #include <stdint.h>
 
-#define BUDDY
+//#define BUDDY
+#define LIST
 
 typedef struct MemoryManagerCDT *MemoryManagerADT;
 
 MemoryManagerADT createMemoryManager(void *const restrict managedMemory, uint64_t memAmount);
 void *allocMemory(const uint64_t size);
 void getMemoryInfo(MemoryInfo *mminfo);
-uint8_t freeMemory(void *ptrAllocatedMemory);
+bool freeMemory(void *ptrAllocatedMemory);
 
 #endif

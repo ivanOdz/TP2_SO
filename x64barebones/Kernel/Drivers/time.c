@@ -8,7 +8,7 @@
 
 static uint64_t ticks = 0;
 
-uint64_t timer_handler() {
+uint64_t timerHandler() {
 	ticks++;
 	soundNext();
 
@@ -22,14 +22,6 @@ uint64_t timer_handler() {
 	return 0;
 }
 
-int ticks_elapsed() {
-	return ticks;
-}
-
-int seconds_elapsed() {
-	return ticks / HZ;
-}
-
-uint64_t get_ticks() {
+uint64_t getTicks() {
 	return ticks;
 }

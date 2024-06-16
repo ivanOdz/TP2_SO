@@ -38,11 +38,11 @@ uint64_t nullHandler() {
 }
 
 uint64_t int_00() {
-	return timer_handler();
+	return timerHandler();
 }
 
 uint64_t int_01() {
-	keyboard_handler();
+	keyboardHandler();
 	return 0;
 }
 
@@ -97,7 +97,7 @@ void syscall_putBlock(draw_type *draw) {
 }
 
 uint64_t syscall_getTicks() {
-	return get_ticks();
+	return getTicks();
 }
 
 uint64_t syscall_playSound(uint8_t flags, const uint8_t *buffer, uint64_t length) {
@@ -183,19 +183,19 @@ int64_t syscall_dup(uint64_t fd) {
 }
 
 int16_t syscall_seminit(int initialValue) {
-	return 0;		// return ksem_init(initialValue);
+	return 0; // return ksem_init(initialValue);
 }
 
 int16_t syscall_semdestroy(uint16_t id) {
-	return 0;		// return ksem_init(id);
+	return 0; // return ksem_init(id);
 }
 
 void syscall_sempost(int16_t id) {
-	return;			// ksem_post(id);
+	return; // ksem_post(id);
 }
 
 void syscall_semwait(int16_t id) {
-	return; 		// ksem_wait(id);
+	return; // ksem_wait(id);
 }
 
 typedef int (*EntryPoint)();

@@ -106,6 +106,7 @@ void getMemoryInfo(MemoryInfo *mminfo) {
 	}
 
 	while (current != NULL) {
+		mminfo->assignedNodes++;
 		currentNodeMemorySize = current->blocks * BLOCK_SIZE;
 		mminfo->occupiedMemory += currentNodeMemorySize;
 		if (current->next != NULL) {
@@ -119,7 +120,7 @@ void getMemoryInfo(MemoryInfo *mminfo) {
 		else {
 			mminfo->endAddress = current->base + currentNodeMemorySize;
 		}
-		current = current->next;	// Avanzo
+		current = current->next; // Avanzo
 	}
 	mminfo->freeMemory = memMan.totalMemory - mminfo->occupiedMemory;
 }
@@ -133,10 +134,10 @@ BlockNode *getNextFree() {
 	return NULL;
 }
 
-uint8_t freeMemory(void *ptrAllocatedMemory) {
+bool freeMemory(void *ptrAllocatedMemory) {
 	BlockNode *current = memMan.first;
 	if (!current) {
-		return 0;
+		return FALSE;
 	}
 	if (current->base == ptrAllocatedMemory) {
 		current->blocks = 0;
@@ -150,11 +151,11 @@ uint8_t freeMemory(void *ptrAllocatedMemory) {
 			temp->base = NULL;
 			current->next = temp->next;
 			temp->next = NULL;
-			return 1;
+			return TRUE;
 		}
 		current = current->next;
 	}
-	return 0;
+	return FALSE;
 }
 
 #endif

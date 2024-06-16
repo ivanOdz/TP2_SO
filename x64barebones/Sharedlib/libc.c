@@ -20,11 +20,13 @@
 #define f	  1812433253UL
 
 typedef struct {
-	uint32_t state_array[n]; // El arreglo de estados 
-	int state_index;		 // El indice dentro del vecotr de estados
+	uint32_t state_array[n]; // El arreglo de estados
+	int state_index;		 // El indice dentro del vector de estados
 } mt_state;
 
 static mt_state *randState;
+static sem_t semaphores[MAX_SEMAPHORES] = {0};
+
 uint64_t pow(uint64_t base, uint64_t exp) {
 	uint64_t ans = 1;
 	while (exp--) {
@@ -270,9 +272,9 @@ void srand(uint32_t seed) {
 		return;
 	}
 	uint32_t *state_array = &(randState->state_array[0]);
-	state_array[0] = seed; // Semilla inicial sugerida = 19650218UL
+	state_array[0] = seed;
 	for (int i = 1; i < n; i++) {
-		seed = f * (seed ^ (seed >> (w - 2))) + i; // Knuth TAOCP Vol2. 3rd Ed. P.106 para el multiplicador.
+		seed = f * (seed ^ (seed >> (w - 2))) + i;
 		state_array[i] = seed;
 	}
 	randState->state_index = 0;
@@ -284,13 +286,11 @@ uint32_t rand() {
 	}
 	uint32_t *state_array = &(randState->state_array[0]);
 
-	int k = randState->state_index; // puntero a la ubicacion del estado actual
+	int k = randState->state_index;
 
-	//  int k = k - n; point to state n iterations before | if (k < 0) k += n; modulo n circular indexing the previous 2 lines actually do nothing for illustrative purposes only
-
-	int j = k - (n - 1); // apunta al estado n-1 iteraciones antes
+	int j = k - (n - 1);
 	if (j < 0) {
-		j += n; // modulo n circular indexing
+		j += n;
 	}
 
 	uint32_t x = (state_array[k] & UMASK) | (state_array[j] & LMASK);
@@ -299,17 +299,17 @@ uint32_t rand() {
 		xA ^= a;
 	}
 
-	j = k - (n - m); // punta al estado n-m iteraciones antes
+	j = k - (n - m);
 	if (j < 0) {
-		j += n; // modulo n circular indexing
+		j += n;
 	}
-	x = state_array[j] ^ xA; // computar el siguente valor en el estado
-	state_array[k++] = x;	 // acutalizar el nuevo valor de estado
+	x = state_array[j] ^ xA;
+	state_array[k++] = x;
 
 	if (k >= n) {
-		k = 0; // modulo n circular indexing
+		k = 0;
 	}
-	randState->state_index = k; // 0 <= state_index <= n-1   always
+	randState->state_index = k;
 	uint32_t y = x ^ (x >> u);
 	y = y ^ ((y << s) & b);
 	y = y ^ ((y << t) & c);
@@ -318,14 +318,14 @@ uint32_t rand() {
 }
 
 uint32_t randBetween(uint32_t start, uint32_t end) {
+	if (end <= start)
+		return 0;
 	return rand() % (end - start) + start;
 }
 
 void memoryManagerStats(MemoryInfo *meminfo) {
 	SyscallMemInfo(meminfo);
 }
-
-static sem_t semaphores[MAX_SEMAPHORES] = {0};
 
 void acquire(bool *lock) {
 	while (_xchg(lock, TRUE) != 0)

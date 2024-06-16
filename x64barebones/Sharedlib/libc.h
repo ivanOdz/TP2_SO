@@ -94,7 +94,7 @@ typedef struct FdInfo {
 
 typedef struct ReturnStatus {
 	int returnValue;
-	uint8_t aborted;
+	bool aborted;
 	PID_t pid;
 } ReturnStatus;
 

@@ -30,7 +30,7 @@ PCB *initProcess(void *kernelStack) {
 	process->runMode = BACKGROUND;
 	process->returnValue = 0;
 	process->killed = FALSE;
-	process->lastTickRun = get_ticks();
+	process->lastTickRun = getTicks();
 	process->blockedOn.waitPID = NULL;
 	process->blockedOn.fd = FALSE;
 	process->blockedOn.timer = 0;
@@ -86,9 +86,9 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	}
 	process->returnValue = 0;
 	process->killed = FALSE;
-	process->lastTickRun = get_ticks();
+	process->lastTickRun = getTicks();
 	process->blockedOn.waitPID = NULL;
-	process->blockedOn.fd = 0;
+	process->blockedOn.fd = FALSE;
 	process->blockedOn.timer = 0;
 	process->blockedOn.manual = FALSE;
 
@@ -156,7 +156,7 @@ PID_t waitPID(PID_t PID, ReturnStatus *wstatus) {
 
 void processSleep(uint64_t ms) {
 	PCB *process = getCurrentProcess();
-	uint64_t wakeUpTick = get_ticks() + ((ms * HZ) / 1000);
+	uint64_t wakeUpTick = getTicks() + ((ms * HZ) / 1000);
 	process->blockedOn.timer = wakeUpTick;
 	process->status = BLOCKED;
 	process->stackPointer = forceyield();
@@ -178,7 +178,7 @@ PID_t killProcess(PID_t PID) {
 	if (!process) {
 		return 0;
 	}
-	process->blockedOn.manual = 0;
+	process->blockedOn.manual = FALSE;
 	process->returnValue = -1;
 	process->killed = TRUE;
 	process->status = ZOMBIE;
@@ -219,9 +219,6 @@ bool blockProcess(uint16_t pid) {
 		return FALSE;
 	}
 	if (process->status == BLOCKED) {
-		if (process->blockedOn.waitPID == NULL && process->blockedOn.fd == 0) {
-			process->status = READY;
-		}
 		process->blockedOn.manual = FALSE;
 		return FALSE;
 	}

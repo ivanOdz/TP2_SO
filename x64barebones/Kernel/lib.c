@@ -59,83 +59,83 @@ void printRegs(stack_registers regs, uint64_t fd) {
 	char buffer[32] = {'0'};
 	clearBuffer(buffer);
 	drawWord(fd, "\nRAX: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.rax, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.rax, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\tRBX: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.rbx, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.rbx, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\tRCX: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.rcx, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.rcx, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\tRDX: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.rdx, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.rdx, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\nRBP: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.rbp, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.rbp, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\tRDI: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.rdi, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.rdi, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\tRSI: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.rsi, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.rsi, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\t R8: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.r8, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.r8, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\n R9: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.r9, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.r9, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\tR10: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.r10, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.r10, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\tR11: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.r11, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.r11, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\tR12: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.r12, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.r12, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\nR13: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.r13, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.r13, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\tR14: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.r14, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.r14, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\tR15: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.r15, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.r15, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\tRIP: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.rip, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.rip, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\n CS: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.cs, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.cs, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\t SS: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.ss, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.ss, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "\tRSP: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.rsp, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.rsp, (char *) (buffer + 16), 16)), 16);
 
 	clearBuffer(buffer);
 	drawWord(fd, "  FLAGS: 0x");
-	syscall_puts(fd, (buffer + uintToBase(regs.rflags, (char *) (buffer + 16), 16)), 16);
+	syscallPuts(fd, (buffer + uintToBase(regs.rflags, (char *) (buffer + 16), 16)), 16);
 	drawWord(fd, "\n");
 }
 

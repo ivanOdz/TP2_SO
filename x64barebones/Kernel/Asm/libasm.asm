@@ -8,8 +8,6 @@ GLOBAL getPIT2Freq
 GLOBAL spkStop
 GLOBAL haltProcess
 GLOBAL fabricateProcessStack
-GLOBAL _xadd
-GLOBAL _xchg
 
 ALIGN 16
 

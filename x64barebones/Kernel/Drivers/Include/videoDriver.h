@@ -5,14 +5,13 @@
 #include <pipesManager.h>
 #include <stdint.h>
 
-int64_t syscall_puts2(char *src, uint64_t size, uint8_t fd);
 void initializeVideoDriver();
 void putPixel(uint64_t x, uint64_t y, uint32_t color);
 void setBackground();
 void drawWord(uint8_t fd, char *word);
 void nextLine();
 void setTab();
-void drawchar_transparent(char c, uint64_t x, uint64_t y, uint32_t fgcolor);
+void drawchar(char c, uint64_t x, uint64_t y, uint32_t fgcolor);
 void print(char *word); // Imprime un string en formato C.
 void printChar(char c, uint32_t fg);
 void setFontSize(uint8_t fontSize);
@@ -24,7 +23,7 @@ void putBlock(draw_type *draw);
 
 void updateScreen();
 
-uint64_t syscall_puts(uint8_t fd, char *buf, uint64_t size);
+uint64_t syscallPuts(uint8_t fd, char *buf, uint64_t size);
 uint64_t setFormat(const text_format *fmt);
 uint64_t getFormat(text_format *fmt);
 void *memmove(void *dest, const void *src, uint64_t n);

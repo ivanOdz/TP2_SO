@@ -13,7 +13,7 @@ typedef struct {
 	uint64_t length;
 	uint64_t current;
 	uint64_t current_delay_left;
-	uint8_t isLoop;
+	bool isLoop;
 } song_type;
 
 static song_type bg, sfx;
@@ -22,7 +22,7 @@ static song_type bg, sfx;
 void playSound(uint8_t flags, const uint8_t *snd, uint64_t length) {
 	if (flags & IS_SFX) {
 		sfx.length = length;
-		sfx.isLoop = 0;
+		sfx.isLoop = FALSE;
 		sfx.buffer = snd;
 		sfx.current = 0;
 		sfx.current_delay_left = 0;
@@ -49,7 +49,7 @@ void soundNext() {
 
 	if (playing->current < playing->length || (playing->current == playing->length && playing->current_delay_left)) {
 		if (playing->current_delay_left == 0) {
-			if (playing->buffer[playing->current] != 0) {
+			if (playing->buffer[playing->current]) {
 				spkMov();
 				setPIT2Freq((uint16_t) (FREQDELAY / playing->buffer[playing->current]));
 			}
@@ -64,7 +64,7 @@ void soundNext() {
 			playing->current_delay_left--;
 
 			if (getPIT2Freq() != playing->buffer[playing->current - 2]) {
-				if (playing->buffer[playing->current - 2] != 0) {
+				if (playing->buffer[playing->current - 2]) {
 					setPIT2Freq((uint16_t) (FREQDELAY / playing->buffer[playing->current - 2]));
 				}
 				else {

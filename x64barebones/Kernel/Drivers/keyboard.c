@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <keyboard.h>
 
-static uint8_t flags = 0;	// bit 0 desplazar izquierda, bit 1 desplazar derecha, bit 2 bloquear mayúscula, bit 3 ctrl izquierdo, bit 4 ctrl derecho
+static uint8_t flags = 0; // bit 0 desplazar izquierda, bit 1 desplazar derecha, bit 2 bloquear mayúscula, bit 3 ctrl izquierdo, bit 4 ctrl derecho
 
 static FifoBuffer *keyboardFifo;
 
@@ -11,7 +11,7 @@ void initializeKeyboardDriver() {
 	keyboardFifo->writeEnds++;
 }
 
-uint8_t isAlpha(uint8_t c) {
+bool isAlpha(uint8_t c) {
 	if (c >= 0x41 && c <= 0x5A) {
 		return TRUE;
 	}
@@ -21,7 +21,7 @@ uint8_t isAlpha(uint8_t c) {
 	return FALSE;
 }
 
-void keyboard_handler() {
+void keyboardHandler() {
 	uint8_t c = getKey();
 	if (!keyboardFifo) {
 		return;
@@ -92,7 +92,7 @@ void keyboard_handler() {
 	}
 	// Caracteres regulares
 	if (c <= 0x3B) {
-		uint8_t ascii = toAscii[c];
+		char ascii = toAscii[c];
 
 		if (ascii != 0) {
 			if (flags & SHIFT) {
