@@ -98,7 +98,7 @@ void blockFifo(FifoBuffer *fifo, FifoMode blockMode) {
 }
 
 void unblockFifo(FifoBuffer *fifo, FifoMode blockMode) {
-	if (!wouldBlock(fifo, blockMode)) {
+	if (!wouldBlock(fifo, blockMode) || (blockMode == READ || !fifo->writeEnds)) {
 		BlockedProcessesNode *blocked = (blockMode == READ) ? fifo->blockedProcessesOnRead : fifo->blockedProcessesOnWrite;
 		BlockedProcessesNode *aux;
 		PCB *process;
@@ -166,7 +166,7 @@ FifoBuffer *createFifo(char *name) {
 	if (name) {
 		uint64_t size = strlen(name);
 		newPipe->name = allocMemory(size);
-		strcpy(newPipe->name, name);	// Si el nombre es la cadena vacia 0, es un pipe anonimo.
+		strcpy(newPipe->name, name); // Si el nombre es la cadena vacia 0, es un pipe anonimo.
 	}
 	else {
 		newPipe->name = "";
@@ -189,6 +189,9 @@ void closeFifo(FifoBuffer *fifo, FifoMode mode) {
 	}
 	else {
 		fifo->writeEnds--;
+	}
+	if (!fifo->writeEnds) {
+		unblockFifo(fifo, READ);
 	}
 }
 

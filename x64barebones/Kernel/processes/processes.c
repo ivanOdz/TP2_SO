@@ -126,12 +126,7 @@ uint64_t exitProcess(int returnValue) {
 	PCB *process = getCurrentProcess();
 	for (int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
 		if (process->fileDescriptors[i].pipe) {
-			if (process->fileDescriptors[i].mode == READ) {
-				process->fileDescriptors[i].pipe->readEnds--;
-			}
-			else {
-				process->fileDescriptors[i].pipe->writeEnds--;
-			}
+			closeFifo(process->fileDescriptors[i].pipe, process->fileDescriptors[i].mode);
 		}
 	}
 	process->returnValue = returnValue;
@@ -187,6 +182,11 @@ PID_t killProcess(PID_t PID) {
 	process->returnValue = -1;
 	process->killed = TRUE;
 	process->status = ZOMBIE;
+	for (int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
+		if (process->fileDescriptors[i].pipe) {
+			closeFifo(process->fileDescriptors[i].pipe, process->fileDescriptors[i].mode);
+		}
+	}
 	if (process == getCurrentProcess()) {
 		schedyield();
 	}
