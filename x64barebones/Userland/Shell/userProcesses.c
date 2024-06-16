@@ -262,14 +262,14 @@ void phylo(int argc, char **argv) {
 			for (int i = 0; i < MAX_PHYLOS; i++) {
 				if (phyloSemaphores[i + 1] == -1) {
 					printf("See you next dinner!\n");
-					for (int j = 0; j < i; j++) {
+					for (int j = 0; j <= i; j++) {
 						sem_wait(editMutex); // Blockea todos los filosofos de comer para que podamos manipular los semaforos sin romper nada
 					}
 					for (int j = 0; j < i; j++) {
 						sem_destroy(phyloSemaphores[j]);
 						phyloSemaphores[j] = -1;
 					}
-					for (int j = 0; j < i; j++) {
+					for (int j = 0; j <= i; j++) {
 						sem_post(editMutex);
 					}
 					printf("Diogenes doesn't wanna leave again. Please wait while we evict him... (this may take a moment while we call the cops on him)\n");
@@ -306,6 +306,8 @@ void phylo(int argc, char **argv) {
 					phyloArgv[2] = NULL;
 					uintToBase(i, phyloNumber, 10);
 					execv(phyloProcess, phyloArgv, BACKGROUND);
+					sem_destroy(printMutex);
+					printMutex = sem_init(0);
 					for (int j = 0; j <= i; j++) {
 						sem_post(editMutex);
 					}
@@ -322,7 +324,7 @@ void phylo(int argc, char **argv) {
 				if (phyloSemaphores[i + 1] == -1) {
 					printf("Setting up table for one less philosopher, please wait...");
 
-					for (int j = 0; j < i; j++) {
+					for (int j = 0; j <= i; j++) {
 						sem_wait(editMutex); // Blockea todos los filosofos de comer para que podamos manipular los semaforos sin romper nada
 					}
 					if (i == 1) {
@@ -346,6 +348,8 @@ void phylo(int argc, char **argv) {
 					sem_destroy(phyloSemaphores[i]);
 					phyloSemaphores[i] = -1;
 					phyloStatus[i] = 0;
+					sem_destroy(printMutex);
+					printMutex = sem_init(0);
 					for (int j = 0; j < i; j++) {
 						sem_post(editMutex);
 					}
