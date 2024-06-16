@@ -47,6 +47,8 @@ int command_clear(int argc, char **argv) {
 int command_tunes(int argc, char **argv) {
 	draw_type ricky = {0, 0, RICKWIDTH, RICKHEIGHT, 0, 0, (uint32_t *) rick};
 	text_format fmt = {0x00000000, 0x00C0C0C0, 3, 0};
+	SyscallGetFormat(&fmt);
+	fmt.enableCursorBlink = FALSE;
 	SyscallSetFormat(&fmt);
 	putchar('\e');
 	SyscallAudio(1, roll, rolllength);
