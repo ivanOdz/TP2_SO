@@ -222,6 +222,13 @@ void phyloProcess(int argc, char **argv) {
 }
 
 void phylo(int argc, char **argv) {
+	int initPhylos = INITIAL_PHYLOS;
+	if (argc > 1) {
+		initPhylos = stringToInt(argv[1], strlen(argv[1]));
+		if (initPhylos < 2) {
+			initPhylos = 2;
+		}
+	}
 	time_type time;
 	SyscallGetRTC(&time);
 	srand(time.hora << 12 | time.min << 6 | time.seg);
@@ -231,27 +238,28 @@ void phylo(int argc, char **argv) {
 	if (printMutex == -1) {
 		exit(1);
 	}
-	editMutex = sem_init(INITIAL_PHYLOS);
+	editMutex = sem_init(initPhylos);
 	if (editMutex == -1) {
 		exit(1);
 	}
 	ReturnStatus wstatus;
 	char *phyloArgv[3];
 	char phyloNumber[4];
-	for (int i = 0; i < INITIAL_PHYLOS; i++) {
+	for (int i = 0; i < initPhylos; i++) {
 		phyloSemaphores[i] = sem_init(1);
 		phyloStatus[i] = '.';
 		if (phyloSemaphores[i] < 0) {
 			exit(1);
 		}
 	}
-	for (int i = INITIAL_PHYLOS; i < MAX_PHYLOS; i++) {
+	for (int i = initPhylos; i < MAX_PHYLOS; i++) {
 		phyloStatus[i] = '0';
 		phyloSemaphores[i] = -1;
 	}
-	for (int i = 0; i < INITIAL_PHYLOS; i++) {
+	for (int i = 0; i < initPhylos; i++) {
 		phyloArgv[0] = "Glutton philosopher";
 		phyloArgv[1] = phyloNumber;
+		phyloArgv[2] = NULL;
 		uintToBase(i, phyloNumber, 10);
 		execv(phyloProcess, phyloArgv, BACKGROUND);
 	}

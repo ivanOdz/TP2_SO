@@ -135,7 +135,7 @@ uint64_t getProcessRunPriority(ProcessListNode *candidate, uint16_t distanceFrom
 		}
 	}
 	return (uint64_t) ((2L << candidate->process->priority) * ((double) processCount / distanceFromCurrent)) +
-		   (1L << ((getTicks() - candidate->process->lastTickRun) / (processCount + (1L << candidate->process->priority))));
+		   (1L << ((getTicks() - candidate->process->lastTickRun) / processCount));
 }
 
 bool checkUnblock(ProcessListNode *candidate) {
