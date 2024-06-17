@@ -107,7 +107,7 @@ void time(int argc, char **argv) {
 			time.hora += offset;
 			time.hora %= 24;
 		}
-		printf("Son %s %2d:%2x:%2x (offset%s \b%d)\n", (time.hora != 1) ? "las" : "la", time.hora, time.min, time.seg,
+		printf("It's %2d:%2x:%2x (offset%s \b%d)\n", time.hora, time.min, time.seg,
 			   (offset >= 0) ? "+" : "-", (uint8_t) ((offset >= 0) ? offset : -offset));
 	}
 	exit(0);

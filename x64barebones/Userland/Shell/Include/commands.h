@@ -8,7 +8,7 @@
 #include <userProcesses.h>
 
 // ------------------------------- TEXTS -------------------------------------------
-#define STR_PREAMBLE_FOR_COMANDS "Estos son los comandos disponibles para ejecutar:\n"
+#define STR_PREAMBLE_FOR_COMANDS "These are the avaliable commands:\n"
 // ---------------------------------------------------------------------------------
 #define AVAILABLE_COMMANDS (sizeof(avCommands) / sizeof(availableCommand))
 

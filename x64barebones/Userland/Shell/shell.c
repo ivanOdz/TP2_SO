@@ -338,10 +338,7 @@ PID_t run(char *command, bool isBackground) {
 				}
 			}
 			else {
-				uint32_t lastColor = text_color_get();
-				text_color_set(COLORS_ORANGE);
-				fprintf(STD_OUT, "Cannot execute \'%s\', not implemented or invalid pointer\n", strBuffer);
-				text_color_set(lastColor);
+				fprintf(STD_ERR, "Cannot execute \'%s\', not implemented or invalid pointer\n", strBuffer);
 				return 0;
 			}
 		}

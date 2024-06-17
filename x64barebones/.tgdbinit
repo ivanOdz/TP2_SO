@@ -1,0 +1,135 @@
+#ARCHIVO MODIFICADO DEL ORIGINAL OBTENIDO EN
+#https://github.com/ficoos/tgdbdb/tree/master
+#A este archivo renómbrenlo como .tgdbinit y lo pueden usar en lugar del original.
+
+python
+import subprocess as sp
+import os
+
+NULLPROG = "sh -c 'while [ 1 = 1 ]; do sleep 100; done'"
+
+def tmux(*args):
+    return sp.check_output(['tmux'] + list(args)).decode('utf8')
+
+def set_title(tty, title):
+    with open(tty, 'ab') as t:
+        t.write(b'\x1b]2;' + title.encode('utf8') + b'\x1b\\')
+
+gdb_pane, gdb_tty = tmux('display-message', '-p' , '-F', '#{pane_id},#{pane_tty}').strip().split(',')
+set_title(gdb_tty, 'gdb')
+
+#GDB(0)
+#------------
+#DASHBOARD(1)
+#dashboard_pane, dashboard_tty = tmux('split-window', '-d', '-v', '-P', '-F', '#{pane_id},#{pane_tty}', NULLPROG).strip().split(',')
+dashboard_pane, dashboard_tty = tmux('split-window','-p','60', '-d', '-v', '-P', '-F', '#{pane_id},#{pane_tty}', NULLPROG).strip().split(',')
+sp.check_call(['stty', '--file', dashboard_tty, '-echo'])
+set_title(dashboard_tty, 'dashboard')
+gdb.execute(f'dashboard -output {dashboard_tty}')
+
+
+#GDB(0)
+#------------
+#DASHBOARD(1)|ASSEMBLY(2)
+#assembly_pane, assembly_tty = tmux('split-window', '-d', '-h', '-P', '-F', '#{pane_id},#{pane_tty}', NULLPROG).strip().split(',')
+assembly_pane, assembly_tty = tmux('split-window','-p','50','-t','1', '-d', '-h', '-P', '-F', '#{pane_id},#{pane_tty}', NULLPROG).strip().split(',')
+set_title(assembly_tty, 'assembly')
+gdb.execute(f'dashboard assembly -output {assembly_tty}')
+
+
+#GDB(0)
+#------------
+#DASHBOARD(1)|ASSEMBLY(2)|STACK(3)
+stack_pane, stack_tty = tmux('split-window','-p','40','-t','2', '-d', '-h', '-P', '-F', '#{pane_id},#{pane_tty}', NULLPROG).strip().split(',')
+set_title(stack_tty, 'stack')
+gdb.execute(f'dashboard stack -output {stack_tty}')
+gdb.execute(f'dashboard breakpoints -output {stack_tty}')
+
+
+#GDB(0)|MEMORY(4)
+#------------
+#DASHBOARD(1)|ASSEMBLY(2)|STACK(3)
+memory_pane, memory_tty = tmux('split-window','-p','70','-t','0', '-d', '-h', '-P', '-F', '#{pane_id},#{pane_tty}', NULLPROG).strip().split(',')
+set_title(memory_tty, 'memory')
+gdb.execute(f'dashboard threads -output {memory_tty}')
+gdb.execute(f'dashboard memory -output {memory_tty}')
+
+
+#GDB(0)|MEMORY(4)|REGISTERS(5)
+#---------------------------------
+#DASHBOARD(1)|ASSEMBLY(2)|STACK(3)
+registers_pane, registers_tty = tmux('split-window','-p','50','-t','1', '-d', '-h', '-P', '-F', '#{pane_id},#{pane_tty}', NULLPROG).strip().split(',')
+set_title(registers_tty, 'registers')
+gdb.execute(f'dashboard registers -output {registers_tty}')
+gdb.execute(f'dashboard history -output {registers_tty}')
+gdb.execute(f'dashboard expressions -output {registers_tty}')
+
+#gdb.execute(f'set inferior-tty {registers_tty}')
+
+
+
+
+
+#configuraciones que quiero tener siempre
+gdb.execute(f'dashboard memory -style full True')
+
+gdb.execute(f'dashboard registers -style column-major True')
+
+gdb.execute(f'dashboard source -style height 0')
+gdb.execute(f'dashboard assembly -style height 0')
+gdb.execute(f'dashboard source -style highlight-line True')
+gdb.execute(f'dashboard assembly -style highlight-line True')
+
+
+
+gdb.execute(f'set disassembly-flavor intel')
+
+#PARA MOSTRAR STACK
+gdb.execute(f'dashboard memory watch $esp-28 28')
+gdb.execute(f'dashboard memory watch $esp-28')
+
+
+# para debug docker
+# set debuginfod enabled off
+gdb.execute(f'target remote  172.18.135.212:1234')
+gdb.execute(f'add-symbol-file Kernel/kernel.elf 0x100000')
+gdb.execute(f'add-symbol-file Userland/shellCodeModule.elf 0x400000')
+gdb.execute(f'set dir Kernel:Userland:Sharedlib')
+gdb.execute(f"dashboard registers -style list 'rax rbx rcx rdx rsi rdi rbp rsp r8 r9 r10 r11 r12 r13 r14 r15 rip eflags cs ss ds es fs gs fs_base gs_base k_gs_base cr0 cr2 cr3 cr4 cr8 efer'")
+
+
+
+
+
+#tmux('select-layout', 'even-horizontal')
+
+
+#tmux('select-pane', '-t', '0')
+
+end
+
+#dashboard -layout memory source assembly registers stack
+dashboard -enabled on
+dashboard -style syntax_highlighting 'monokai'
+
+# make sure dashboard output is updated when gdb state changes
+define hookpost-up
+dashboard
+end
+define hookpost-down
+dashboard
+end
+define hookpost-thread
+dashboard
+end
+define hookpost-delete
+dashboard
+end
+define hookpost-clear
+dashboard
+end
+define hookpost-break
+dashboard
+end
+
+# vim: set ft=python:

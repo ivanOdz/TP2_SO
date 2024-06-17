@@ -2,11 +2,9 @@
 .bash_history
 .bashrc
 .gdb_history
-x64barebones/.tgdbinit
 *.md
 *.sublime-project
 *.png
-x64barebones/run.sh
 *.elf
 x64barebones/Kernel/include/.idea/workspace.xml
 x64barebones/compile.sh

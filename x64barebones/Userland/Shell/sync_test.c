@@ -27,7 +27,7 @@ static uint64_t shared = 0;
 
 void racyInc() {
 	uint64_t aux = shared;
-	yield(); 
+	yield();
 	aux++;
 	shared = aux;
 }
@@ -149,7 +149,8 @@ void testSemaphores(int argc, char **argv) { // Cant incrementos, cant procesos,
 			waitpid(0, &status);
 		}
 
-		printf("\nFinal counter with%s semaphores is %lu, it was expected to be %lu. %s.\n\n", useSemaphore ? "" : "out", shared, nProcesses * cycles, (shared == nProcesses * cycles) ? "Hurray!" : "F");
+		fprintf((shared == nProcesses * cycles) ? STD_OUT : STD_ERR, "\nFinal counter with%s semaphores is %lu, it was expected to be %lu. %s.\n\n",
+				useSemaphore ? "" : "out", shared, nProcesses * cycles, (shared == nProcesses * cycles) ? "Hurray!" : "F");
 		if (useSemaphore) {
 			sem_destroy(idSemaphore);
 		}
