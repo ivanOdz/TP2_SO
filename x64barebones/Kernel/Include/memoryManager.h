@@ -3,8 +3,8 @@
 #include <libc.h>
 #include <stdint.h>
 
-//#define BUDDY
-#define LIST
+#define BUDDY
+//#define LIST
 
 typedef struct MemoryManagerCDT *MemoryManagerADT;
 

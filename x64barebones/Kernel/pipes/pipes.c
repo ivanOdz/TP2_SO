@@ -205,7 +205,7 @@ void setFdInfo(PCB *process, FdInfo *node, uint16_t fd) {
 	node->nextFdInfo = NULL;
 }
 
-FdInfo *fdInfo(uint16_t pid) {
+FdInfo *fdInfo(PID_t pid) {
 	PCB *process = getProcess(pid);
 	int fdnum = 0;
 	if (!process) {

@@ -81,13 +81,14 @@ char syscall_tryGetChar(uint8_t fd) {
 	return c;
 }
 
-uint64_t syscall_getRTC(time_type *buf) {
-	return (getRTC(buf));
+void syscall_getRTC(time_type *buf) {
+	getRTC(buf);
 }
 
 uint64_t syscall_getFormat(text_format *buf) {
 	return getFormat(buf);
 }
+
 uint64_t syscall_setFormat(text_format *buf) {
 	return setFormat(buf);
 }
@@ -100,36 +101,34 @@ uint64_t syscall_getTicks() {
 	return getTicks();
 }
 
-uint64_t syscall_playSound(uint8_t flags, const uint8_t *buffer, uint64_t length) {
+void syscall_playSound(uint8_t flags, const uint8_t *buffer, uint64_t length) {
 	playSound(flags, buffer, length);
-	return 0;
 }
 
-uint64_t syscall_setTimer(uint16_t delay) {
+void syscall_setTimer(uint16_t delay) {
 	setPIT0Freq(delay);
-	return 0;
 }
 
 void *syscall_malloc(uint64_t size) {
 	return allocMemory(size);
 }
 
-uint64_t syscall_free(void *memory) {
-	freeMemory(memory);
-	return 0;
-}
-uint64_t syscall_meminfo(MemoryInfo *meminfo) {
-	getMemoryInfo(meminfo);
-	return 0;
+bool syscall_free(void *memory) {
+	return freeMemory(memory);
 }
 
-uint64_t syscall_execv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode) {
+void syscall_meminfo(MemoryInfo *meminfo) {
+	getMemoryInfo(meminfo);
+}
+
+PID_t syscall_execv(int (*processMain)(int argc, char **argv), char **argv, ProcessRunMode runMode) {
 	return execute(processMain, argv, runMode);
 }
 
-uint64_t syscall_exit(int returnValue) {
+PID_t syscall_exit(int returnValue) {
 	return exitProcess(returnValue);
 }
+
 PID_t syscall_kill(PID_t PID) {
 	return killProcess(PID);
 }
@@ -138,7 +137,7 @@ PID_t syscall_getPID() {
 	return getCurrentPID();
 }
 
-uint64_t syscall_waitpid(uint64_t PID, ReturnStatus *wstatus) {
+PID_t syscall_waitpid(uint64_t PID, ReturnStatus *wstatus) {
 	return waitPID(PID, wstatus);
 }
 
@@ -150,7 +149,7 @@ bool syscall_nice(uint16_t pid, uint8_t newPriority) {
 	return setProcessPriority(pid, newPriority);
 }
 
-uint64_t syscall_block(uint16_t pid) {
+bool syscall_block(uint16_t pid) {
 	return blockProcess(pid);
 }
 
@@ -162,7 +161,7 @@ void syscall_sleep(uint64_t ms) {
 	processSleep(ms);
 }
 
-int64_t syscall_pipe(char *name, int pipefd[2]) {
+bool syscall_pipe(char *name, int pipefd[2]) {
 	return createPipe(name, pipefd);
 }
 
@@ -174,7 +173,7 @@ int64_t syscall_open(char *name, FifoMode mode) {
 	return openFD(name, mode);
 }
 
-int64_t syscall_close(uint64_t fd) {
+bool syscall_close(uint64_t fd) {
 	return closeFD(fd);
 }
 
