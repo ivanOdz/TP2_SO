@@ -142,6 +142,9 @@ uint64_t exitProcess(int returnValue) {
 			parent->runMode = FOREGROUND;
 		}
 	}
+	if (!process->parentPid) {
+		freeProcess(process);
+	}
 	return schedyield();
 }
 
