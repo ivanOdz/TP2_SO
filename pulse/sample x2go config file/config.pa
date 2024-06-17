@@ -1,0 +1,3 @@
+load-module module-native-protocol-tcp port=4713
+load-module module-esound-protocol-tcp port=4714
+load-module module-waveout
