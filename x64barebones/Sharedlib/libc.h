@@ -34,7 +34,8 @@ typedef char bool;
 
 typedef enum { FOREGROUND = 0,
 			   BACKGROUND,
-			   RELEGATED } ProcessRunMode;
+			   RELEGATED,
+			   ORPHANED } ProcessRunMode;
 typedef int32_t PID_t;
 
 typedef struct text_format {

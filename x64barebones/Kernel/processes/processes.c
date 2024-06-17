@@ -73,7 +73,12 @@ PCB *createProcess(int (*processMain)(int argc, char **argv), char **argv, Proce
 	process->stackPointer = fabricateProcessStack(process->stackPointer, argc, process->argv, processMain);
 	process->name = argv[0];
 	process->pid = nextPid++;
-	process->parentPid = parent->pid;
+	if (runMode == ORPHANED) {
+		process->parentPid = 0;
+	}
+	else {
+		process->parentPid = parent->pid;
+	}
 	process->status = READY;
 	process->runMode = runMode;
 	process->priority = 5;

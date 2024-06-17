@@ -127,7 +127,7 @@ void shell(int argc, char **argv) {
 						emptyCommandBuffer(command);
 					}
 					break;
-				case 0x11: // felcha izquierda
+				case 0x11: // flecha izquierda
 					deleteChars(command);
 					if (shell_fmt.enableCursorBlink) {
 						shell_fmt.enableCursorBlink = 0;
@@ -330,7 +330,7 @@ PID_t run(char *command, bool isBackground) {
 					return getPID();
 				}
 				else {
-					PID_t childPID = execv((void (*)(int, char **)) avCommands[cont].function, argv, isBackground);
+					PID_t childPID = execv((void (*)(int, char **)) avCommands[cont].function, argv, (isBackground) ? ORPHANED : FOREGROUND);
 					if (!childPID) {
 						fprintf(STD_ERR, "Couldn't execute %s\n", strBuffer);
 					}
